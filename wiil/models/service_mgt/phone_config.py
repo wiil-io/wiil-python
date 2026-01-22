@@ -130,11 +130,6 @@ class PhoneConfiguration(BaseModel):
         description="Telephony service provider",
         alias="providerType"
     )
-    provider_account_id: Optional[str] = Field(
-        None,
-        description="Account identifier with the provider",
-        alias="providerAccountId"
-    )
     is_imported: bool = Field(
         False,
         description="Whether imported from external system",

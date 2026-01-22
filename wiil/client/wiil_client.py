@@ -38,6 +38,8 @@ from wiil.resources.service_mgt import (
     ConversationConfigurationsResource,
     TranslationSessionsResource,
     KnowledgeSourcesResource,
+    SupportModelsResource,
+    TelephonyProviderResource,
 )
 
 # Default configuration values
@@ -148,6 +150,8 @@ class WiilClient:
         self.conversation_configs = ConversationConfigurationsResource(self._http)
         self.translation_sessions = TranslationSessionsResource(self._http)
         self.knowledge_sources = KnowledgeSourcesResource(self._http)
+        self.support_models = SupportModelsResource(self._http)
+        self.telephony_provider = TelephonyProviderResource(self._http)
 
     def _validate_config(
         self,

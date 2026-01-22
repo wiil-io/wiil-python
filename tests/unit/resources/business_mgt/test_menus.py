@@ -28,6 +28,8 @@ class TestMenusResource:
             "id": "cat_123",
             "name": "Appetizers",
             "description": "Starter dishes",
+            "displayOrder": 1,
+            "isDefault": False,
             "createdAt": 1234567890,
             "updatedAt": 1234567890,
         }
@@ -48,6 +50,8 @@ class TestMenusResource:
             "id": "cat_123",
             "name": "Appetizers",
             "description": "Starter dishes",
+            "displayOrder": 1,
+            "isDefault": False,
             "createdAt": 1234567890,
             "updatedAt": 1234567890,
         }
@@ -68,12 +72,18 @@ class TestMenusResource:
             {
                 "id": "cat_1",
                 "name": "Appetizers",
+                "description": None,
+                "displayOrder": 1,
+                "isDefault": False,
                 "createdAt": 1234567890,
                 "updatedAt": 1234567890,
             },
             {
                 "id": "cat_2",
                 "name": "Main Course",
+                "description": None,
+                "displayOrder": 2,
+                "isDefault": False,
                 "createdAt": 1234567891,
                 "updatedAt": 1234567891,
             },
@@ -101,6 +111,8 @@ class TestMenusResource:
             "id": "cat_123",
             "name": "Updated Appetizers",
             "description": "New description",
+            "displayOrder": 1,
+            "isDefault": False,
             "createdAt": 1234567890,
             "updatedAt": 1234567891,
         }
@@ -140,9 +152,17 @@ class TestMenusResource:
         mock_response = {
             "id": "item_123",
             "name": "Caesar Salad",
-            "categoryId": "cat_123",
-            "price": 12.99,
             "description": "Fresh romaine lettuce",
+            "price": 12.99,
+            "categoryId": "cat_123",
+            "category": None,
+            "ingredients": None,
+            "allergens": None,
+            "nutritionalInfo": None,
+            "isAvailable": True,
+            "preparationTime": None,
+            "isActive": True,
+            "displayOrder": None,
             "createdAt": 1234567890,
             "updatedAt": 1234567890,
         }
@@ -163,8 +183,17 @@ class TestMenusResource:
         mock_response = {
             "id": "item_123",
             "name": "Caesar Salad",
-            "categoryId": "cat_123",
+            "description": None,
             "price": 12.99,
+            "categoryId": "cat_123",
+            "category": None,
+            "ingredients": None,
+            "allergens": None,
+            "nutritionalInfo": None,
+            "isAvailable": True,
+            "preparationTime": None,
+            "isActive": True,
+            "displayOrder": None,
             "createdAt": 1234567890,
             "updatedAt": 1234567890,
         }
@@ -185,14 +214,34 @@ class TestMenusResource:
             {
                 "id": "item_1",
                 "name": "Caesar Salad",
+                "description": None,
                 "price": 12.99,
+                "categoryId": "cat_123",
+                "category": None,
+                "ingredients": None,
+                "allergens": None,
+                "nutritionalInfo": None,
+                "isAvailable": True,
+                "preparationTime": None,
+                "isActive": True,
+                "displayOrder": None,
                 "createdAt": 1234567890,
                 "updatedAt": 1234567890,
             },
             {
                 "id": "item_2",
                 "name": "Greek Salad",
+                "description": None,
                 "price": 10.99,
+                "categoryId": "cat_123",
+                "category": None,
+                "ingredients": None,
+                "allergens": None,
+                "nutritionalInfo": None,
+                "isAvailable": True,
+                "preparationTime": None,
+                "isActive": True,
+                "displayOrder": None,
                 "createdAt": 1234567891,
                 "updatedAt": 1234567891,
             },
@@ -226,8 +275,17 @@ class TestMenusResource:
             {
                 "id": "item_1",
                 "name": "Caesar Salad",
-                "categoryId": "cat_123",
+                "description": None,
                 "price": 12.99,
+                "categoryId": "cat_123",
+                "category": None,
+                "ingredients": None,
+                "allergens": None,
+                "nutritionalInfo": None,
+                "isAvailable": True,
+                "preparationTime": None,
+                "isActive": True,
+                "displayOrder": None,
                 "createdAt": 1234567890,
                 "updatedAt": 1234567890,
             },
@@ -249,8 +307,17 @@ class TestMenusResource:
             {
                 "id": "item_1",
                 "name": "Caesar Salad",
+                "description": None,
                 "price": 12.99,
-                "orderCount": 150,
+                "categoryId": "cat_123",
+                "category": None,
+                "ingredients": None,
+                "allergens": None,
+                "nutritionalInfo": None,
+                "isAvailable": True,
+                "preparationTime": None,
+                "isActive": True,
+                "displayOrder": None,
                 "createdAt": 1234567890,
                 "updatedAt": 1234567890,
             },
@@ -277,7 +344,17 @@ class TestMenusResource:
         mock_response = {
             "id": "item_123",
             "name": "Updated Caesar Salad",
+            "description": None,
             "price": 13.99,
+            "categoryId": "cat_123",
+            "category": None,
+            "ingredients": None,
+            "allergens": None,
+            "nutritionalInfo": None,
+            "isAvailable": True,
+            "preparationTime": None,
+            "isActive": True,
+            "displayOrder": None,
             "createdAt": 1234567890,
             "updatedAt": 1234567891,
         }
@@ -310,10 +387,9 @@ class TestMenusResource:
         mock_qr_codes = [
             {
                 "id": "qr_123",
-                "name": "Table 1 Menu",
-                "url": "https://menu.example.com/qr_123",
-                "createdAt": 1234567890,
-                "updatedAt": 1234567890,
+                "menuUrl": "https://menu.example.com/qr_123",
+                "qrCodeImage": None,
+                "tableNumber": "Table 1",
             },
         ]
 
@@ -325,17 +401,15 @@ class TestMenusResource:
         result = client.menus.get_qr_codes()
 
         assert len(result) == 1
-        assert result[0].name == "Table 1 Menu"
+        assert result[0].table_number == "Table 1"
 
     def test_generate_qr_code(self, client: WiilClient, mock_api, api_response):
         """Test generating a new menu QR code."""
         mock_response = {
             "id": "qr_123",
-            "name": "Table 1 Menu",
-            "url": "https://menu.example.com/qr_123",
-            "categoryId": "cat_123",
-            "createdAt": 1234567890,
-            "updatedAt": 1234567890,
+            "menuUrl": "https://menu.example.com/qr_123",
+            "qrCodeImage": None,
+            "tableNumber": "Table 1",
         }
 
         mock_api.post(
@@ -346,7 +420,7 @@ class TestMenusResource:
         result = client.menus.generate_qr_code(name="Table 1 Menu", category_id="cat_123")
 
         assert result.id == "qr_123"
-        assert result.name == "Table 1 Menu"
+        assert result.menu_url == "https://menu.example.com/qr_123"
 
     def test_delete_qr_code(self, client: WiilClient, mock_api, api_response):
         """Test deleting a menu QR code."""

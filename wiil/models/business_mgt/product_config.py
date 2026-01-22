@@ -68,7 +68,6 @@ class ProductCategory(BaseModel):
         name: Category name for product organization
         description: Category description
         display_order: Numeric order for category display
-        is_default: Whether this is the default category for uncategorized products
 
     Example:
         ```python
@@ -76,8 +75,7 @@ class ProductCategory(BaseModel):
             id="cat_123",
             name="Electronics",
             description="Electronic devices and accessories",
-            display_order=1,
-            is_default=False
+            display_order=1
         )
         ```
     """
@@ -102,11 +100,6 @@ class ProductCategory(BaseModel):
         description="Numeric order for category display in product catalog",
         alias="displayOrder"
     )
-    is_default: bool = Field(
-        False,
-        description="Whether this is the default category for uncategorized products",
-        alias="isDefault"
-    )
 
 
 class BusinessProduct(BaseModel):
@@ -129,7 +122,6 @@ class BusinessProduct(BaseModel):
         weight: Product weight
         dimensions: Product dimensions
         is_active: Whether product is available for sale
-        display_order: Display order in category
 
     Example:
         ```python
@@ -220,11 +212,6 @@ class BusinessProduct(BaseModel):
         description="Whether product is active and available for sale",
         alias="isActive"
     )
-    display_order: Optional[int] = Field(
-        None,
-        description="Display order within category. Lower numbers appear first",
-        alias="displayOrder"
-    )
 
 
 class CreateProductCategory(BaseModel):
@@ -251,7 +238,6 @@ class CreateProductCategory(BaseModel):
     name: str = Field(..., min_length=1)
     description: Optional[str] = None
     display_order: Optional[int] = Field(None, alias="displayOrder")
-    is_default: bool = Field(False, alias="isDefault")
 
 
 class UpdateProductCategory(BaseModel):
@@ -278,7 +264,6 @@ class UpdateProductCategory(BaseModel):
     name: Optional[str] = Field(None, min_length=1)
     description: Optional[str] = None
     display_order: Optional[int] = Field(None, alias="displayOrder")
-    is_default: Optional[bool] = Field(None, alias="isDefault")
 
 
 class CreateBusinessProduct(BaseModel):
@@ -312,7 +297,6 @@ class CreateBusinessProduct(BaseModel):
     sku: Optional[str] = None
     barcode: Optional[str] = None
     category_id: Optional[str] = Field(None, alias="categoryId")
-    category: Optional[str] = None
     brand: Optional[str] = None
     track_inventory: bool = Field(False, alias="trackInventory")
     stock_quantity: Optional[int] = Field(None, ge=0, alias="stockQuantity")
@@ -320,7 +304,6 @@ class CreateBusinessProduct(BaseModel):
     weight: Optional[float] = Field(None, gt=0)
     dimensions: Optional[ProductDimensions] = None
     is_active: bool = Field(True, alias="isActive")
-    display_order: Optional[int] = Field(None, alias="displayOrder")
 
 
 class UpdateBusinessProduct(BaseModel):
@@ -351,7 +334,6 @@ class UpdateBusinessProduct(BaseModel):
     sku: Optional[str] = None
     barcode: Optional[str] = None
     category_id: Optional[str] = Field(None, alias="categoryId")
-    category: Optional[str] = None
     brand: Optional[str] = None
     track_inventory: Optional[bool] = Field(None, alias="trackInventory")
     stock_quantity: Optional[int] = Field(None, ge=0, alias="stockQuantity")
@@ -359,4 +341,3 @@ class UpdateBusinessProduct(BaseModel):
     weight: Optional[float] = Field(None, gt=0)
     dimensions: Optional[ProductDimensions] = None
     is_active: Optional[bool] = Field(None, alias="isActive")
-    display_order: Optional[int] = Field(None, alias="displayOrder")

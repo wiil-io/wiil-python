@@ -15,18 +15,28 @@ API_KEY = "test-api-key"
 class TestTranslationSessionsResource:
     """Test suite for TranslationSessionsResource."""
 
-    def test_get_translation_session(self, client: WiilClient, mock_api, api_response):
+    def test_get_translation_session(
+        self, client: WiilClient, mock_api, api_response
+    ):
         """Test retrieving a translation session by ID."""
         mock_response = {
             "id": "session_123",
-            "sessionId": "sess_abc",
-            "sourceLanguage": "en",
-            "targetLanguage": "es",
-            "sourceText": "Hello, how are you?",
-            "translatedText": "Hola, ¿cómo estás?",
-            "status": "COMPLETED",
+            "organizationId": "org_456",
+            "projectId": "proj_789",
+            "partnerInitiatorId": "initiator_001",
+            "partnerSessionId": "sess_abc",
+            "sdrtId": None,
+            "translationConfigId": "config_123",
+            "participants": ["participant_1", "participant_2"],
+            "durationInSeconds": 120,
+            "status": "completed",
+            "direction": "bidirectional",
+            "transcribedConversationLog": None,
+            "logTranscriptionInParticipantRecords": False,
+            "translationSummary": None,
+            "createdDay": None,
             "createdAt": 1234567890,
-            "completedAt": 1234567895,
+            "updatedAt": 1234567890,
         }
 
         mock_api.get(
@@ -37,10 +47,12 @@ class TestTranslationSessionsResource:
         result = client.translation_sessions.get("session_123")
 
         assert result.id == "session_123"
-        assert result.source_language == "en"
-        assert result.target_language == "es"
+        assert result.organization_id == "org_456"
+        assert result.status == "completed"
 
-    def test_get_translation_session_not_found(self, client: WiilClient, mock_api, error_response):
+    def test_get_translation_session_not_found(
+        self, client: WiilClient, mock_api, error_response
+    ):
         """Test API error when translation session not found."""
         mock_api.get(
             f"{BASE_URL}/translation-sessions/invalid_id",
@@ -56,30 +68,48 @@ class TestTranslationSessionsResource:
         assert exc_info.value.status_code == 404
         assert exc_info.value.code == "NOT_FOUND"
 
-    def test_list_translation_sessions(self, client: WiilClient, mock_api, api_response):
+    def test_list_translation_sessions(
+        self, client: WiilClient, mock_api, api_response
+    ):
         """Test listing translation sessions with pagination."""
         mock_sessions = [
             {
                 "id": "session_1",
-                "sessionId": "sess_1",
-                "sourceLanguage": "en",
-                "targetLanguage": "es",
-                "sourceText": "Hello",
-                "translatedText": "Hola",
-                "status": "COMPLETED",
+                "organizationId": "org_456",
+                "projectId": "proj_789",
+                "partnerInitiatorId": "initiator_001",
+                "partnerSessionId": "sess_1",
+                "sdrtId": None,
+                "translationConfigId": "config_123",
+                "participants": ["participant_1", "participant_2"],
+                "durationInSeconds": 90,
+                "status": "completed",
+                "direction": "bidirectional",
+                "transcribedConversationLog": None,
+                "logTranscriptionInParticipantRecords": False,
+                "translationSummary": None,
+                "createdDay": None,
                 "createdAt": 1234567890,
-                "completedAt": 1234567895,
+                "updatedAt": 1234567890,
             },
             {
                 "id": "session_2",
-                "sessionId": "sess_2",
-                "sourceLanguage": "en",
-                "targetLanguage": "fr",
-                "sourceText": "Thank you",
-                "translatedText": "Merci",
-                "status": "COMPLETED",
+                "organizationId": "org_456",
+                "projectId": "proj_789",
+                "partnerInitiatorId": "initiator_002",
+                "partnerSessionId": "sess_2",
+                "sdrtId": None,
+                "translationConfigId": "config_123",
+                "participants": ["participant_3", "participant_4"],
+                "durationInSeconds": 150,
+                "status": "completed",
+                "direction": "bidirectional",
+                "transcribedConversationLog": None,
+                "logTranscriptionInParticipantRecords": False,
+                "translationSummary": None,
+                "createdDay": None,
                 "createdAt": 1234567891,
-                "completedAt": 1234567896,
+                "updatedAt": 1234567891,
             },
         ]
 
@@ -106,8 +136,10 @@ class TestTranslationSessionsResource:
         assert result.meta.total_count == 2
         assert result.meta.page == 1
 
-    def test_list_translation_sessions_with_pagination(self, client: WiilClient, mock_api, api_response):
-        """Test listing translation sessions with custom pagination parameters."""
+    def test_list_translation_sessions_with_pagination(
+        self, client: WiilClient, mock_api, api_response
+    ):
+        """Test listing translation sessions with pagination parameters."""
         mock_response = {
             "data": [],
             "meta": {

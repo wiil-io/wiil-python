@@ -55,7 +55,7 @@ from wiil.models.service_mgt.provisioning_config import (
     TtsModelConfig,
     UpdateProvisioningConfigChain,
 )
-from wiil.models.service_mgt.support_llm import TravnexSupportModel
+from wiil.models.service_mgt.support_llm import WiilSupportModel
 from wiil.models.service_mgt.voice_language import Language, Voice, VoiceGender
 
 __all__ = [
@@ -106,7 +106,7 @@ __all__ = [
     "SttModelConfig",
     "TtsModelConfig",
     # Support Models
-    "TravnexSupportModel",
+    "WiilSupportModel",
     # Voice & Language
     "Voice",
     "Language",

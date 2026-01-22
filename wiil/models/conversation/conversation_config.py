@@ -269,7 +269,7 @@ class BaseConversationConfig(PydanticBaseModel):
     )
     model_id: Optional[str] = Field(
         None,
-        description="AI model ID used for this conversation, may override deployment configuration model for A/B testing, specialized scenarios, or model version upgrades (references TravnexSupportModel)"
+        description="AI model ID used for this conversation, may override deployment configuration model for A/B testing, specialized scenarios, or model version upgrades (references WiilSupportModel)"
     )
     user_id: Optional[int] = Field(
         None,
@@ -302,11 +302,11 @@ class BaseConversationConfig(PydanticBaseModel):
     )
     stt_model_id: Optional[str] = Field(
         None,
-        description="Speech-to-Text model ID used for voice conversations to transcribe user speech into text (e.g., 'whisper-v3', 'google-stt-enhanced', references TravnexSupportModel)"
+        description="Speech-to-Text model ID used for voice conversations to transcribe user speech into text (e.g., 'whisper-v3', 'google-stt-enhanced', references WiilSupportModel)"
     )
     tts_model_id: Optional[str] = Field(
         None,
-        description="Text-to-Speech model ID used for voice conversations to synthesize agent text responses into natural speech (e.g., 'eleven-labs-v2', 'azure-neural-tts', references TravnexSupportModel)"
+        description="Text-to-Speech model ID used for voice conversations to synthesize agent text responses into natural speech (e.g., 'eleven-labs-v2', 'azure-neural-tts', references WiilSupportModel)"
     )
     conversation_summary: Optional[ConversationSummary] = Field(
         None,
@@ -392,7 +392,7 @@ class ServiceConversationConfig(BaseModel):
     )
     model_id: Optional[str] = Field(
         None,
-        description="AI model ID used for this conversation, may override deployment configuration model for A/B testing, specialized scenarios, or model version upgrades (references TravnexSupportModel)"
+        description="AI model ID used for this conversation, may override deployment configuration model for A/B testing, specialized scenarios, or model version upgrades (references WiilSupportModel)"
     )
     user_id: Optional[int] = Field(
         None,
@@ -421,11 +421,11 @@ class ServiceConversationConfig(BaseModel):
     )
     stt_model_id: Optional[str] = Field(
         None,
-        description="Speech-to-Text model ID used for voice conversations to transcribe user speech into text (e.g., 'whisper-v3', 'google-stt-enhanced', references TravnexSupportModel)"
+        description="Speech-to-Text model ID used for voice conversations to transcribe user speech into text (e.g., 'whisper-v3', 'google-stt-enhanced', references WiilSupportModel)"
     )
     tts_model_id: Optional[str] = Field(
         None,
-        description="Text-to-Speech model ID used for voice conversations to synthesize agent text responses into natural speech (e.g., 'eleven-labs-v2', 'azure-neural-tts', references TravnexSupportModel)"
+        description="Text-to-Speech model ID used for voice conversations to synthesize agent text responses into natural speech (e.g., 'eleven-labs-v2', 'azure-neural-tts', references WiilSupportModel)"
     )
     conversation_summary: Optional[ConversationSummary] = Field(
         None,

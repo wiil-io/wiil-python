@@ -6,7 +6,7 @@ reservations for tables, rooms, rentals, and other bookable resources.
 
 from typing import Optional
 
-from pydantic import ConfigDict, EmailStr, Field
+from pydantic import ConfigDict, Field
 
 from wiil.models.base import BaseModel
 from wiil.types.business_types import (
@@ -85,8 +85,6 @@ class Reservation(BaseModel):
         reservation_type: Type of reservation
         resource_id: ID of the reserved resource (table, room, etc.)
         customer_id: Customer ID if registered
-        customer_name: Customer's full name
-        customer_email: Customer's email address
         start_time: Reservation start time as Unix timestamp
         end_time: Reservation end time as Unix timestamp
         duration: Duration based on resource type
@@ -106,8 +104,6 @@ class Reservation(BaseModel):
             reservation_type=ResourceType.TABLE,
             resource_id="table_5",
             customer_id="cust_123",
-            customer_name="John Doe",
-            customer_email="john@example.com",
             start_time=1234567890,
             duration=2,
             persons_number=4,
@@ -139,16 +135,6 @@ class Reservation(BaseModel):
         ...,
         description="References Customer who made this reservation",
         alias="customerId"
-    )
-    customer_name: Optional[str] = Field(
-        None,
-        description="Customer's full name captured at reservation time",
-        alias="customerName"
-    )
-    customer_email: Optional[EmailStr] = Field(
-        None,
-        description="Customer's email for confirmation messages and updates",
-        alias="customerEmail"
     )
     start_time: int = Field(
         ...,
@@ -208,39 +194,6 @@ class Reservation(BaseModel):
     )
 
 
-class CreateReservationSettings(BaseModel):
-    """Schema for creating new reservation settings.
-
-    Omits auto-generated fields (id, created_at, updated_at).
-
-    Example:
-        ```python
-        create_data = CreateReservationSettings(
-            reservation_type=ResourceType.ROOM,
-            setting_type=ReservationSettingType.RESOURCE_SPECIFIC,
-            default_reservation_duration=1,
-            default_reservation_duration_unit=ResourceReservationDurationUnit.NIGHTS,
-            is_active=True
-        )
-        ```
-    """
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
-
-    reservation_type: ResourceType = Field(..., alias="reservationType")
-    setting_type: ReservationSettingType = Field(..., alias="settingType")
-    default_reservation_duration: Optional[int] = Field(1, gt=0, alias="defaultReservationDuration")
-    default_reservation_duration_unit: Optional[ResourceReservationDurationUnit] = Field(
-        ResourceReservationDurationUnit.HOURS,
-        alias="defaultReservationDurationUnit"
-    )
-    is_active: bool = Field(False, alias="isActive")
-
-
 class UpdateReservationSettings(BaseModel):
     """Schema for updating existing reservation settings.
 
@@ -283,12 +236,9 @@ class CreateReservation(BaseModel):
             reservation_type=ResourceType.TABLE,
             resource_id="table_10",
             customer_id="cust_456",
-            customer_name="Jane Smith",
-            customer_email="jane@example.com",
             start_time=1234567890,
             duration=1.5,
             persons_number=2,
-            status=AppointmentStatus.PENDING,
             is_resource_reservation=True
         )
         ```
@@ -303,18 +253,14 @@ class CreateReservation(BaseModel):
     reservation_type: ResourceType = Field(..., alias="reservationType")
     resource_id: Optional[str] = Field(None, alias="resourceId")
     customer_id: str = Field(..., alias="customerId")
-    customer_name: Optional[str] = Field(None, alias="customerName")
-    customer_email: Optional[EmailStr] = Field(None, alias="customerEmail")
     start_time: int = Field(..., alias="startTime")
     end_time: Optional[int] = Field(None, alias="endTime")
     duration: Optional[float] = Field(None, ge=0)
     persons_number: Optional[int] = Field(None, ge=0, alias="personsNumber")
     total_price: Optional[float] = Field(None, ge=0, alias="totalPrice")
     deposit_paid: float = Field(0.0, ge=0, alias="depositPaid")
-    status: AppointmentStatus = AppointmentStatus.PENDING
     notes: Optional[str] = None
     is_resource_reservation: bool = Field(False, alias="isResourceReservation")
-    service_conversation_config_id: Optional[str] = Field(None, alias="serviceConversationConfigId")
 
 
 class UpdateReservation(BaseModel):
@@ -342,8 +288,6 @@ class UpdateReservation(BaseModel):
     reservation_type: Optional[ResourceType] = Field(None, alias="reservationType")
     resource_id: Optional[str] = Field(None, alias="resourceId")
     customer_id: Optional[str] = Field(None, alias="customerId")
-    customer_name: Optional[str] = Field(None, alias="customerName")
-    customer_email: Optional[EmailStr] = Field(None, alias="customerEmail")
     start_time: Optional[int] = Field(None, alias="startTime")
     end_time: Optional[int] = Field(None, alias="endTime")
     duration: Optional[float] = Field(None, ge=0)
@@ -354,4 +298,3 @@ class UpdateReservation(BaseModel):
     notes: Optional[str] = None
     cancel_reason: Optional[str] = Field(None, alias="cancelReason")
     is_resource_reservation: Optional[bool] = Field(None, alias="isResourceReservation")
-    service_conversation_config_id: Optional[str] = Field(None, alias="serviceConversationConfigId")

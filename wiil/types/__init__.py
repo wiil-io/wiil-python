@@ -6,12 +6,25 @@ This module contains all type definitions organized by domain:
 - service_types: Service configuration enumerations
 - conversation_types: Conversation and messaging enumerations
 - knowledge_types: Knowledge base enumerations
+- paginated_result: Pagination models for API responses
+- paginated_quest: Timestamp-based query models
 """
 
 from wiil.types.account_types import (
     BusinessSupportServices,
     ServiceStatus,
     ServiceSuspensionType,
+)
+from wiil.types.paginated_result import (
+    PaginatedResult,
+    PaginationMeta,
+    PaginatedAccountRequest,
+    PaginationRequest,
+    SearchablePaginationRequest,
+)
+from wiil.types.paginated_quest import (
+    TimestampQuery,
+    AccountPaginatedTimestampQuery,
 )
 from wiil.types.business_types import (
     AppointmentStatus,
@@ -121,4 +134,13 @@ __all__ = [
     "KnowledgeTypes",
     "StorageTier",
     "SupportedDocumentTypes",
+    # Pagination types
+    "PaginatedResult",
+    "PaginationMeta",
+    "PaginatedAccountRequest",
+    "PaginationRequest",
+    "SearchablePaginationRequest",
+    # Timestamp query types
+    "TimestampQuery",
+    "AccountPaginatedTimestampQuery",
 ]

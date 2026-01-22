@@ -19,13 +19,14 @@ class TestConversationConfigurationsResource:
         """Test retrieving a conversation configuration by ID."""
         mock_response = {
             "id": "conv_123",
-            "name": "Customer Service Conversation",
-            "description": "Conversation configuration for customer service",
-            "conversationFlow": {
-                "greeting": "Hello! How can I help you today?",
-                "maxTurns": 10,
-                "contextWindow": 5,
-            },
+            "channelId": "channel_456",
+            "organizationId": "org_789",
+            "projectId": "proj_012",
+            "deploymentConfigId": "deploy_345",
+            "channelIdentifier": "+12125551234",
+            "conversationType": "TELEPHONY_CALL",
+            "status": "active",
+            "durationInSeconds": 120,
             "createdAt": 1234567890,
             "updatedAt": 1234567890,
         }
@@ -38,7 +39,9 @@ class TestConversationConfigurationsResource:
         result = client.conversation_configs.get("conv_123")
 
         assert result.id == "conv_123"
-        assert result.name == "Customer Service Conversation"
+        assert result.channel_id == "channel_456"
+        assert result.organization_id == "org_789"
+        assert result.conversation_type == "TELEPHONY_CALL"
 
     def test_get_conversation_configuration_not_found(self, client: WiilClient, mock_api, error_response):
         """Test API error when conversation configuration not found."""
@@ -61,23 +64,27 @@ class TestConversationConfigurationsResource:
         mock_configs = [
             {
                 "id": "conv_1",
-                "name": "Conversation 1",
-                "description": "First conversation config",
-                "conversationFlow": {
-                    "greeting": "Hello!",
-                    "maxTurns": 10,
-                },
+                "channelId": "channel_101",
+                "organizationId": "org_789",
+                "projectId": "proj_012",
+                "deploymentConfigId": "deploy_345",
+                "channelIdentifier": "+12125551111",
+                "conversationType": "OTT_CHAT",
+                "status": "active",
+                "durationInSeconds": 45,
                 "createdAt": 1234567890,
                 "updatedAt": 1234567890,
             },
             {
                 "id": "conv_2",
-                "name": "Conversation 2",
-                "description": "Second conversation config",
-                "conversationFlow": {
-                    "greeting": "Welcome!",
-                    "maxTurns": 15,
-                },
+                "channelId": "channel_102",
+                "organizationId": "org_789",
+                "projectId": "proj_012",
+                "deploymentConfigId": "deploy_345",
+                "channelIdentifier": "+12125552222",
+                "conversationType": "SMS",
+                "status": "ended",
+                "durationInSeconds": 90,
                 "createdAt": 1234567891,
                 "updatedAt": 1234567891,
             },
@@ -105,6 +112,10 @@ class TestConversationConfigurationsResource:
         assert len(result.data) == 2
         assert result.meta.total_count == 2
         assert result.meta.page == 1
+        assert result.data[0].id == "conv_1"
+        assert result.data[0].conversation_type == "OTT_CHAT"
+        assert result.data[1].id == "conv_2"
+        assert result.data[1].conversation_type == "SMS"
 
     def test_list_conversation_configurations_with_pagination(self, client: WiilClient, mock_api, api_response):
         """Test listing conversation configurations with custom pagination parameters."""

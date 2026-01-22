@@ -52,16 +52,6 @@ class PhoneChannelConfig(PydanticBaseModel):
         description="ID of the PhoneConfiguration resource that manages the phone number and telephony provider settings for this channel",
         alias="phoneConfigurationId"
     )
-    has_forwarding_enabled: bool = Field(
-        False,
-        description="Whether call forwarding is enabled for this phone channel, allowing calls to be forwarded to external numbers for escalation or overflow handling",
-        alias="hasForwardingEnabled"
-    )
-    forwarding_phone_number: Optional[str] = Field(
-        None,
-        description="Phone number in E.164 format to forward calls to when forwarding is enabled (e.g., '+12125551234' for escalation or overflow)",
-        alias="forwardingPhoneNumber"
-    )
 
 
 class WidgetConfiguration(PydanticBaseModel):
@@ -142,11 +132,6 @@ class WebChannelConfig(PydanticBaseModel):
         OttCommunicationType.UNIFIED,
         description="Type of over-the-top (OTT) communication protocol used for the web channel (default: UNIFIED for combined text/media communication)",
         alias="communicationType"
-    )
-    custom_css_url: Optional[str] = Field(
-        None,
-        description="Optional URL to a custom CSS stylesheet for styling the chat widget to match brand guidelines and website design",
-        alias="customCssUrl"
     )
     widget_configuration: Optional[WidgetConfiguration] = Field(
         None,

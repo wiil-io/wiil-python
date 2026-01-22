@@ -1,6 +1,6 @@
 """Instruction Configurations resource for managing instruction configuration entities."""
 
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 from urllib.parse import urlencode
 
 from wiil.client.http_client import HttpClient
@@ -64,6 +64,24 @@ class InstructionConfigurationsResource:
 
         query_string = f'?{urlencode(params)}' if params else ''
         return self._http.get(f'{self._base_path}{query_string}')
+
+    def get_supported_templates(self) -> List[InstructionConfiguration]:
+        """Retrieve the list of supported instruction templates.
+
+        Returns:
+            Array of supported instruction template configurations
+
+        Raises:
+            WiilAPIError: When the API returns an error
+            WiilNetworkError: When network communication fails
+
+        Example:
+            >>> templates = client.instruction_configs.get_supported_templates()
+            >>> print(f"Found {len(templates)} supported templates")
+            >>> for template in templates:
+            ...     print(f"- {template.name} ({template.id})")
+        """
+        return self._http.get(f'{self._base_path}/supported-templates')
 
 
 __all__ = ['InstructionConfigurationsResource']

@@ -20,10 +20,26 @@ class TestKnowledgeSourcesResource:
         mock_response = {
             "id": "source_123",
             "name": "Product Documentation",
-            "description": "Product documentation knowledge base",
-            "sourceType": "DOCUMENTATION",
-            "sourceUrl": "https://docs.example.com",
-            "status": "ACTIVE",
+            "sourceType": "document",
+            "requestSuccess": True,
+            "processingStatus": "completed",
+            "content": None,
+            "preppedContent": None,
+            "contentPath": None,
+            "preppedContentPath": None,
+            "originalContentUrl": "https://docs.example.com",
+            "storedContentUrl": None,
+            "preppedContentUrl": None,
+            "contentSize": None,
+            "preppedContentSize": None,
+            "storageTier": "firestore",
+            "lastAccessed": None,
+            "accessCount": 0,
+            "isCompressed": False,
+            "compressionRatio": None,
+            "metadata": None,
+            "originalContentType": None,
+            "contentHash": None,
             "createdAt": 1234567890,
             "updatedAt": 1234567890,
         }
@@ -38,7 +54,9 @@ class TestKnowledgeSourcesResource:
         assert result.id == "source_123"
         assert result.name == "Product Documentation"
 
-    def test_get_knowledge_source_not_found(self, client: WiilClient, mock_api, error_response):
+    def test_get_knowledge_source_not_found(
+        self, client: WiilClient, mock_api, error_response
+    ):
         """Test API error when knowledge source not found."""
         mock_api.get(
             f"{BASE_URL}/knowledge-sources/invalid_id",
@@ -54,26 +72,60 @@ class TestKnowledgeSourcesResource:
         assert exc_info.value.status_code == 404
         assert exc_info.value.code == "NOT_FOUND"
 
-    def test_list_knowledge_sources(self, client: WiilClient, mock_api, api_response):
+    def test_list_knowledge_sources(
+        self, client: WiilClient, mock_api, api_response
+    ):
         """Test listing knowledge sources with pagination."""
         mock_sources = [
             {
                 "id": "source_1",
                 "name": "Product Documentation",
-                "description": "Product docs",
-                "sourceType": "DOCUMENTATION",
-                "sourceUrl": "https://docs.example.com",
-                "status": "ACTIVE",
+                "sourceType": "document",
+                "requestSuccess": True,
+                "processingStatus": "completed",
+                "content": None,
+                "preppedContent": None,
+                "contentPath": None,
+                "preppedContentPath": None,
+                "originalContentUrl": "https://docs.example.com",
+                "storedContentUrl": None,
+                "preppedContentUrl": None,
+                "contentSize": None,
+                "preppedContentSize": None,
+                "storageTier": "firestore",
+                "lastAccessed": None,
+                "accessCount": 5,
+                "isCompressed": False,
+                "compressionRatio": None,
+                "metadata": None,
+                "originalContentType": "application/pdf",
+                "contentHash": None,
                 "createdAt": 1234567890,
                 "updatedAt": 1234567890,
             },
             {
                 "id": "source_2",
                 "name": "FAQ Database",
-                "description": "Frequently asked questions",
-                "sourceType": "FAQ",
-                "sourceUrl": "https://faq.example.com",
-                "status": "ACTIVE",
+                "sourceType": "url",
+                "requestSuccess": True,
+                "processingStatus": "completed",
+                "content": None,
+                "preppedContent": None,
+                "contentPath": None,
+                "preppedContentPath": None,
+                "originalContentUrl": "https://faq.example.com",
+                "storedContentUrl": None,
+                "preppedContentUrl": None,
+                "contentSize": None,
+                "preppedContentSize": None,
+                "storageTier": "firestore",
+                "lastAccessed": None,
+                "accessCount": 3,
+                "isCompressed": False,
+                "compressionRatio": None,
+                "metadata": None,
+                "originalContentType": "text/html",
+                "contentHash": None,
                 "createdAt": 1234567891,
                 "updatedAt": 1234567891,
             },
@@ -102,8 +154,10 @@ class TestKnowledgeSourcesResource:
         assert result.meta.total_count == 2
         assert result.meta.page == 1
 
-    def test_list_knowledge_sources_with_pagination(self, client: WiilClient, mock_api, api_response):
-        """Test listing knowledge sources with custom pagination parameters."""
+    def test_list_knowledge_sources_with_pagination(
+        self, client: WiilClient, mock_api, api_response
+    ):
+        """Test listing knowledge sources with pagination parameters."""
         mock_response = {
             "data": [],
             "meta": {

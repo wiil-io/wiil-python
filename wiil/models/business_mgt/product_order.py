@@ -328,7 +328,6 @@ class CreateProductOrder(BaseModel):
     status: OrderStatus = OrderStatus.PENDING
     items: List[ProductOrderItemBase] = Field(..., min_length=1)
     customer_id: str = Field(..., alias="customerId")
-    customer: Optional[OrderCustomer] = None
     pricing: OrderPricing
     payment_status: PaymentStatus = Field(PaymentStatus.PENDING, alias="paymentStatus")
     payment_method: Optional[str] = Field(None, alias="paymentMethod")
@@ -343,7 +342,6 @@ class CreateProductOrder(BaseModel):
     external_order_id: Optional[str] = Field(None, alias="externalOrderId")
     source: str = "direct"
     notes: Optional[str] = None
-    service_conversation_config_id: Optional[str] = Field(None, alias="serviceConversationConfigId")
 
 
 class UpdateProductOrder(BaseModel):
@@ -372,7 +370,6 @@ class UpdateProductOrder(BaseModel):
     status: Optional[OrderStatus] = None
     items: Optional[List[ProductOrderItemBase]] = Field(None, min_length=1)
     customer_id: Optional[str] = Field(None, alias="customerId")
-    customer: Optional[OrderCustomer] = None
     pricing: Optional[OrderPricing] = None
     payment_status: Optional[PaymentStatus] = Field(None, alias="paymentStatus")
     payment_method: Optional[str] = Field(None, alias="paymentMethod")
@@ -390,7 +387,6 @@ class UpdateProductOrder(BaseModel):
     source: Optional[str] = None
     cancel_reason: Optional[str] = Field(None, alias="cancelReason")
     notes: Optional[str] = None
-    service_conversation_config_id: Optional[str] = Field(None, alias="serviceConversationConfigId")
 
 
 class UpdateProductOrderStatus(PydanticBaseModel):

@@ -20,7 +20,7 @@ class SttModelConfig(BaseModel):
     Pipeline Position: First stage (Speech → Text)
 
     Attributes:
-        model_id: Identifier of the STT model from Travnex registry
+        model_id: Identifier of the STT model from Wiil registry
         default_language: Default language code for speech recognition
 
     Example:
@@ -58,7 +58,7 @@ class TtsModelConfig(BaseModel):
     Pipeline Position: Final stage (Text → Speech)
 
     Attributes:
-        model_id: Identifier of the TTS model from Travnex registry
+        model_id: Identifier of the TTS model from Wiil registry
         voice_id: Identifier of the specific voice for speech synthesis
         default_language: Default language code for speech synthesis
         voice_settings: Optional voice-specific settings

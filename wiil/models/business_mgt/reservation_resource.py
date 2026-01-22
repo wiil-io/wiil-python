@@ -213,7 +213,7 @@ class Resource(BaseModel):
         description="External calendar system ID for real-time availability synchronization",
         alias="calendarId"
     )
-    sync_enabled: bool = Field(
+    sync_enabled: Optional[bool] = Field(
         False,
         description="Whether automatic calendar synchronization is active for this resource",
         alias="syncEnabled"
@@ -281,8 +281,6 @@ class CreateResource(BaseModel):
         alias="reservationDurationUnit"
     )
     calendar_id: Optional[str] = Field(None, alias="calendarId")
-    sync_enabled: bool = Field(False, alias="syncEnabled")
-    last_sync_at: Optional[int] = Field(None, alias="lastSyncAt")
     room_resource: Optional[RoomResource] = Field(None, alias="roomResource")
     rental_resource: Optional[RentalResource] = Field(None, alias="rentalResource")
     metadata: Optional[Dict[str, Any]] = None

@@ -26,10 +26,15 @@ class TestDeploymentConfigurationsResource:
 
         mock_response = {
             "id": "deploy_123",
-            "name": "Customer Service Deployment",
-            "agentConfigId": "agent_123",
-            "instructionConfigId": "inst_456",
             "projectId": "proj_789",
+            "deploymentChannelId": "channel_999",
+            "deploymentName": "Customer Service Deployment",
+            "agentConfigurationId": "agent_123",
+            "instructionConfigurationId": "inst_456",
+            "deploymentStatus": "PENDING",
+            "provisioningType": "DIRECT",
+            "provisioningConfigChainId": None,
+            "isActive": False,
             "createdAt": 1234567890,
             "updatedAt": 1234567890,
         }
@@ -42,7 +47,8 @@ class TestDeploymentConfigurationsResource:
         result = client.deployment_configs.create(**input_data)
 
         assert result.id == "deploy_123"
-        assert result.name == "Customer Service Deployment"
+        assert result.deployment_name == "Customer Service Deployment"
+        assert result.agent_configuration_id == "agent_123"
 
     def test_create_chain_deployment_configuration(self, client: WiilClient, mock_api, api_response):
         """Test creating a chained deployment configuration."""
@@ -54,9 +60,15 @@ class TestDeploymentConfigurationsResource:
 
         mock_response = {
             "id": "deploy_456",
-            "name": "Voice Chain Deployment",
-            "provisioningConfigChainId": "chain_123",
             "projectId": "proj_789",
+            "deploymentChannelId": "channel_888",
+            "deploymentName": "Voice Chain Deployment",
+            "agentConfigurationId": "agent_456",
+            "instructionConfigurationId": "inst_789",
+            "deploymentStatus": "PENDING",
+            "provisioningType": "CHAINED",
+            "provisioningConfigChainId": "chain_123",
+            "isActive": False,
             "createdAt": 1234567890,
             "updatedAt": 1234567890,
         }
@@ -69,14 +81,22 @@ class TestDeploymentConfigurationsResource:
         result = client.deployment_configs.create_chain(**input_data)
 
         assert result.id == "deploy_456"
-        assert result.name == "Voice Chain Deployment"
+        assert result.deployment_name == "Voice Chain Deployment"
+        assert result.provisioning_config_chain_id == "chain_123"
 
     def test_get_deployment_configuration(self, client: WiilClient, mock_api, api_response):
         """Test retrieving a deployment configuration by ID."""
         mock_response = {
             "id": "deploy_123",
-            "name": "Customer Service Deployment",
-            "agentConfigId": "agent_123",
+            "projectId": "proj_789",
+            "deploymentChannelId": "channel_999",
+            "deploymentName": "Customer Service Deployment",
+            "agentConfigurationId": "agent_123",
+            "instructionConfigurationId": "inst_456",
+            "deploymentStatus": "ACTIVE",
+            "provisioningType": "DIRECT",
+            "provisioningConfigChainId": None,
+            "isActive": True,
             "createdAt": 1234567890,
             "updatedAt": 1234567890,
         }
@@ -89,14 +109,22 @@ class TestDeploymentConfigurationsResource:
         result = client.deployment_configs.get("deploy_123")
 
         assert result.id == "deploy_123"
-        assert result.name == "Customer Service Deployment"
+        assert result.deployment_name == "Customer Service Deployment"
+        assert result.deployment_status == "ACTIVE"
 
     def test_get_deployment_configuration_by_channel(self, client: WiilClient, mock_api, api_response):
         """Test retrieving a deployment configuration by channel ID."""
         mock_response = {
             "id": "deploy_123",
-            "name": "Customer Service Deployment",
-            "channelId": "channel_789",
+            "projectId": "proj_789",
+            "deploymentChannelId": "channel_789",
+            "deploymentName": "Customer Service Deployment",
+            "agentConfigurationId": "agent_123",
+            "instructionConfigurationId": "inst_456",
+            "deploymentStatus": "ACTIVE",
+            "provisioningType": "DIRECT",
+            "provisioningConfigChainId": None,
+            "isActive": True,
             "createdAt": 1234567890,
             "updatedAt": 1234567890,
         }
@@ -109,6 +137,7 @@ class TestDeploymentConfigurationsResource:
         result = client.deployment_configs.get_by_channel("channel_789")
 
         assert result.id == "deploy_123"
+        assert result.deployment_channel_id == "channel_789"
 
     def test_update_deployment_configuration(self, client: WiilClient, mock_api, api_response):
         """Test updating a deployment configuration."""
@@ -119,8 +148,15 @@ class TestDeploymentConfigurationsResource:
 
         mock_response = {
             "id": "deploy_123",
-            "name": "Updated Deployment Name",
-            "agentConfigId": "agent_123",
+            "projectId": "proj_789",
+            "deploymentChannelId": "channel_999",
+            "deploymentName": "Updated Deployment Name",
+            "agentConfigurationId": "agent_123",
+            "instructionConfigurationId": "inst_456",
+            "deploymentStatus": "ACTIVE",
+            "provisioningType": "DIRECT",
+            "provisioningConfigChainId": None,
+            "isActive": True,
             "createdAt": 1234567890,
             "updatedAt": 1234567891,
         }
@@ -132,7 +168,8 @@ class TestDeploymentConfigurationsResource:
 
         result = client.deployment_configs.update(**update_data)
 
-        assert result.name == "Updated Deployment Name"
+        assert result.deployment_name == "Updated Deployment Name"
+        assert result.updated_at == 1234567891
 
     def test_delete_deployment_configuration(self, client: WiilClient, mock_api, api_response):
         """Test deleting a deployment configuration."""
@@ -150,15 +187,29 @@ class TestDeploymentConfigurationsResource:
         mock_configs = [
             {
                 "id": "deploy_1",
-                "name": "Deployment 1",
-                "agentConfigId": "agent_123",
+                "projectId": "proj_789",
+                "deploymentChannelId": "channel_101",
+                "deploymentName": "Deployment 1",
+                "agentConfigurationId": "agent_123",
+                "instructionConfigurationId": "inst_456",
+                "deploymentStatus": "ACTIVE",
+                "provisioningType": "DIRECT",
+                "provisioningConfigChainId": None,
+                "isActive": True,
                 "createdAt": 1234567890,
                 "updatedAt": 1234567890,
             },
             {
                 "id": "deploy_2",
-                "name": "Deployment 2",
-                "agentConfigId": "agent_456",
+                "projectId": "proj_789",
+                "deploymentChannelId": "channel_102",
+                "deploymentName": "Deployment 2",
+                "agentConfigurationId": "agent_456",
+                "instructionConfigurationId": "inst_789",
+                "deploymentStatus": "PENDING",
+                "provisioningType": "DIRECT",
+                "provisioningConfigChainId": None,
+                "isActive": False,
                 "createdAt": 1234567891,
                 "updatedAt": 1234567891,
             },
@@ -185,6 +236,8 @@ class TestDeploymentConfigurationsResource:
 
         assert len(result.data) == 2
         assert result.meta.total_count == 2
+        assert result.data[0].deployment_name == "Deployment 1"
+        assert result.data[1].deployment_status == "PENDING"
 
     def test_list_deployment_configurations_by_project(self, client: WiilClient, mock_api, api_response):
         """Test listing deployment configurations by project ID."""

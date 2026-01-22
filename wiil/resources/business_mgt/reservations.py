@@ -9,7 +9,6 @@ from wiil.models.business_mgt import (
     CreateReservation,
     UpdateReservation,
     ReservationSettings,
-    CreateReservationSettings,
     UpdateReservationSettings,
 )
 from wiil.types import PaginatedResult
@@ -135,15 +134,6 @@ class ReservationsResource:
     def get_settings(self) -> List[ReservationSettings]:
         """Retrieve reservation settings for the organization."""
         return self._http.get(f'{self._base_path}/settings')
-
-    def create_settings(self, **kwargs: Any) -> ReservationSettings:
-        """Create reservation settings."""
-        data = CreateReservationSettings(**kwargs)
-        return self._http.post(
-            f'{self._base_path}/settings',
-            data.model_dump(by_alias=True, exclude_none=True),
-            schema=CreateReservationSettings
-        )
 
     def update_settings(self, **kwargs: Any) -> ReservationSettings:
         """Update reservation settings."""

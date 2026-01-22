@@ -36,8 +36,7 @@ print(f"Organization: {organization.company_name}")
 # Create a project
 project = client.projects.create(
     name="Production Environment",
-    description="Main production deployment",
-    is_default=True
+    description="Main production deployment"
 )
 
 print(f"Project created: {project.id}")
@@ -215,8 +214,7 @@ print(f"Organization: {org.company_name}")
 # Create a project
 project = client.projects.create(
     name="Production Environment",
-    description="Main production deployment",
-    is_default=True
+    description="Main production deployment"
 )
 
 # Get a project

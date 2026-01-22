@@ -44,7 +44,6 @@ class MenuCategory(BaseModel):
         name: Category name for menu organization
         description: Category description providing context
         display_order: Numeric order for category display in menu listings
-        is_default: Whether this is the default category for uncategorized items
 
     Example:
         ```python
@@ -52,8 +51,7 @@ class MenuCategory(BaseModel):
             id="cat_123",
             name="Main Course",
             description="Entrees and main dishes",
-            display_order=2,
-            is_default=False
+            display_order=2
         )
         ```
     """
@@ -73,11 +71,6 @@ class MenuCategory(BaseModel):
         None,
         description="Numeric order for category display. Lower numbers appear first",
         alias="displayOrder"
-    )
-    is_default: bool = Field(
-        False,
-        description="Whether this is the default category for uncategorized menu items",
-        alias="isDefault"
     )
 
 
@@ -251,7 +244,6 @@ class CreateMenuCategory(BaseModel):
     name: str = Field(..., min_length=1)
     description: Optional[str] = None
     display_order: Optional[int] = Field(None, alias="displayOrder")
-    is_default: bool = Field(False, alias="isDefault")
 
 
 class CreateBusinessMenuItem(BaseModel):
@@ -282,7 +274,6 @@ class CreateBusinessMenuItem(BaseModel):
     description: Optional[str] = None
     price: float = Field(..., ge=0)
     category_id: Optional[str] = Field(None, alias="categoryId")
-    category: Optional[str] = None
     ingredients: Optional[List[str]] = None
     allergens: Optional[List[str]] = None
     nutritional_info: Optional[NutritionalInfo] = Field(None, alias="nutritionalInfo")
@@ -317,7 +308,6 @@ class UpdateMenuCategory(BaseModel):
     name: Optional[str] = Field(None, min_length=1)
     description: Optional[str] = None
     display_order: Optional[int] = Field(None, alias="displayOrder")
-    is_default: Optional[bool] = Field(None, alias="isDefault")
 
 
 class UpdateBusinessMenuItem(BaseModel):
@@ -346,7 +336,6 @@ class UpdateBusinessMenuItem(BaseModel):
     description: Optional[str] = None
     price: Optional[float] = Field(None, ge=0)
     category_id: Optional[str] = Field(None, alias="categoryId")
-    category: Optional[str] = None
     ingredients: Optional[List[str]] = None
     allergens: Optional[List[str]] = None
     nutritional_info: Optional[NutritionalInfo] = Field(None, alias="nutritionalInfo")

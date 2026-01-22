@@ -1,6 +1,6 @@
-"""Travnex support model schema definitions.
+"""Wiil support model schema definitions.
 
-This module contains models for the Travnex Support Model Registry which maintains
+This module contains models for the Wiil Support Model Registry which maintains
 a curated list of LLM models from various providers.
 """
 
@@ -13,15 +13,15 @@ from wiil.models.service_mgt.voice_language import Language, Voice
 from wiil.types.service_types import LLMType, SupportedProprietor
 
 
-class TravnexSupportModel(PydanticBaseModel):
-    """Travnex supported model configuration.
+class WiilSupportModel(PydanticBaseModel):
+    """Wiil supported model configuration.
 
-    Represents a language model registered in the Travnex platform's support registry.
+    Represents a language model registered in the Wiil platform's support registry.
     The registry provides a centralized catalog of available models with their capabilities,
     supported languages, and voices.
 
     Attributes:
-        model_id: Unique identifier for the model in Travnex registry
+        model_id: Unique identifier for the model in Wiil registry
         proprietor: Model proprietor/provider organization
         name: Human-readable name of the model
         provider_model_id: Original model ID from provider if different
@@ -33,8 +33,8 @@ class TravnexSupportModel(PydanticBaseModel):
 
     Example:
         ```python
-        model = TravnexSupportModel(
-            model_id="gpt-4-turbo",
+        model = WiilSupportModel(
+            model_id="YUSI21217J1",
             proprietor=SupportedProprietor.OPENAI,
             name="GPT-4 Turbo",
             provider_model_id="gpt-4-1106-preview",
@@ -61,7 +61,7 @@ class TravnexSupportModel(PydanticBaseModel):
 
     model_id: str = Field(
         ...,
-        description="Unique identifier for the model in Travnex registry (e.g., 'gpt-4-turbo')",
+        description="Unique identifier for the model in Wiil registry (e.g., 'YUSI21217J1')",
         alias="modelId"
     )
     proprietor: SupportedProprietor = Field(

@@ -188,11 +188,11 @@ class MenusResource:
         query_string = f'?{urlencode(params)}' if params else ''
         return self._http.get(f'{self._base_path}/items/by-category/{category_id}{query_string}')
 
-    def get_popular_items(self, limit: Optional[int] = None) -> List[BusinessMenuItem]:
+    def get_popular_items(self, pageSize: Optional[int] = None) -> List[BusinessMenuItem]:
         """Retrieve popular menu items.
 
         Args:
-            limit: Maximum number of items to return
+            pageSize: Maximum number of items to return
 
         Returns:
             List of popular menu items

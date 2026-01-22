@@ -15,7 +15,9 @@ API_KEY = "test-api-key"
 class TestPhoneConfigurationsResource:
     """Test suite for PhoneConfigurationsResource."""
 
-    def test_purchase_phone_number(self, client: WiilClient, mock_api, api_response):
+    def test_purchase_phone_number(
+        self, client: WiilClient, mock_api, api_response
+    ):
         """Test purchasing a new phone number."""
         input_data = {
             "phone_number": "+14155551234",
@@ -28,7 +30,7 @@ class TestPhoneConfigurationsResource:
             "requestId": "req_123",
             "phoneNumber": "+14155551234",
             "friendlyName": "Support Line",
-            "status": "PENDING",
+            "status": "pending",
             "purchaseDate": 1234567890,
         }
 
@@ -42,14 +44,31 @@ class TestPhoneConfigurationsResource:
         assert result.request_id == "req_123"
         assert result.phone_number == "+14155551234"
 
-    def test_get_phone_configuration(self, client: WiilClient, mock_api, api_response):
+    def test_get_phone_configuration(
+        self, client: WiilClient, mock_api, api_response
+    ):
         """Test retrieving a phone configuration by ID."""
         mock_response = {
             "id": "phone_123",
             "phoneNumber": "+14155551234",
+            "providerPhoneNumberId": "PN123abc",
+            "phoneRequestId": "REQ456",
             "friendlyName": "Support Line",
-            "status": "ACTIVE",
-            "capabilities": ["voice", "sms"],
+            "regionId": "us-ca",
+            "monthlyPrice": 1.00,
+            "regionOrCountryName": "California, United States",
+            "countryCode": "US",
+            "providerType": "signalwire",
+            "isImported": False,
+            "status": "active",
+            "isPorted": False,
+            "markedForRelease": False,
+            "metadata": None,
+            "voiceChannelId": None,
+            "smsChannelId": None,
+            "voiceChannel": None,
+            "smsChannel": None,
+            "isUSSMSPermitted": True,
             "createdAt": 1234567890,
             "updatedAt": 1234567890,
         }
@@ -64,7 +83,9 @@ class TestPhoneConfigurationsResource:
         assert result.id == "phone_123"
         assert result.phone_number == "+14155551234"
 
-    def test_get_phone_configuration_not_found(self, client: WiilClient, mock_api, error_response):
+    def test_get_phone_configuration_not_found(
+        self, client: WiilClient, mock_api, error_response
+    ):
         """Test API error when phone configuration not found."""
         mock_api.get(
             f"{BASE_URL}/phone-configurations/invalid_id",
@@ -80,13 +101,31 @@ class TestPhoneConfigurationsResource:
         assert exc_info.value.status_code == 404
         assert exc_info.value.code == "NOT_FOUND"
 
-    def test_get_phone_configuration_by_phone_number(self, client: WiilClient, mock_api, api_response):
+    def test_get_phone_configuration_by_phone_number(
+        self, client: WiilClient, mock_api, api_response
+    ):
         """Test retrieving a phone configuration by phone number."""
         mock_response = {
             "id": "phone_123",
             "phoneNumber": "+14155551234",
+            "providerPhoneNumberId": "PN123abc",
+            "phoneRequestId": "REQ456",
             "friendlyName": "Support Line",
-            "status": "ACTIVE",
+            "regionId": "us-ca",
+            "monthlyPrice": 1.00,
+            "regionOrCountryName": "California, United States",
+            "countryCode": "US",
+            "providerType": "signalwire",
+            "isImported": False,
+            "status": "active",
+            "isPorted": False,
+            "markedForRelease": False,
+            "metadata": None,
+            "voiceChannelId": None,
+            "smsChannelId": None,
+            "voiceChannel": None,
+            "smsChannel": None,
+            "isUSSMSPermitted": True,
             "createdAt": 1234567890,
             "updatedAt": 1234567890,
         }
@@ -101,14 +140,31 @@ class TestPhoneConfigurationsResource:
         assert result.id == "phone_123"
         assert result.phone_number == "+14155551234"
 
-    def test_get_phone_configuration_by_request_id(self, client: WiilClient, mock_api, api_response):
+    def test_get_phone_configuration_by_request_id(
+        self, client: WiilClient, mock_api, api_response
+    ):
         """Test retrieving a phone configuration by request ID."""
         mock_response = {
             "id": "phone_123",
             "phoneNumber": "+14155551234",
+            "providerPhoneNumberId": "PN123abc",
+            "phoneRequestId": "req_123",
             "friendlyName": "Support Line",
-            "status": "ACTIVE",
-            "requestId": "req_123",
+            "regionId": "us-ca",
+            "monthlyPrice": 1.00,
+            "regionOrCountryName": "California, United States",
+            "countryCode": "US",
+            "providerType": "signalwire",
+            "isImported": False,
+            "status": "active",
+            "isPorted": False,
+            "markedForRelease": False,
+            "metadata": None,
+            "voiceChannelId": None,
+            "smsChannelId": None,
+            "voiceChannel": None,
+            "smsChannel": None,
+            "isUSSMSPermitted": True,
             "createdAt": 1234567890,
             "updatedAt": 1234567890,
         }
@@ -121,21 +177,38 @@ class TestPhoneConfigurationsResource:
         result = client.phone_configs.get_by_request_id("req_123")
 
         assert result.id == "phone_123"
-        assert result.request_id == "req_123"
+        assert result.phone_request_id == "req_123"
 
-    def test_update_phone_configuration(self, client: WiilClient, mock_api, api_response):
+    def test_update_phone_configuration(
+        self, client: WiilClient, mock_api, api_response
+    ):
         """Test updating a phone configuration."""
         update_data = {
             "id": "phone_123",
             "friendly_name": "Updated Support Line",
-            "status": "INACTIVE",
         }
 
         mock_response = {
             "id": "phone_123",
             "phoneNumber": "+14155551234",
+            "providerPhoneNumberId": "PN123abc",
+            "phoneRequestId": "REQ456",
             "friendlyName": "Updated Support Line",
-            "status": "INACTIVE",
+            "regionId": "us-ca",
+            "monthlyPrice": 1.00,
+            "regionOrCountryName": "California, United States",
+            "countryCode": "US",
+            "providerType": "signalwire",
+            "isImported": False,
+            "status": "active",
+            "isPorted": False,
+            "markedForRelease": False,
+            "metadata": None,
+            "voiceChannelId": None,
+            "smsChannelId": None,
+            "voiceChannel": None,
+            "smsChannel": None,
+            "isUSSMSPermitted": True,
             "createdAt": 1234567890,
             "updatedAt": 1234567891,
         }
@@ -148,9 +221,11 @@ class TestPhoneConfigurationsResource:
         result = client.phone_configs.update(**update_data)
 
         assert result.friendly_name == "Updated Support Line"
-        assert result.status == "INACTIVE"
+        assert result.updated_at == 1234567891
 
-    def test_delete_phone_configuration(self, client: WiilClient, mock_api, api_response):
+    def test_delete_phone_configuration(
+        self, client: WiilClient, mock_api, api_response
+    ):
         """Test deleting a phone configuration."""
         mock_api.delete(
             f"{BASE_URL}/phone-configurations/phone_123",
@@ -161,8 +236,10 @@ class TestPhoneConfigurationsResource:
 
         assert result is True
 
-    def test_delete_phone_configuration_not_found(self, client: WiilClient, mock_api, error_response):
-        """Test API error when deleting non-existent phone configuration."""
+    def test_delete_phone_configuration_not_found(
+        self, client: WiilClient, mock_api, error_response
+    ):
+        """Test API error when deleting non-existent phone config."""
         mock_api.delete(
             f"{BASE_URL}/phone-configurations/invalid_id",
             headers={"X-WIIL-API-Key": API_KEY}
@@ -176,22 +253,58 @@ class TestPhoneConfigurationsResource:
 
         assert exc_info.value.status_code == 404
 
-    def test_list_phone_configurations(self, client: WiilClient, mock_api, api_response):
+    def test_list_phone_configurations(
+        self, client: WiilClient, mock_api, api_response
+    ):
         """Test listing phone configurations with pagination."""
         mock_configs = [
             {
                 "id": "phone_1",
                 "phoneNumber": "+14155551234",
+                "providerPhoneNumberId": "PN123abc",
+                "phoneRequestId": "REQ001",
                 "friendlyName": "Phone 1",
-                "status": "ACTIVE",
+                "regionId": "us-ca",
+                "monthlyPrice": 1.00,
+                "regionOrCountryName": "California, United States",
+                "countryCode": "US",
+                "providerType": "signalwire",
+                "providerAccountId": None,
+                "isImported": False,
+                "status": "active",
+                "isPorted": False,
+                "markedForRelease": False,
+                "metadata": None,
+                "voiceChannelId": None,
+                "smsChannelId": None,
+                "voiceChannel": None,
+                "smsChannel": None,
+                "isUSSMSPermitted": True,
                 "createdAt": 1234567890,
                 "updatedAt": 1234567890,
             },
             {
                 "id": "phone_2",
                 "phoneNumber": "+14155555678",
+                "providerPhoneNumberId": "PN456def",
+                "phoneRequestId": "REQ002",
                 "friendlyName": "Phone 2",
-                "status": "ACTIVE",
+                "regionId": "us-ca",
+                "monthlyPrice": 1.00,
+                "regionOrCountryName": "California, United States",
+                "countryCode": "US",
+                "providerType": "signalwire",
+                "providerAccountId": None,
+                "isImported": False,
+                "status": "active",
+                "isPorted": False,
+                "markedForRelease": False,
+                "metadata": None,
+                "voiceChannelId": None,
+                "smsChannelId": None,
+                "voiceChannel": None,
+                "smsChannel": None,
+                "isUSSMSPermitted": True,
                 "createdAt": 1234567891,
                 "updatedAt": 1234567891,
             },
@@ -220,8 +333,10 @@ class TestPhoneConfigurationsResource:
         assert result.meta.total_count == 2
         assert result.meta.page == 1
 
-    def test_list_phone_configurations_with_pagination(self, client: WiilClient, mock_api, api_response):
-        """Test listing phone configurations with custom pagination parameters."""
+    def test_list_phone_configurations_with_pagination(
+        self, client: WiilClient, mock_api, api_response
+    ):
+        """Test listing phone configs with custom pagination parameters."""
         mock_response = {
             "data": [],
             "meta": {

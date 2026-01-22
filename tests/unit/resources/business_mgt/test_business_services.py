@@ -19,19 +19,25 @@ class TestBusinessServicesResource:
         """Test creating a new business service."""
         input_data = {
             "name": "Haircut",
-            "category": "Hair Services",
-            "duration": 30,
-            "price": 25.00,
             "description": "Professional haircut service",
+            "duration": 30,
+            "bufferTime": 10,
+            "isBookable": True,
+            "price": 25.00,
+            "isActive": True,
+            "displayOrder": 1,
         }
 
         mock_response = {
             "id": "svc_123",
             "name": "Haircut",
-            "category": "Hair Services",
-            "duration": 30,
-            "price": 25.00,
             "description": "Professional haircut service",
+            "duration": 30,
+            "bufferTime": 10,
+            "isBookable": True,
+            "price": 25.00,
+            "isActive": True,
+            "displayOrder": 1,
             "createdAt": 1234567890,
             "updatedAt": 1234567890,
         }
@@ -52,10 +58,13 @@ class TestBusinessServicesResource:
         mock_response = {
             "id": "svc_123",
             "name": "Haircut",
-            "category": "Hair Services",
-            "duration": 30,
-            "price": 25.00,
             "description": "Professional haircut service",
+            "duration": 30,
+            "bufferTime": 10,
+            "isBookable": True,
+            "price": 25.00,
+            "isActive": True,
+            "displayOrder": 1,
             "createdAt": 1234567890,
             "updatedAt": 1234567890,
         }
@@ -81,7 +90,13 @@ class TestBusinessServicesResource:
         mock_response = {
             "id": "svc_123",
             "name": "Premium Haircut",
+            "description": "Professional haircut service",
+            "duration": 30,
+            "bufferTime": 10,
+            "isBookable": True,
             "price": 35.00,
+            "isActive": True,
+            "displayOrder": 1,
             "createdAt": 1234567890,
             "updatedAt": 1234567891,
         }
@@ -113,18 +128,26 @@ class TestBusinessServicesResource:
             {
                 "id": "svc_1",
                 "name": "Haircut",
-                "category": "Hair Services",
+                "description": "Professional haircut service",
                 "duration": 30,
+                "bufferTime": 10,
+                "isBookable": True,
                 "price": 25.00,
+                "isActive": True,
+                "displayOrder": 1,
                 "createdAt": 1234567890,
                 "updatedAt": 1234567890,
             },
             {
                 "id": "svc_2",
                 "name": "Massage",
-                "category": "Spa Services",
+                "description": "Relaxing massage therapy",
                 "duration": 60,
+                "bufferTime": 15,
+                "isBookable": True,
                 "price": 80.00,
+                "isActive": True,
+                "displayOrder": 2,
                 "createdAt": 1234567891,
                 "updatedAt": 1234567891,
             },
@@ -158,18 +181,26 @@ class TestBusinessServicesResource:
             {
                 "id": "svc_1",
                 "name": "Haircut",
-                "category": "Hair Services",
+                "description": "Professional haircut service",
                 "duration": 30,
+                "bufferTime": 10,
+                "isBookable": True,
                 "price": 25.00,
+                "isActive": True,
+                "displayOrder": 1,
                 "createdAt": 1234567890,
                 "updatedAt": 1234567890,
             },
             {
                 "id": "svc_2",
                 "name": "Hair Coloring",
-                "category": "Hair Services",
+                "description": "Professional hair coloring service",
                 "duration": 90,
+                "bufferTime": 15,
+                "isBookable": True,
                 "price": 75.00,
+                "isActive": True,
+                "displayOrder": 2,
                 "createdAt": 1234567891,
                 "updatedAt": 1234567891,
             },
@@ -183,4 +214,4 @@ class TestBusinessServicesResource:
         result = client.business_services.get_by_category("Hair Services")
 
         assert len(result) == 2
-        assert result[0].category == "Hair Services"
+        assert result[0].name == "Haircut"

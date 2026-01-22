@@ -11,7 +11,7 @@ from pydantic import ConfigDict, Field
 
 from wiil.models.base import BaseModel
 from wiil.models.service_mgt.call_transfer_config import CallTransferConfig
-from wiil.models.service_mgt.support_llm import TravnexSupportModel
+from wiil.models.service_mgt.support_llm import WiilSupportModel
 from wiil.types.service_types import AssistantType, LLMType
 
 
@@ -26,14 +26,14 @@ class AgentConfiguration(BaseModel):
         - Managed By: Service Configuration (lifecycle management)
         - Used By: Deployment Configurations (N:1)
         - Associated With: Instruction Configuration (1:N)
-        - References: Travnex Support Model Registry (via modelId)
+        - References: Wiil Support Model Registry (via modelId)
 
     Attributes:
         id: Unique identifier for the agent configuration
-        model_id: Identifier of the LLM model from Travnex Support Registry
+        model_id: Identifier of the LLM model from Wiil Support Registry
         name: Human-readable name for the agent
         default_function_state: Default operational mode
-        uses_travnex_support_model: Whether using Travnex's model registry
+        uses_travnex_support_model: Whether using Wiil's model registry
         required_model_config: Additional model parameters
         instruction_configuration_id: ID of the instruction configuration
         assistant_type: Channel specialization type
@@ -72,7 +72,7 @@ class AgentConfiguration(BaseModel):
 
     model_id: str = Field(
         ...,
-        description="LLM model identifier from Travnex Support Registry",
+        description="LLM model identifier from Wiil Support Registry",
         alias="modelId"
     )
     name: str = Field(
@@ -86,8 +86,8 @@ class AgentConfiguration(BaseModel):
     )
     uses_travnex_support_model: bool = Field(
         True,
-        description="Whether using Travnex's supported model registry",
-        alias="usesTravnexSupportModel"
+        description="Whether using Wiil's supported model registry",
+        alias="usesWiilSupportModel"
     )
     required_model_config: Optional[Dict[str, Any]] = Field(
         None,
@@ -112,7 +112,7 @@ class AgentConfiguration(BaseModel):
         None,
         description="Additional metadata for organization and filtering"
     )
-    model: Optional[TravnexSupportModel] = Field(
+    model: Optional[WiilSupportModel] = Field(
         None,
         description="Auto-populated model information from registry"
     )
@@ -147,7 +147,7 @@ class CreateAgentConfiguration(BaseModel):
     model_id: str = Field(..., alias="modelId")
     name: str
     default_function_state: LLMType = Field(LLMType.MULTI_MODE, alias="defaultFunctionState")
-    uses_travnex_support_model: bool = Field(True, alias="usesTravnexSupportModel")
+    uses_travnex_support_model: bool = Field(True, alias="usesWiilSupportModel")
     required_model_config: Optional[Dict[str, Any]] = Field(None, alias="requiredModelConfig")
     instruction_configuration_id: str = Field(..., alias="instructionConfigurationId")
     assistant_type: AssistantType = Field(AssistantType.GENERAL, alias="assistantType")
@@ -181,7 +181,7 @@ class UpdateAgentConfiguration(BaseModel):
     model_id: Optional[str] = Field(None, alias="modelId")
     name: Optional[str] = None
     default_function_state: Optional[LLMType] = Field(None, alias="defaultFunctionState")
-    uses_travnex_support_model: Optional[bool] = Field(None, alias="usesTravnexSupportModel")
+    uses_travnex_support_model: Optional[bool] = Field(None, alias="usesWiilSupportModel")
     required_model_config: Optional[Dict[str, Any]] = Field(None, alias="requiredModelConfig")
     instruction_configuration_id: Optional[str] = Field(None, alias="instructionConfigurationId")
     assistant_type: Optional[AssistantType] = Field(None, alias="assistantType")

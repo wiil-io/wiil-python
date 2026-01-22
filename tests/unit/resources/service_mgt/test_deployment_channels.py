@@ -26,11 +26,15 @@ class TestDeploymentChannelsResource:
 
         mock_response = {
             "id": "channel_123",
-            "channelType": "CALLS",
-            "identifier": "+14155551234",
-            "name": "Main Support Line",
-            "description": "Primary customer support phone line",
-            "status": "ACTIVE",
+            "deploymentType": "CALLS",
+            "channelIdentifier": "+14155551234",
+            "channelName": "Main Support Line",
+            "recordingEnabled": True,
+            "configuration": {
+                "phoneConfigurationId": "phone_789",
+                "hasForwardingEnabled": False,
+                "forwardingPhoneNumber": None,
+            },
             "createdAt": 1234567890,
             "updatedAt": 1234567890,
         }
@@ -43,16 +47,22 @@ class TestDeploymentChannelsResource:
         result = client.deployment_channels.create(**input_data)
 
         assert result.id == "channel_123"
-        assert result.identifier == "+14155551234"
+        assert result.channel_identifier == "+14155551234"
+        assert result.deployment_type == "CALLS"
 
     def test_get_deployment_channel(self, client: WiilClient, mock_api, api_response):
         """Test retrieving a deployment channel by ID."""
         mock_response = {
             "id": "channel_123",
-            "channelType": "CALLS",
-            "identifier": "+14155551234",
-            "name": "Main Support Line",
-            "status": "ACTIVE",
+            "deploymentType": "CALLS",
+            "channelIdentifier": "+14155551234",
+            "channelName": "Main Support Line",
+            "recordingEnabled": True,
+            "configuration": {
+                "phoneConfigurationId": "phone_789",
+                "hasForwardingEnabled": False,
+                "forwardingPhoneNumber": None,
+            },
             "createdAt": 1234567890,
             "updatedAt": 1234567890,
         }
@@ -65,7 +75,8 @@ class TestDeploymentChannelsResource:
         result = client.deployment_channels.get("channel_123")
 
         assert result.id == "channel_123"
-        assert result.identifier == "+14155551234"
+        assert result.channel_identifier == "+14155551234"
+        assert result.deployment_type == "CALLS"
 
     def test_get_deployment_channel_not_found(self, client: WiilClient, mock_api, error_response):
         """Test API error when deployment channel not found."""
@@ -87,10 +98,15 @@ class TestDeploymentChannelsResource:
         """Test retrieving a deployment channel by identifier and type."""
         mock_response = {
             "id": "channel_123",
-            "channelType": "CALLS",
-            "identifier": "+14155551234",
-            "name": "Main Support Line",
-            "status": "ACTIVE",
+            "deploymentType": "CALLS",
+            "channelIdentifier": "+14155551234",
+            "channelName": "Main Support Line",
+            "recordingEnabled": True,
+            "configuration": {
+                "phoneConfigurationId": "phone_789",
+                "hasForwardingEnabled": False,
+                "forwardingPhoneNumber": None,
+            },
             "createdAt": 1234567890,
             "updatedAt": 1234567890,
         }
@@ -103,8 +119,8 @@ class TestDeploymentChannelsResource:
         result = client.deployment_channels.get_by_identifier("+14155551234", "CALLS")
 
         assert result.id == "channel_123"
-        assert result.identifier == "+14155551234"
-        assert result.channel_type == "CALLS"
+        assert result.channel_identifier == "+14155551234"
+        assert result.deployment_type == "CALLS"
 
     def test_update_deployment_channel(self, client: WiilClient, mock_api, api_response):
         """Test updating a deployment channel."""
@@ -116,11 +132,15 @@ class TestDeploymentChannelsResource:
 
         mock_response = {
             "id": "channel_123",
-            "channelType": "CALLS",
-            "identifier": "+14155551234",
-            "name": "Updated Support Line",
-            "description": "Updated customer support line",
-            "status": "ACTIVE",
+            "deploymentType": "CALLS",
+            "channelIdentifier": "+14155551234",
+            "channelName": "Updated Support Line",
+            "recordingEnabled": True,
+            "configuration": {
+                "phoneConfigurationId": "phone_789",
+                "hasForwardingEnabled": False,
+                "forwardingPhoneNumber": None,
+            },
             "createdAt": 1234567890,
             "updatedAt": 1234567891,
         }
@@ -132,8 +152,8 @@ class TestDeploymentChannelsResource:
 
         result = client.deployment_channels.update(**update_data)
 
-        assert result.name == "Updated Support Line"
-        assert result.description == "Updated customer support line"
+        assert result.channel_name == "Updated Support Line"
+        assert result.id == "channel_123"
 
     def test_delete_deployment_channel(self, client: WiilClient, mock_api, api_response):
         """Test deleting a deployment channel."""
@@ -166,19 +186,29 @@ class TestDeploymentChannelsResource:
         mock_channels = [
             {
                 "id": "channel_1",
-                "channelType": "CALLS",
-                "identifier": "+14155551234",
-                "name": "Channel 1",
-                "status": "ACTIVE",
+                "deploymentType": "CALLS",
+                "channelIdentifier": "+14155551234",
+                "channelName": "Channel 1",
+                "recordingEnabled": True,
+                "configuration": {
+                    "phoneConfigurationId": "phone_101",
+                    "hasForwardingEnabled": False,
+                    "forwardingPhoneNumber": None,
+                },
                 "createdAt": 1234567890,
                 "updatedAt": 1234567890,
             },
             {
                 "id": "channel_2",
-                "channelType": "SMS",
-                "identifier": "+14155555678",
-                "name": "Channel 2",
-                "status": "ACTIVE",
+                "deploymentType": "SMS",
+                "channelIdentifier": "+14155555678",
+                "channelName": "Channel 2",
+                "recordingEnabled": True,
+                "configuration": {
+                    "phoneConfigurationId": "phone_102",
+                    "hasForwardingEnabled": False,
+                    "forwardingPhoneNumber": None,
+                },
                 "createdAt": 1234567891,
                 "updatedAt": 1234567891,
             },
@@ -206,6 +236,8 @@ class TestDeploymentChannelsResource:
         assert len(result.data) == 2
         assert result.meta.total_count == 2
         assert result.meta.page == 1
+        assert result.data[0].deployment_type == "CALLS"
+        assert result.data[1].deployment_type == "SMS"
 
     def test_list_deployment_channels_with_pagination(self, client: WiilClient, mock_api, api_response):
         """Test listing deployment channels with custom pagination parameters."""
@@ -237,10 +269,15 @@ class TestDeploymentChannelsResource:
         mock_channels = [
             {
                 "id": "channel_1",
-                "channelType": "CALLS",
-                "identifier": "+14155551234",
-                "name": "Call Channel 1",
-                "status": "ACTIVE",
+                "deploymentType": "CALLS",
+                "channelIdentifier": "+14155551234",
+                "channelName": "Call Channel 1",
+                "recordingEnabled": True,
+                "configuration": {
+                    "phoneConfigurationId": "phone_201",
+                    "hasForwardingEnabled": False,
+                    "forwardingPhoneNumber": None,
+                },
                 "createdAt": 1234567890,
                 "updatedAt": 1234567890,
             },
@@ -266,7 +303,7 @@ class TestDeploymentChannelsResource:
         result = client.deployment_channels.list_by_type("CALLS")
 
         assert len(result.data) == 1
-        assert result.data[0].channel_type == "CALLS"
+        assert result.data[0].deployment_type == "CALLS"
 
     def test_list_deployment_channels_by_type_with_pagination(self, client: WiilClient, mock_api, api_response):
         """Test listing deployment channels by type with pagination."""
