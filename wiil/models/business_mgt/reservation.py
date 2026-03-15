@@ -6,6 +6,7 @@ reservations for tables, rooms, rentals, and other bookable resources.
 
 from typing import Optional
 
+from pydantic import BaseModel as PydanticBaseModel
 from pydantic import ConfigDict, Field
 
 from wiil.models.base import BaseModel
@@ -194,7 +195,7 @@ class Reservation(BaseModel):
     )
 
 
-class UpdateReservationSettings(BaseModel):
+class UpdateReservationSettings(PydanticBaseModel):
     """Schema for updating existing reservation settings.
 
     All fields are optional except id.
@@ -225,7 +226,29 @@ class UpdateReservationSettings(BaseModel):
     is_active: Optional[bool] = Field(None, alias="isActive")
 
 
-class CreateReservation(BaseModel):
+class CreateReservationSettings(PydanticBaseModel):
+    """Schema for creating reservation settings.
+
+    Omits auto-generated fields (id, created_at, updated_at).
+    """
+
+    model_config = ConfigDict(
+        validate_by_name=True,
+        validate_by_alias=True,
+        use_enum_values=True,
+    )
+
+    reservation_type: ResourceType = Field(..., alias="reservationType")
+    setting_type: ReservationSettingType = Field(..., alias="settingType")
+    default_reservation_duration: Optional[int] = Field(None, gt=0, alias="defaultReservationDuration")
+    default_reservation_duration_unit: Optional[ResourceReservationDurationUnit] = Field(
+        None,
+        alias="defaultReservationDurationUnit"
+    )
+    is_active: Optional[bool] = Field(None, alias="isActive")
+
+
+class CreateReservation(PydanticBaseModel):
     """Schema for creating a new reservation.
 
     Omits auto-generated fields (id, created_at, updated_at).
@@ -263,7 +286,7 @@ class CreateReservation(BaseModel):
     is_resource_reservation: bool = Field(False, alias="isResourceReservation")
 
 
-class UpdateReservation(BaseModel):
+class UpdateReservation(PydanticBaseModel):
     """Schema for updating an existing reservation.
 
     All fields are optional except id.

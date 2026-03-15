@@ -303,7 +303,7 @@ class ProductOrder(BaseModel):
     )
 
 
-class CreateProductOrder(BaseModel):
+class CreateProductOrder(PydanticBaseModel):
     """Schema for creating a new product order.
 
     Omits auto-generated fields and uses base items without IDs.
@@ -344,7 +344,7 @@ class CreateProductOrder(BaseModel):
     notes: Optional[str] = None
 
 
-class UpdateProductOrder(BaseModel):
+class UpdateProductOrder(PydanticBaseModel):
     """Schema for updating an existing product order.
 
     All fields are optional except id.

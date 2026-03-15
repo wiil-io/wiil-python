@@ -1,12 +1,17 @@
 """Tests for Products resource."""
 
 import pytest
-import respx
-from httpx import Response
+import responses
 
 from wiil import WiilClient
 from wiil.errors import WiilAPIError
-
+from wiil.models.business_mgt import (
+    CreateProductCategory,
+    UpdateProductCategory,
+    CreateBusinessProduct,
+    UpdateBusinessProduct,
+)
+from wiil.types import PaginationRequest
 
 BASE_URL = "https://api.wiil.io/v1"
 API_KEY = "test-api-key"
@@ -19,11 +24,6 @@ class TestProductsResource:
 
     def test_create_category(self, client: WiilClient, mock_api, api_response):
         """Test creating a new product category."""
-        input_data = {
-            "name": "Electronics",
-            "description": "Electronic devices",
-        }
-
         mock_response = {
             "id": "cat_123",
             "name": "Electronics",
@@ -34,12 +34,18 @@ class TestProductsResource:
             "updatedAt": 1234567890,
         }
 
-        mock_api.post(
+        mock_api.add(
+            responses.POST,
             f"{BASE_URL}/product-management/categories",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_response)))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(mock_response),
+            status=200,
+        )
 
-        result = client.products.create_category(**input_data)
+        result = client.products.create_category(CreateProductCategory(
+            name="Electronics",
+            description="Electronic devices"
+        ))
 
         assert result.id == "cat_123"
         assert result.name == "Electronics"
@@ -56,10 +62,13 @@ class TestProductsResource:
             "updatedAt": 1234567890,
         }
 
-        mock_api.get(
+        mock_api.add(
+            responses.GET,
             f"{BASE_URL}/product-management/categories/cat_123",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_response)))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(mock_response),
+            status=200,
+        )
 
         result = client.products.get_category("cat_123")
 
@@ -101,24 +110,23 @@ class TestProductsResource:
             },
         }
 
-        mock_api.get(
+        mock_api.add(
+            responses.GET,
             f"{BASE_URL}/product-management/categories?page=1&pageSize=10",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_response)))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(mock_response),
+            status=200,
+        )
 
-        result = client.products.list_categories(page=1, page_size=10)
+        result = client.products.list_categories(
+            PaginationRequest(page=1, page_size=10)
+        )
 
         assert len(result.data) == 2
         assert result.meta.total_count == 2
 
     def test_update_category(self, client: WiilClient, mock_api, api_response):
         """Test updating a product category."""
-        update_data = {
-            "id": "cat_123",
-            "name": "Updated Electronics",
-            "description": "New description",
-        }
-
         mock_response = {
             "id": "cat_123",
             "name": "Updated Electronics",
@@ -129,22 +137,32 @@ class TestProductsResource:
             "updatedAt": 1234567891,
         }
 
-        mock_api.patch(
+        mock_api.add(
+            responses.PATCH,
             f"{BASE_URL}/product-management/categories",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_response)))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(mock_response),
+            status=200,
+        )
 
-        result = client.products.update_category(**update_data)
+        result = client.products.update_category(UpdateProductCategory(
+            id="cat_123",
+            name="Updated Electronics",
+            description="New description"
+        ))
 
         assert result.name == "Updated Electronics"
         assert result.description == "New description"
 
     def test_delete_category(self, client: WiilClient, mock_api, api_response):
         """Test deleting a product category."""
-        mock_api.delete(
+        mock_api.add(
+            responses.DELETE,
             f"{BASE_URL}/product-management/categories/cat_123",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(True)))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(True),
+            status=200,
+        )
 
         result = client.products.delete_category("cat_123")
 
@@ -154,14 +172,6 @@ class TestProductsResource:
 
     def test_create(self, client: WiilClient, mock_api, api_response):
         """Test creating a new product."""
-        input_data = {
-            "name": "Wireless Mouse",
-            "category_id": "cat_123",
-            "sku": "WM-001",
-            "price": 29.99,
-            "description": "Ergonomic wireless mouse",
-        }
-
         mock_response = {
             "id": "prod_123",
             "name": "Wireless Mouse",
@@ -183,12 +193,21 @@ class TestProductsResource:
             "updatedAt": 1234567890,
         }
 
-        mock_api.post(
+        mock_api.add(
+            responses.POST,
             f"{BASE_URL}/product-management/products",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_response)))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(mock_response),
+            status=200,
+        )
 
-        result = client.products.create(**input_data)
+        result = client.products.create(CreateBusinessProduct(
+            name="Wireless Mouse",
+            category_id="cat_123",
+            sku="WM-001",
+            price=29.99,
+            description="Ergonomic wireless mouse"
+        ))
 
         assert result.id == "prod_123"
         assert result.name == "Wireless Mouse"
@@ -217,10 +236,13 @@ class TestProductsResource:
             "updatedAt": 1234567890,
         }
 
-        mock_api.get(
+        mock_api.add(
+            responses.GET,
             f"{BASE_URL}/product-management/products/prod_123",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_response)))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(mock_response),
+            status=200,
+        )
 
         result = client.products.get("prod_123")
 
@@ -250,10 +272,13 @@ class TestProductsResource:
             "updatedAt": 1234567890,
         }
 
-        mock_api.get(
+        mock_api.add(
+            responses.GET,
             f"{BASE_URL}/product-management/products/by-sku/WM-001",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_response)))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(mock_response),
+            status=200,
+        )
 
         result = client.products.get_by_sku("WM-001")
 
@@ -283,10 +308,13 @@ class TestProductsResource:
             "updatedAt": 1234567890,
         }
 
-        mock_api.get(
+        mock_api.add(
+            responses.GET,
             f"{BASE_URL}/product-management/products/by-barcode/1234567890123",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_response)))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(mock_response),
+            status=200,
+        )
 
         result = client.products.get_by_barcode("1234567890123")
 
@@ -350,12 +378,15 @@ class TestProductsResource:
             },
         }
 
-        mock_api.get(
+        mock_api.add(
+            responses.GET,
             f"{BASE_URL}/product-management/products?page=1&pageSize=10",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_response)))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(mock_response),
+            status=200,
+        )
 
-        result = client.products.list(page=1, page_size=10)
+        result = client.products.list(PaginationRequest(page=1, page_size=10))
 
         assert len(result.data) == 2
         assert result.meta.total_count == 2
@@ -397,12 +428,18 @@ class TestProductsResource:
             },
         }
 
-        mock_api.get(
+        mock_api.add(
+            responses.GET,
             f"{BASE_URL}/product-management/products/by-category/cat_123?page=1&pageSize=10",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_response)))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(mock_response),
+            status=200,
+        )
 
-        result = client.products.get_by_category("cat_123", page=1, page_size=10)
+        result = client.products.get_by_category(
+            "cat_123",
+            PaginationRequest(page=1, page_size=10)
+        )
 
         assert len(result.data) == 1
         assert result.data[0].category_id == "cat_123"
@@ -444,24 +481,24 @@ class TestProductsResource:
             },
         }
 
-        mock_api.get(
+        mock_api.add(
+            responses.GET,
             f"{BASE_URL}/product-management/products/search?query=mouse&page=1&pageSize=10",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_response)))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(mock_response),
+            status=200,
+        )
 
-        result = client.products.search("mouse", page=1, page_size=10)
+        result = client.products.search(
+            "mouse",
+            PaginationRequest(page=1, page_size=10)
+        )
 
         assert len(result.data) == 1
         assert result.data[0].name == "Wireless Mouse"
 
     def test_update(self, client: WiilClient, mock_api, api_response):
         """Test updating a product."""
-        update_data = {
-            "id": "prod_123",
-            "name": "Updated Wireless Mouse",
-            "price": 34.99,
-        }
-
         mock_response = {
             "id": "prod_123",
             "name": "Updated Wireless Mouse",
@@ -483,23 +520,72 @@ class TestProductsResource:
             "updatedAt": 1234567891,
         }
 
-        mock_api.patch(
+        mock_api.add(
+            responses.PATCH,
             f"{BASE_URL}/product-management/products",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_response)))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(mock_response),
+            status=200,
+        )
 
-        result = client.products.update(**update_data)
+        result = client.products.update(UpdateBusinessProduct(
+            id="prod_123",
+            name="Updated Wireless Mouse",
+            price=34.99
+        ))
 
         assert result.name == "Updated Wireless Mouse"
         assert result.price == 34.99
 
     def test_delete(self, client: WiilClient, mock_api, api_response):
         """Test deleting a product."""
-        mock_api.delete(
+        mock_api.add(
+            responses.DELETE,
             f"{BASE_URL}/product-management/products/prod_123",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(True)))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(True),
+            status=200,
+        )
 
         result = client.products.delete("prod_123")
 
         assert result is True
+
+    # =============== Error Handling Tests ===============
+
+    def test_create_api_error(
+        self, client: WiilClient, mock_api, error_response
+    ):
+        """Test create product handles API errors."""
+        mock_api.add(
+            responses.POST,
+            f"{BASE_URL}/product-management/products",
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=error_response("VALIDATION_ERROR", "Price is required"),
+            status=400,
+        )
+
+        with pytest.raises(WiilAPIError) as exc_info:
+            client.products.create(CreateBusinessProduct(
+                name="Test Product",
+                price=0
+            ))
+
+        assert exc_info.value.code == "VALIDATION_ERROR"
+
+    def test_get_not_found(
+        self, client: WiilClient, mock_api, error_response
+    ):
+        """Test get product handles not found errors."""
+        mock_api.add(
+            responses.GET,
+            f"{BASE_URL}/product-management/products/nonexistent",
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=error_response("NOT_FOUND", "Product not found"),
+            status=404,
+        )
+
+        with pytest.raises(WiilAPIError) as exc_info:
+            client.products.get("nonexistent")
+
+        assert exc_info.value.code == "NOT_FOUND"

@@ -5,12 +5,13 @@ in the WIIL Platform API.
 
 Example:
     >>> from wiil import WiilClient
+    >>> from wiil.models.business_mgt import CreateCustomer
     >>> client = WiilClient(api_key='your-api-key')
-    >>> customer = client.customers.create(
+    >>> customer = client.customers.create(CreateCustomer(
     ...     first_name='John',
     ...     last_name='Doe',
     ...     email='john.doe@example.com'
-    ... )
+    ... ))
 """
 
 from typing import Any, Dict, Optional
@@ -22,7 +23,7 @@ from wiil.models.business_mgt import (
     CreateCustomer,
     UpdateCustomer,
 )
-from wiil.types import PaginatedResult
+from wiil.types import PaginatedResult, PaginationRequest
 
 
 class CustomersResource:
@@ -36,30 +37,29 @@ class CustomersResource:
         >>> client = WiilClient(api_key='your-api-key')
         >>>
         >>> # Create a new customer
-        >>> customer = client.customers.create(
+        >>> customer = client.customers.create(CreateCustomer(
         ...     first_name='John',
         ...     last_name='Doe',
         ...     email='john.doe@example.com',
         ...     phone_number='+1234567890'
-        ... )
+        ... ))
         >>>
         >>> # Get a customer by ID
         >>> customer = client.customers.get('cust_123')
         >>>
         >>> # Search customers
-        >>> results = client.customers.search('john', page=1, page_size=10)
+        >>> results = client.customers.search('john', PaginationRequest(page=1, page_size=10))
         >>>
         >>> # Get customer by phone
         >>> customer = client.customers.get_by_phone('+1234567890')
         >>>
         >>> # Update a customer
-        >>> updated = client.customers.update(
-        ...     id='cust_123',
+        >>> updated = client.customers.update('cust_123', UpdateCustomer(
         ...     email='john.newemail@example.com'
-        ... )
+        ... ))
         >>>
         >>> # List all customers
-        >>> customers = client.customers.list(page=1, page_size=20)
+        >>> customers = client.customers.list(PaginationRequest(page=1, page_size=20))
         >>>
         >>> # Delete a customer
         >>> deleted = client.customers.delete('cust_123')
@@ -74,11 +74,11 @@ class CustomersResource:
         self._http = http
         self._base_path = '/customers'
 
-    def create(self, **kwargs: Any) -> Customer:
+    def create(self, data: CreateCustomer) -> Customer:
         """Create a new customer.
 
         Args:
-            **kwargs: Customer data fields
+            data: Customer creation data
 
         Returns:
             The created customer
@@ -89,7 +89,7 @@ class CustomersResource:
             WiilNetworkError: When network communication fails
 
         Example:
-            >>> customer = client.customers.create(
+            >>> customer = client.customers.create(CreateCustomer(
             ...     first_name='Jane',
             ...     last_name='Smith',
             ...     email='jane.smith@example.com',
@@ -98,10 +98,9 @@ class CustomersResource:
             ...         'source': 'website',
             ...         'referral_code': 'FRIEND2023'
             ...     }
-            ... )
+            ... ))
             >>> print('Created customer:', customer.id)
         """
-        data = CreateCustomer(**kwargs)
         return self._http.post(
             self._base_path,
             data.model_dump(by_alias=True, exclude_none=True),
@@ -174,8 +173,7 @@ class CustomersResource:
     def search(
         self,
         query: str,
-        page: Optional[int] = None,
-        page_size: Optional[int] = None
+        params: Optional[PaginationRequest] = None
     ) -> PaginatedResult[Customer]:
         """Search customers by query string.
 
@@ -183,8 +181,7 @@ class CustomersResource:
 
         Args:
             query: Search query string
-            page: Page number (1-indexed)
-            page_size: Number of items per page
+            params: Pagination parameters
 
         Returns:
             Paginated search results
@@ -194,26 +191,28 @@ class CustomersResource:
             WiilNetworkError: When network communication fails
 
         Example:
-            >>> results = client.customers.search('john', page=1, page_size=20)
+            >>> results = client.customers.search('john', PaginationRequest(
+            ...     page=1,
+            ...     page_size=20
+            ... ))
             >>>
             >>> print(f"Found {results.meta.total_count} customers")
             >>> for customer in results.data:
             ...     print(f"- {customer.first_name} {customer.last_name}")
         """
-        params: Dict[str, Any] = {'query': query}
-        if page is not None:
-            params['page'] = page
-        if page_size is not None:
-            params['pageSize'] = page_size
+        query_params: Dict[str, Any] = {'query': query}
+        if params:
+            query_params['page'] = params.page
+            query_params['pageSize'] = params.page_size
 
-        return self._http.get(f'{self._base_path}/search?{urlencode(params)}')
+        return self._http.get(f'{self._base_path}/search?{urlencode(query_params)}')
 
-    def update(self, customer_id: str, **kwargs: Any) -> Customer:
+    def update(self, customer_id: str, data: UpdateCustomer) -> Customer:
         """Update an existing customer.
 
         Args:
             customer_id: Customer ID
-            **kwargs: Customer update data fields
+            data: Customer update data
 
         Returns:
             The updated customer
@@ -224,18 +223,16 @@ class CustomersResource:
             WiilNetworkError: When network communication fails
 
         Example:
-            >>> updated = client.customers.update(
-            ...     'cust_123',
+            >>> updated = client.customers.update('cust_123', UpdateCustomer(
             ...     email='newemail@example.com',
             ...     phone_number='+1555555555',
             ...     metadata={
             ...         'updated_by': 'admin-user',
             ...         'loyalty_tier': 'gold'
             ...     }
-            ... )
+            ... ))
             >>> print('Updated customer:', updated.email)
         """
-        data = UpdateCustomer(**kwargs)
         return self._http.patch(
             f'{self._base_path}/{customer_id}',
             data.model_dump(by_alias=True, exclude_none=True),
@@ -265,16 +262,11 @@ class CustomersResource:
         """
         return self._http.delete(f'{self._base_path}/{customer_id}')
 
-    def list(
-        self,
-        page: Optional[int] = None,
-        page_size: Optional[int] = None
-    ) -> PaginatedResult[Customer]:
+    def list(self, params: Optional[PaginationRequest] = None) -> PaginatedResult[Customer]:
         """List customers with optional pagination.
 
         Args:
-            page: Page number (1-indexed)
-            page_size: Number of items per page
+            params: Pagination parameters
 
         Returns:
             Paginated list of customers
@@ -288,20 +280,19 @@ class CustomersResource:
             >>> result = client.customers.list()
             >>>
             >>> # List with custom pagination
-            >>> page2 = client.customers.list(page=2, page_size=50)
+            >>> page2 = client.customers.list(PaginationRequest(page=2, page_size=50))
             >>>
             >>> print(f"Found {page2.meta.total_count} customers")
             >>> print(f"Page {page2.meta.page} of {page2.meta.total_pages}")
             >>> for customer in page2.data:
             ...     print(f"- {customer.first_name} {customer.last_name} ({customer.email})")
         """
-        params: Dict[str, Any] = {}
-        if page is not None:
-            params['page'] = page
-        if page_size is not None:
-            params['pageSize'] = page_size
+        query_params: Dict[str, Any] = {}
+        if params:
+            query_params['page'] = params.page
+            query_params['pageSize'] = params.page_size
 
-        query_string = f'?{urlencode(params)}' if params else ''
+        query_string = f'?{urlencode(query_params)}' if query_params else ''
         return self._http.get(f'{self._base_path}{query_string}')
 
 

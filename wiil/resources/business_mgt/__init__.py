@@ -9,6 +9,8 @@ from wiil.resources.business_mgt.reservations import ReservationsResource
 from wiil.resources.business_mgt.reservation_resources import ReservationResourcesResource
 from wiil.resources.business_mgt.service_appointments import ServiceAppointmentsResource
 from wiil.resources.business_mgt.business_services import BusinessServicesResource
+from wiil.resources.business_mgt.property_config import PropertyConfigResource
+from wiil.resources.business_mgt.property_inquiry import PropertyInquiryResource
 
 __all__ = [
     'CustomersResource',
@@ -20,4 +22,6 @@ __all__ = [
     'ReservationResourcesResource',
     'ServiceAppointmentsResource',
     'BusinessServicesResource',
+    'PropertyConfigResource',
+    'PropertyInquiryResource',
 ]

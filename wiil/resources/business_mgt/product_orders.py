@@ -9,7 +9,7 @@ from wiil.models.business_mgt import (
     CreateProductOrder,
     UpdateProductOrder,
 )
-from wiil.types import PaginatedResult
+from wiil.types import PaginatedResult, PaginationRequest
 
 
 class ProductOrdersResource:
@@ -19,9 +19,8 @@ class ProductOrdersResource:
         self._http = http
         self._base_path = '/product-orders'
 
-    def create(self, **kwargs: Any) -> ProductOrder:
+    def create(self, data: CreateProductOrder) -> ProductOrder:
         """Create a new product order."""
-        data = CreateProductOrder(**kwargs)
         return self._http.post(
             self._base_path,
             data.model_dump(by_alias=True, exclude_none=True),
@@ -35,22 +34,19 @@ class ProductOrdersResource:
     def get_by_customer(
         self,
         customer_id: str,
-        page: Optional[int] = None,
-        page_size: Optional[int] = None
+        params: Optional[PaginationRequest] = None
     ) -> PaginatedResult[ProductOrder]:
         """Retrieve product orders by customer."""
-        params: Dict[str, Any] = {}
-        if page is not None:
-            params['page'] = page
-        if page_size is not None:
-            params['pageSize'] = page_size
+        query_params: Dict[str, Any] = {}
+        if params:
+            query_params['page'] = params.page
+            query_params['pageSize'] = params.page_size
 
-        query_string = f'?{urlencode(params)}' if params else ''
+        query_string = f'?{urlencode(query_params)}' if query_params else ''
         return self._http.get(f'{self._base_path}/by-customer/{customer_id}{query_string}')
 
-    def update(self, **kwargs: Any) -> ProductOrder:
+    def update(self, data: UpdateProductOrder) -> ProductOrder:
         """Update a product order."""
-        data = UpdateProductOrder(**kwargs)
         return self._http.patch(
             self._base_path,
             data.model_dump(by_alias=True, exclude_none=True),
@@ -75,19 +71,14 @@ class ProductOrdersResource:
         """Delete a product order."""
         return self._http.delete(f'{self._base_path}/{order_id}')
 
-    def list(
-        self,
-        page: Optional[int] = None,
-        page_size: Optional[int] = None
-    ) -> PaginatedResult[ProductOrder]:
+    def list(self, params: Optional[PaginationRequest] = None) -> PaginatedResult[ProductOrder]:
         """List product orders with pagination."""
-        params: Dict[str, Any] = {}
-        if page is not None:
-            params['page'] = page
-        if page_size is not None:
-            params['pageSize'] = page_size
+        query_params: Dict[str, Any] = {}
+        if params:
+            query_params['page'] = params.page
+            query_params['pageSize'] = params.page_size
 
-        query_string = f'?{urlencode(params)}' if params else ''
+        query_string = f'?{urlencode(query_params)}' if query_params else ''
         return self._http.get(f'{self._base_path}{query_string}')
 
 

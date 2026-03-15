@@ -1,102 +1,86 @@
 """Instruction configuration schema definitions.
 
-The Instruction Configuration is the heart of agent behaviour in the Service Configuration
-architecture. It contains the prompts, guidelines, and contextual instructions that
-fundamentally define how agents operate during conversations.
+The Instruction Configuration is the heart of agent behaviour in the Service Configuration architecture.
+It contains the prompts, guidelines, and contextual instructions that fundamentally define how agents
+operate during conversations.
 """
 
 from typing import Any, Dict, List, Optional
 
+from pydantic import BaseModel as PydanticBaseModel
 from pydantic import ConfigDict, Field
 
 from wiil.models.base import BaseModel
-from wiil.types.account_types import BusinessSupportServices
+from wiil.models.type_definitions import BusinessSupportServices
 
 
 class InstructionConfiguration(BaseModel):
-    """Instruction Configuration model.
+    """Instruction configuration for agent behavior.
 
-    The Instruction Configuration is the core element that shapes agent behavior.
-    A single Instruction Configuration can be associated with multiple Agent
-    Configurations (1:N relationship), allowing consistent behavioral guidelines
-    across different agent types.
+    The Instruction Configuration is the heart of agent behaviour in the Service Configuration architecture.
+    It contains the prompts, guidelines, and contextual instructions that fundamentally define how an agent
+    operates during conversations. A single Instruction Configuration can be associated with multiple Agent
+    Configurations (1:N relationship), allowing consistent behavioral guidelines across different agent types.
 
     Architecture Context:
-        - Central Role: Core element that shapes agent behavior
-        - Relationship: 1:N with Agent Configurations
+        - Central Role: The Instruction Configuration is the core element that shapes agent behavior
+        - Relationship: 1:N with Agent Configurations - one instruction set can govern multiple agents
         - Reusability: Designed to be reused across multiple deployments
-        - Managed By: Service Configuration
+        - Managed By: Service Configuration (lifecycle management)
+        - Used By: Deployment Configurations reference instruction sets for agent behavior
 
     Example Use Case:
-        A "Customer Service Guidelines" instruction set might govern both a
-        "Sales Agent" and a "Support Agent", ensuring uniform tone and compliance.
+        A "Customer Service Guidelines" instruction set might govern both a "Sales Agent" and a "Support Agent",
+        ensuring uniform tone and compliance while each agent maintains its specialized capabilities.
 
     Attributes:
-        id: Unique identifier
-        instruction_name: System-readable name
+        instruction_name: System-readable name, typically auto-generated based on role
         role: The role or persona the agent should adopt
-        introduction_message: Initial greeting message
-        instructions: Detailed behavioral guidelines
-        guardrails: Safety and behavioral constraints
-        required_skills: Specific skills or capabilities required
-        validation_rules: Custom validation rules
-        service_id: ID of associated service
-        supported_services: Platform business services enabled
+        introduction_message: Initial greeting message presented to users
+        instructions: Detailed instructions that guide agent behavior
+        guardrails: Safety and behavioral constraints the agent must follow
+        required_skills: Specific skills required for this instruction set
+        validation_rules: Custom validation rules for input/output processing
+        service_id: ID of the service this instruction configuration is associated with
+        supported_services: Platform business services (tools) enabled for this agent
         tools: Tool identifiers the agent can use
         is_template: Whether this is a reusable template
-        is_primary: Whether this is the primary system instruction
-        metadata: Additional metadata
-        knowledge_source_ids: IDs of knowledge sources
-        created_at: Timestamp when created
-        updated_at: Timestamp when last updated
-
-    Example:
-        ```python
-        instruction = InstructionConfiguration(
-            id="123",
-            instruction_name="customer-support-agent",
-            role="Customer Support Specialist",
-            introduction_message="Hello! How can I help you today?",
-            instructions="You are a helpful customer support agent...",
-            guardrails="Never share sensitive customer data...",
-            supported_services=[BusinessSupportServices.APPOINTMENT_MANAGEMENT],
-            knowledge_source_ids=["789"],
-            is_template=False,
-            is_primary=False
-        )
-        ```
+        is_primary: Whether this is the primary system instruction configuration template
+        metadata: Additional metadata for the instruction configuration
+        knowledge_source_ids: Array of IDs referencing knowledge sources
     """
 
     model_config = ConfigDict(
-        validate_by_name=True, validate_by_alias=True,
+        validate_by_name=True,
+        validate_by_alias=True,
         use_enum_values=True,
     )
 
     instruction_name: str = Field(
         ...,
-        description="System-readable name (e.g., 'customer-support-agent')",
+        description="System-readable name for the instruction configuration (e.g., 'customer-support-agent')",
         alias="instructionName"
     )
     role: str = Field(
         ...,
-        description="The role or persona the agent should adopt"
+        description="The role or persona the agent should adopt (e.g., 'Customer Support Specialist', 'Sales Representative')"
     )
     introduction_message: str = Field(
         ...,
-        description="Initial greeting message presented to users",
+        description="Initial greeting message presented to users when starting a conversation",
         alias="introductionMessage"
     )
     instructions: str = Field(
         ...,
-        description="Detailed instructions that define agent behavior"
+        description="Detailed instructions that fundamentally define how the agent operates"
     )
     guardrails: str = Field(
         ...,
-        description="Safety and behavioral constraints"
+        description="Safety and behavioral constraints the agent must strictly follow"
     )
     required_skills: Optional[List[str]] = Field(
         None,
-        description="Specific skills or capabilities required",
+        description="Specific skills or capabilities required for this instruction set (e.g., 'appointment_booking')",
         alias="requiredSkills"
     )
     validation_rules: Optional[Dict[str, Any]] = Field(
@@ -106,62 +90,48 @@ class InstructionConfiguration(BaseModel):
     )
     service_id: Optional[str] = Field(
         None,
-        description="ID of the parent service",
+        description="ID of the parent service this instruction configuration is associated with",
         alias="serviceId"
     )
     supported_services: List[BusinessSupportServices] = Field(
         default_factory=list,
-        description="Platform business services enabled for this agent",
+        description="Array of platform business services (tools) enabled for this agent",
         alias="supportedServices"
     )
     tools: Optional[List[str]] = Field(
         None,
-        description="Tool identifiers the agent can use"
+        description="Array of tool identifiers the agent can use"
     )
     is_template: bool = Field(
         False,
-        description="Whether this is a reusable template",
+        description="Whether this instruction configuration is a reusable template",
         alias="isTemplate"
     )
     is_primary: bool = Field(
         False,
-        description="Whether this is the primary system instruction",
+        description="Whether this is the primary system instruction configuration template",
         alias="isPrimary"
     )
     metadata: Optional[Dict[str, Any]] = Field(
         None,
-        description="Additional metadata"
+        description="Additional metadata for the instruction configuration"
     )
     knowledge_source_ids: List[str] = Field(
         default_factory=list,
-        description="IDs of knowledge sources providing context",
+        description="Array of IDs referencing knowledge sources that provide context for this instruction set",
         alias="knowledgeSourceIds"
     )
 
 
-class CreateInstructionConfiguration(BaseModel):
+class CreateInstructionConfiguration(PydanticBaseModel):
     """Schema for creating a new instruction configuration.
 
-    Omits auto-generated fields (id, timestamps).
-
-    Example:
-        ```python
-        create_data = CreateInstructionConfiguration(
-            instruction_name="sales-agent",
-            role="Sales Representative",
-            introduction_message="Hi! I can help you find the perfect solution.",
-            instructions="You are a knowledgeable sales agent...",
-            guardrails="Always be honest about product capabilities...",
-            supported_services=[BusinessSupportServices.PRODUCT_ORDER_MANAGEMENT],
-            knowledge_source_ids=["123"],
-            is_template=False,
-            is_primary=False
-        )
-        ```
+    Omits auto-generated fields (id, timestamps) that are populated by the system.
     """
 
     model_config = ConfigDict(
-        validate_by_name=True, validate_by_alias=True,
+        validate_by_name=True,
+        validate_by_alias=True,
         use_enum_values=True,
     )
 
@@ -187,23 +157,15 @@ class CreateInstructionConfiguration(BaseModel):
     )
 
 
-class UpdateInstructionConfiguration(BaseModel):
+class UpdateInstructionConfiguration(PydanticBaseModel):
     """Schema for updating an existing instruction configuration.
 
     All fields are optional except id.
-
-    Example:
-        ```python
-        update_data = UpdateInstructionConfiguration(
-            id="123",
-            role="Senior Sales Representative",
-            metadata={"version": "2.0"}
-        )
-        ```
     """
 
     model_config = ConfigDict(
-        validate_by_name=True, validate_by_alias=True,
+        validate_by_name=True,
+        validate_by_alias=True,
         use_enum_values=True,
     )
 
@@ -216,9 +178,15 @@ class UpdateInstructionConfiguration(BaseModel):
     required_skills: Optional[List[str]] = Field(None, alias="requiredSkills")
     validation_rules: Optional[Dict[str, Any]] = Field(None, alias="validationRules")
     service_id: Optional[str] = Field(None, alias="serviceId")
-    supported_services: Optional[List[BusinessSupportServices]] = Field(None, alias="supportedServices")
+    supported_services: Optional[List[BusinessSupportServices]] = Field(
+        None,
+        alias="supportedServices"
+    )
     tools: Optional[List[str]] = None
     is_template: Optional[bool] = Field(None, alias="isTemplate")
     is_primary: Optional[bool] = Field(None, alias="isPrimary")
     metadata: Optional[Dict[str, Any]] = None
-    knowledge_source_ids: Optional[List[str]] = Field(None, alias="knowledgeSourceIds")
+    knowledge_source_ids: Optional[List[str]] = Field(
+        None,
+        alias="knowledgeSourceIds"
+    )

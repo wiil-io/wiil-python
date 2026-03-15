@@ -9,7 +9,7 @@ from wiil.models.service_mgt import (
     CreateAgentConfiguration,
     UpdateAgentConfiguration,
 )
-from wiil.types import PaginatedResult
+from wiil.types import PaginatedResult, PaginationRequest
 
 
 class AgentConfigurationsResource:
@@ -24,9 +24,15 @@ class AgentConfigurationsResource:
         self._http = http
         self._base_path = '/agent-configurations'
 
-    def create(self, **kwargs: Any) -> AgentConfiguration:
-        """Create a new agent configuration."""
-        data = CreateAgentConfiguration(**kwargs)
+    def create(self, data: CreateAgentConfiguration) -> AgentConfiguration:
+        """Create a new agent configuration.
+
+        Args:
+            data: Agent configuration creation data
+
+        Returns:
+            The created agent configuration
+        """
         return self._http.post(
             self._base_path,
             data.model_dump(by_alias=True, exclude_none=True),
@@ -37,9 +43,15 @@ class AgentConfigurationsResource:
         """Retrieve an agent configuration by ID."""
         return self._http.get(f'{self._base_path}/{config_id}')
 
-    def update(self, **kwargs: Any) -> AgentConfiguration:
-        """Update an existing agent configuration."""
-        data = UpdateAgentConfiguration(**kwargs)
+    def update(self, data: UpdateAgentConfiguration) -> AgentConfiguration:
+        """Update an existing agent configuration.
+
+        Args:
+            data: Agent configuration update data (must include id)
+
+        Returns:
+            The updated agent configuration
+        """
         return self._http.patch(
             self._base_path,
             data.model_dump(by_alias=True, exclude_none=True),
@@ -52,17 +64,22 @@ class AgentConfigurationsResource:
 
     def list(
         self,
-        page: Optional[int] = None,
-        page_size: Optional[int] = None
+        params: Optional[PaginationRequest] = None
     ) -> PaginatedResult[AgentConfiguration]:
-        """List agent configurations with pagination."""
-        params: Dict[str, Any] = {}
-        if page is not None:
-            params['page'] = page
-        if page_size is not None:
-            params['pageSize'] = page_size
+        """List agent configurations with pagination.
 
-        query_string = f'?{urlencode(params)}' if params else ''
+        Args:
+            params: Pagination parameters
+
+        Returns:
+            Paginated list of agent configurations
+        """
+        query_params: Dict[str, Any] = {}
+        if params:
+            query_params['page'] = params.page
+            query_params['pageSize'] = params.page_size
+
+        query_string = f'?{urlencode(query_params)}' if query_params else ''
         return self._http.get(f'{self._base_path}{query_string}')
 
 

@@ -7,9 +7,9 @@ from wiil.client.http_client import HttpClient
 from wiil.models.service_mgt import (
     DeploymentChannel,
     CreateDeploymentChannel,
-    DeploymentChannelUpdateRequest,
+    UpdateDeploymentChannel,
 )
-from wiil.types import PaginatedResult
+from wiil.types import PaginatedResult, PaginationRequest
 
 
 class DeploymentChannelsResource:
@@ -24,9 +24,15 @@ class DeploymentChannelsResource:
         self._http = http
         self._base_path = '/deployment-channels'
 
-    def create(self, **kwargs: Any) -> DeploymentChannel:
-        """Create a new deployment channel."""
-        data = CreateDeploymentChannel(**kwargs)
+    def create(self, data: CreateDeploymentChannel) -> DeploymentChannel:
+        """Create a new deployment channel.
+
+        Args:
+            data: Deployment channel creation data
+
+        Returns:
+            The created deployment channel
+        """
         return self._http.post(
             self._base_path,
             data.model_dump(by_alias=True, exclude_none=True),
@@ -43,16 +49,25 @@ class DeploymentChannelsResource:
         Args:
             identifier: Channel identifier (phone number, URL, etc.)
             channel_type: Deployment type (CALLS, SMS, WEB, MOBILE)
+
+        Returns:
+            The deployment channel matching the identifier and type
         """
         return self._http.get(f'{self._base_path}/by-identifier/{identifier}?type={channel_type}')
 
-    def update(self, **kwargs: Any) -> DeploymentChannel:
-        """Update an existing deployment channel."""
-        data = DeploymentChannelUpdateRequest(**kwargs)
+    def update(self, data: UpdateDeploymentChannel) -> DeploymentChannel:
+        """Update an existing deployment channel.
+
+        Args:
+            data: Deployment channel update data (must include id)
+
+        Returns:
+            The updated deployment channel
+        """
         return self._http.patch(
             self._base_path,
             data.model_dump(by_alias=True, exclude_none=True),
-            schema=DeploymentChannelUpdateRequest
+            schema=UpdateDeploymentChannel
         )
 
     def delete(self, channel_id: str) -> bool:
@@ -61,39 +76,44 @@ class DeploymentChannelsResource:
 
     def list(
         self,
-        page: Optional[int] = None,
-        page_size: Optional[int] = None
+        params: Optional[PaginationRequest] = None
     ) -> PaginatedResult[DeploymentChannel]:
-        """List deployment channels with pagination."""
-        params: Dict[str, Any] = {}
-        if page is not None:
-            params['page'] = page
-        if page_size is not None:
-            params['pageSize'] = page_size
+        """List deployment channels with pagination.
 
-        query_string = f'?{urlencode(params)}' if params else ''
+        Args:
+            params: Pagination parameters
+
+        Returns:
+            Paginated list of deployment channels
+        """
+        query_params: Dict[str, Any] = {}
+        if params:
+            query_params['page'] = params.page
+            query_params['pageSize'] = params.page_size
+
+        query_string = f'?{urlencode(query_params)}' if query_params else ''
         return self._http.get(f'{self._base_path}{query_string}')
 
     def list_by_type(
         self,
         channel_type: str,
-        page: Optional[int] = None,
-        page_size: Optional[int] = None
+        params: Optional[PaginationRequest] = None
     ) -> PaginatedResult[DeploymentChannel]:
         """List deployment channels by deployment type.
 
         Args:
             channel_type: Deployment type (CALLS, SMS, WEB, MOBILE)
-            page: Page number
-            page_size: Number of items per page
-        """
-        params: Dict[str, Any] = {}
-        if page is not None:
-            params['page'] = page
-        if page_size is not None:
-            params['pageSize'] = page_size
+            params: Pagination parameters
 
-        query_string = f'?{urlencode(params)}' if params else ''
+        Returns:
+            Paginated list of deployment channels of the specified type
+        """
+        query_params: Dict[str, Any] = {}
+        if params:
+            query_params['page'] = params.page
+            query_params['pageSize'] = params.page_size
+
+        query_string = f'?{urlencode(query_params)}' if query_params else ''
         return self._http.get(f'{self._base_path}/by-type/{channel_type}{query_string}')
 
 

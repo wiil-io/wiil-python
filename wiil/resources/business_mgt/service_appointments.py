@@ -8,7 +8,7 @@ from wiil.models.business_mgt import (
     ServiceAppointment,
     CreateServiceAppointment,
 )
-from wiil.types import PaginatedResult
+from wiil.types import PaginatedResult, PaginationRequest
 
 
 class ServiceAppointmentsResource:
@@ -23,9 +23,8 @@ class ServiceAppointmentsResource:
         self._http = http
         self._base_path = '/service-appointments'
 
-    def create(self, **kwargs: Any) -> ServiceAppointment:
+    def create(self, data: CreateServiceAppointment) -> ServiceAppointment:
         """Create a new service appointment."""
-        data = CreateServiceAppointment(**kwargs)
         return self._http.post(
             self._base_path,
             data.model_dump(by_alias=True, exclude_none=True),
@@ -39,33 +38,29 @@ class ServiceAppointmentsResource:
     def get_by_customer(
         self,
         customer_id: str,
-        page: Optional[int] = None,
-        page_size: Optional[int] = None
+        params: Optional[PaginationRequest] = None
     ) -> PaginatedResult[ServiceAppointment]:
         """Retrieve service appointments by customer."""
-        params: Dict[str, Any] = {}
-        if page is not None:
-            params['page'] = page
-        if page_size is not None:
-            params['pageSize'] = page_size
+        query_params: Dict[str, Any] = {}
+        if params:
+            query_params['page'] = params.page
+            query_params['pageSize'] = params.page_size
 
-        query_string = f'?{urlencode(params)}' if params else ''
+        query_string = f'?{urlencode(query_params)}' if query_params else ''
         return self._http.get(f'{self._base_path}/by-customer/{customer_id}{query_string}')
 
     def get_by_service(
         self,
         service_id: str,
-        page: Optional[int] = None,
-        page_size: Optional[int] = None
+        params: Optional[PaginationRequest] = None
     ) -> PaginatedResult[ServiceAppointment]:
         """Retrieve service appointments by service."""
-        params: Dict[str, Any] = {}
-        if page is not None:
-            params['page'] = page
-        if page_size is not None:
-            params['pageSize'] = page_size
+        query_params: Dict[str, Any] = {}
+        if params:
+            query_params['page'] = params.page
+            query_params['pageSize'] = params.page_size
 
-        query_string = f'?{urlencode(params)}' if params else ''
+        query_string = f'?{urlencode(query_params)}' if query_params else ''
         return self._http.get(f'{self._base_path}/by-service/{service_id}{query_string}')
 
     def update_status(self, appointment_id: str, status: str) -> ServiceAppointment:
@@ -102,19 +97,14 @@ class ServiceAppointmentsResource:
         """Delete a service appointment."""
         return self._http.delete(f'{self._base_path}/{appointment_id}')
 
-    def list(
-        self,
-        page: Optional[int] = None,
-        page_size: Optional[int] = None
-    ) -> PaginatedResult[ServiceAppointment]:
+    def list(self, params: Optional[PaginationRequest] = None) -> PaginatedResult[ServiceAppointment]:
         """List service appointments with pagination."""
-        params: Dict[str, Any] = {}
-        if page is not None:
-            params['page'] = page
-        if page_size is not None:
-            params['pageSize'] = page_size
+        query_params: Dict[str, Any] = {}
+        if params:
+            query_params['page'] = params.page
+            query_params['pageSize'] = params.page_size
 
-        query_string = f'?{urlencode(params)}' if params else ''
+        query_string = f'?{urlencode(query_params)}' if query_params else ''
         return self._http.get(f'{self._base_path}{query_string}')
 
 

@@ -1,11 +1,12 @@
 """Tests for Phone Configurations resource."""
 
 import pytest
-import respx
-from httpx import Response
+import responses
 
 from wiil import WiilClient
 from wiil.errors import WiilAPIError
+from wiil.models.service_mgt import UpdatePhoneConfiguration
+from wiil.types import PaginationRequest
 
 
 BASE_URL = "https://api.wiil.io/v1"
@@ -14,35 +15,6 @@ API_KEY = "test-api-key"
 
 class TestPhoneConfigurationsResource:
     """Test suite for PhoneConfigurationsResource."""
-
-    def test_purchase_phone_number(
-        self, client: WiilClient, mock_api, api_response
-    ):
-        """Test purchasing a new phone number."""
-        input_data = {
-            "phone_number": "+14155551234",
-            "area_code": "415",
-            "country_code": "US",
-            "friendly_name": "Support Line",
-        }
-
-        mock_response = {
-            "requestId": "req_123",
-            "phoneNumber": "+14155551234",
-            "friendlyName": "Support Line",
-            "status": "pending",
-            "purchaseDate": 1234567890,
-        }
-
-        mock_api.post(
-            f"{BASE_URL}/phone-configurations/purchase",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_response)))
-
-        result = client.phone_configs.purchase(**input_data)
-
-        assert result.request_id == "req_123"
-        assert result.phone_number == "+14155551234"
 
     def test_get_phone_configuration(
         self, client: WiilClient, mock_api, api_response
@@ -73,10 +45,13 @@ class TestPhoneConfigurationsResource:
             "updatedAt": 1234567890,
         }
 
-        mock_api.get(
+        mock_api.add(
+            responses.GET,
             f"{BASE_URL}/phone-configurations/phone_123",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_response)))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(mock_response),
+            status=200,
+        )
 
         result = client.phone_configs.get("phone_123")
 
@@ -87,13 +62,13 @@ class TestPhoneConfigurationsResource:
         self, client: WiilClient, mock_api, error_response
     ):
         """Test API error when phone configuration not found."""
-        mock_api.get(
+        mock_api.add(
+            responses.GET,
             f"{BASE_URL}/phone-configurations/invalid_id",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(
-            404,
-            json=error_response("NOT_FOUND", "Phone configuration not found")
-        ))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=error_response("NOT_FOUND", "Phone configuration not found"),
+            status=404,
+        )
 
         with pytest.raises(WiilAPIError) as exc_info:
             client.phone_configs.get("invalid_id")
@@ -130,10 +105,13 @@ class TestPhoneConfigurationsResource:
             "updatedAt": 1234567890,
         }
 
-        mock_api.get(
+        mock_api.add(
+            responses.GET,
             f"{BASE_URL}/phone-configurations/by-phone-number/+14155551234",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_response)))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(mock_response),
+            status=200,
+        )
 
         result = client.phone_configs.get_by_phone_number("+14155551234")
 
@@ -169,10 +147,13 @@ class TestPhoneConfigurationsResource:
             "updatedAt": 1234567890,
         }
 
-        mock_api.get(
+        mock_api.add(
+            responses.GET,
             f"{BASE_URL}/phone-configurations/by-request/req_123",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_response)))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(mock_response),
+            status=200,
+        )
 
         result = client.phone_configs.get_by_request_id("req_123")
 
@@ -183,11 +164,6 @@ class TestPhoneConfigurationsResource:
         self, client: WiilClient, mock_api, api_response
     ):
         """Test updating a phone configuration."""
-        update_data = {
-            "id": "phone_123",
-            "friendly_name": "Updated Support Line",
-        }
-
         mock_response = {
             "id": "phone_123",
             "phoneNumber": "+14155551234",
@@ -213,12 +189,18 @@ class TestPhoneConfigurationsResource:
             "updatedAt": 1234567891,
         }
 
-        mock_api.patch(
+        mock_api.add(
+            responses.PATCH,
             f"{BASE_URL}/phone-configurations",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_response)))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(mock_response),
+            status=200,
+        )
 
-        result = client.phone_configs.update(**update_data)
+        result = client.phone_configs.update(UpdatePhoneConfiguration(
+            id="phone_123",
+            friendly_name="Updated Support Line"
+        ))
 
         assert result.friendly_name == "Updated Support Line"
         assert result.updated_at == 1234567891
@@ -227,10 +209,13 @@ class TestPhoneConfigurationsResource:
         self, client: WiilClient, mock_api, api_response
     ):
         """Test deleting a phone configuration."""
-        mock_api.delete(
+        mock_api.add(
+            responses.DELETE,
             f"{BASE_URL}/phone-configurations/phone_123",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(True)))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(True),
+            status=200,
+        )
 
         result = client.phone_configs.delete("phone_123")
 
@@ -240,13 +225,13 @@ class TestPhoneConfigurationsResource:
         self, client: WiilClient, mock_api, error_response
     ):
         """Test API error when deleting non-existent phone config."""
-        mock_api.delete(
+        mock_api.add(
+            responses.DELETE,
             f"{BASE_URL}/phone-configurations/invalid_id",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(
-            404,
-            json=error_response("NOT_FOUND", "Phone configuration not found")
-        ))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=error_response("NOT_FOUND", "Phone configuration not found"),
+            status=404,
+        )
 
         with pytest.raises(WiilAPIError) as exc_info:
             client.phone_configs.delete("invalid_id")
@@ -322,10 +307,13 @@ class TestPhoneConfigurationsResource:
             },
         }
 
-        mock_api.get(
+        mock_api.add(
+            responses.GET,
             f"{BASE_URL}/phone-configurations",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_response)))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(mock_response),
+            status=200,
+        )
 
         result = client.phone_configs.list()
 
@@ -349,12 +337,17 @@ class TestPhoneConfigurationsResource:
             },
         }
 
-        mock_api.get(
+        mock_api.add(
+            responses.GET,
             f"{BASE_URL}/phone-configurations?page=2&pageSize=50",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_response)))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(mock_response),
+            status=200,
+        )
 
-        result = client.phone_configs.list(page=2, page_size=50)
+        result = client.phone_configs.list(
+            PaginationRequest(page=2, page_size=50)
+        )
 
         assert result.meta.page == 2
         assert result.meta.page_size == 50

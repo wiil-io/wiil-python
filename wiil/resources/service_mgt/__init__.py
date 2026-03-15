@@ -1,16 +1,27 @@
 """Service Management resource classes for managing AI service configurations."""
 
 from wiil.resources.service_mgt.agent_configs import AgentConfigurationsResource
-from wiil.resources.service_mgt.deployment_configs import DeploymentConfigurationsResource
+from wiil.resources.service_mgt.deployment_configs import (
+    DeploymentConfigurationsResource,
+)
 from wiil.resources.service_mgt.deployment_channels import DeploymentChannelsResource
-from wiil.resources.service_mgt.instruction_configs import InstructionConfigurationsResource
+from wiil.resources.service_mgt.instruction_configs import (
+    InstructionConfigurationsResource,
+)
 from wiil.resources.service_mgt.phone_configs import PhoneConfigurationsResource
-from wiil.resources.service_mgt.provisioning_configs import ProvisioningConfigurationsResource
-from wiil.resources.service_mgt.conversation_configs import ConversationConfigurationsResource
+from wiil.resources.service_mgt.provisioning_configs import (
+    ProvisioningConfigurationsResource,
+)
+from wiil.resources.service_mgt.conversation_configs import (
+    ConversationConfigurationsResource,
+)
 from wiil.resources.service_mgt.translation_sessions import TranslationSessionsResource
 from wiil.resources.service_mgt.knowledge_sources import KnowledgeSourcesResource
 from wiil.resources.service_mgt.support_models import SupportModelsResource
 from wiil.resources.service_mgt.telephony_provider import TelephonyProviderResource
+from wiil.resources.service_mgt.dynamic_agent_status import DynamicAgentStatusResource
+from wiil.resources.service_mgt.dynamic_web_agent import DynamicWebAgentResource
+from wiil.resources.service_mgt.dynamic_phone_agent import DynamicPhoneAgentResource
 
 __all__ = [
     'AgentConfigurationsResource',
@@ -24,4 +35,7 @@ __all__ = [
     'KnowledgeSourcesResource',
     'SupportModelsResource',
     'TelephonyProviderResource',
+    'DynamicAgentStatusResource',
+    'DynamicWebAgentResource',
+    'DynamicPhoneAgentResource',
 ]

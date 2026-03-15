@@ -239,7 +239,7 @@ class Resource(BaseModel):
     )
 
 
-class CreateResource(BaseModel):
+class CreateResource(PydanticBaseModel):
     """Schema for creating a new resource.
 
     Omits auto-generated fields (id, created_at, updated_at).
@@ -286,7 +286,7 @@ class CreateResource(BaseModel):
     metadata: Optional[Dict[str, Any]] = None
 
 
-class UpdateResource(BaseModel):
+class UpdateResource(PydanticBaseModel):
     """Schema for updating an existing resource.
 
     All fields are optional except id.

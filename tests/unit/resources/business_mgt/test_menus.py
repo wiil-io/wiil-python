@@ -1,12 +1,17 @@
 """Tests for Menus resource."""
 
 import pytest
-import respx
-from httpx import Response
+import responses
 
 from wiil import WiilClient
 from wiil.errors import WiilAPIError
-
+from wiil.models.business_mgt import (
+    CreateMenuCategory,
+    UpdateMenuCategory,
+    CreateBusinessMenuItem,
+    UpdateBusinessMenuItem,
+)
+from wiil.types import PaginationRequest
 
 BASE_URL = "https://api.wiil.io/v1"
 API_KEY = "test-api-key"
@@ -19,11 +24,6 @@ class TestMenusResource:
 
     def test_create_category(self, client: WiilClient, mock_api, api_response):
         """Test creating a new menu category."""
-        input_data = {
-            "name": "Appetizers",
-            "description": "Starter dishes",
-        }
-
         mock_response = {
             "id": "cat_123",
             "name": "Appetizers",
@@ -34,12 +34,18 @@ class TestMenusResource:
             "updatedAt": 1234567890,
         }
 
-        mock_api.post(
+        mock_api.add(
+            responses.POST,
             f"{BASE_URL}/menu-management/categories",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_response)))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(mock_response),
+            status=200,
+        )
 
-        result = client.menus.create_category(**input_data)
+        result = client.menus.create_category(CreateMenuCategory(
+            name="Appetizers",
+            description="Starter dishes"
+        ))
 
         assert result.id == "cat_123"
         assert result.name == "Appetizers"
@@ -56,10 +62,13 @@ class TestMenusResource:
             "updatedAt": 1234567890,
         }
 
-        mock_api.get(
+        mock_api.add(
+            responses.GET,
             f"{BASE_URL}/menu-management/categories/cat_123",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_response)))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(mock_response),
+            status=200,
+        )
 
         result = client.menus.get_category("cat_123")
 
@@ -89,10 +98,13 @@ class TestMenusResource:
             },
         ]
 
-        mock_api.get(
+        mock_api.add(
+            responses.GET,
             f"{BASE_URL}/menu-management/categories",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_categories)))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(mock_categories),
+            status=200,
+        )
 
         result = client.menus.list_categories()
 
@@ -101,12 +113,6 @@ class TestMenusResource:
 
     def test_update_category(self, client: WiilClient, mock_api, api_response):
         """Test updating a menu category."""
-        update_data = {
-            "id": "cat_123",
-            "name": "Updated Appetizers",
-            "description": "New description",
-        }
-
         mock_response = {
             "id": "cat_123",
             "name": "Updated Appetizers",
@@ -117,22 +123,32 @@ class TestMenusResource:
             "updatedAt": 1234567891,
         }
 
-        mock_api.patch(
+        mock_api.add(
+            responses.PATCH,
             f"{BASE_URL}/menu-management/categories",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_response)))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(mock_response),
+            status=200,
+        )
 
-        result = client.menus.update_category(**update_data)
+        result = client.menus.update_category(UpdateMenuCategory(
+            id="cat_123",
+            name="Updated Appetizers",
+            description="New description"
+        ))
 
         assert result.name == "Updated Appetizers"
         assert result.description == "New description"
 
     def test_delete_category(self, client: WiilClient, mock_api, api_response):
         """Test deleting a menu category."""
-        mock_api.delete(
+        mock_api.add(
+            responses.DELETE,
             f"{BASE_URL}/menu-management/categories/cat_123",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(True)))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(True),
+            status=200,
+        )
 
         result = client.menus.delete_category("cat_123")
 
@@ -142,13 +158,6 @@ class TestMenusResource:
 
     def test_create_item(self, client: WiilClient, mock_api, api_response):
         """Test creating a new menu item."""
-        input_data = {
-            "name": "Caesar Salad",
-            "category_id": "cat_123",
-            "price": 12.99,
-            "description": "Fresh romaine lettuce",
-        }
-
         mock_response = {
             "id": "item_123",
             "name": "Caesar Salad",
@@ -167,12 +176,20 @@ class TestMenusResource:
             "updatedAt": 1234567890,
         }
 
-        mock_api.post(
+        mock_api.add(
+            responses.POST,
             f"{BASE_URL}/menu-management/items",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_response)))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(mock_response),
+            status=200,
+        )
 
-        result = client.menus.create_item(**input_data)
+        result = client.menus.create_item(CreateBusinessMenuItem(
+            name="Caesar Salad",
+            category_id="cat_123",
+            price=12.99,
+            description="Fresh romaine lettuce"
+        ))
 
         assert result.id == "item_123"
         assert result.name == "Caesar Salad"
@@ -198,10 +215,13 @@ class TestMenusResource:
             "updatedAt": 1234567890,
         }
 
-        mock_api.get(
+        mock_api.add(
+            responses.GET,
             f"{BASE_URL}/menu-management/items/item_123",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_response)))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(mock_response),
+            status=200,
+        )
 
         result = client.menus.get_item("item_123")
 
@@ -259,17 +279,22 @@ class TestMenusResource:
             },
         }
 
-        mock_api.get(
+        mock_api.add(
+            responses.GET,
             f"{BASE_URL}/menu-management/items?page=1&pageSize=10",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_response)))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(mock_response),
+            status=200,
+        )
 
-        result = client.menus.list_items(page=1, page_size=10)
+        result = client.menus.list_items(PaginationRequest(page=1, page_size=10))
 
         assert len(result.data) == 2
         assert result.meta.total_count == 2
 
-    def test_get_items_by_category(self, client: WiilClient, mock_api, api_response):
+    def test_get_items_by_category(
+        self, client: WiilClient, mock_api, api_response
+    ):
         """Test retrieving menu items by category."""
         mock_items = [
             {
@@ -291,10 +316,13 @@ class TestMenusResource:
             },
         ]
 
-        mock_api.get(
+        mock_api.add(
+            responses.GET,
             f"{BASE_URL}/menu-management/items/by-category/cat_123",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_items)))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(mock_items),
+            status=200,
+        )
 
         result = client.menus.get_items_by_category("cat_123")
 
@@ -323,10 +351,13 @@ class TestMenusResource:
             },
         ]
 
-        mock_api.get(
+        mock_api.add(
+            responses.GET,
             f"{BASE_URL}/menu-management/items/popular?limit=5",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_items)))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(mock_items),
+            status=200,
+        )
 
         result = client.menus.get_popular_items(limit=5)
 
@@ -335,12 +366,6 @@ class TestMenusResource:
 
     def test_update_item(self, client: WiilClient, mock_api, api_response):
         """Test updating a menu item."""
-        update_data = {
-            "id": "item_123",
-            "name": "Updated Caesar Salad",
-            "price": 13.99,
-        }
-
         mock_response = {
             "id": "item_123",
             "name": "Updated Caesar Salad",
@@ -359,22 +384,32 @@ class TestMenusResource:
             "updatedAt": 1234567891,
         }
 
-        mock_api.patch(
+        mock_api.add(
+            responses.PATCH,
             f"{BASE_URL}/menu-management/items",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_response)))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(mock_response),
+            status=200,
+        )
 
-        result = client.menus.update_item(**update_data)
+        result = client.menus.update_item(UpdateBusinessMenuItem(
+            id="item_123",
+            name="Updated Caesar Salad",
+            price=13.99
+        ))
 
         assert result.name == "Updated Caesar Salad"
         assert result.price == 13.99
 
     def test_delete_item(self, client: WiilClient, mock_api, api_response):
         """Test deleting a menu item."""
-        mock_api.delete(
+        mock_api.add(
+            responses.DELETE,
             f"{BASE_URL}/menu-management/items/item_123",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(True)))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(True),
+            status=200,
+        )
 
         result = client.menus.delete_item("item_123")
 
@@ -393,10 +428,13 @@ class TestMenusResource:
             },
         ]
 
-        mock_api.get(
+        mock_api.add(
+            responses.GET,
             f"{BASE_URL}/menu-management/qr-codes",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_qr_codes)))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(mock_qr_codes),
+            status=200,
+        )
 
         result = client.menus.get_qr_codes()
 
@@ -412,23 +450,68 @@ class TestMenusResource:
             "tableNumber": "Table 1",
         }
 
-        mock_api.post(
+        mock_api.add(
+            responses.POST,
             f"{BASE_URL}/menu-management/qr-codes",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_response)))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(mock_response),
+            status=200,
+        )
 
-        result = client.menus.generate_qr_code(name="Table 1 Menu", category_id="cat_123")
+        result = client.menus.generate_qr_code(
+            name="Table 1 Menu",
+            category_id="cat_123"
+        )
 
         assert result.id == "qr_123"
         assert result.menu_url == "https://menu.example.com/qr_123"
 
     def test_delete_qr_code(self, client: WiilClient, mock_api, api_response):
         """Test deleting a menu QR code."""
-        mock_api.delete(
+        mock_api.add(
+            responses.DELETE,
             f"{BASE_URL}/menu-management/qr-codes/qr_123",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(True)))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(True),
+            status=200,
+        )
 
         result = client.menus.delete_qr_code("qr_123")
 
         assert result is True
+
+    # =============== Error Handling Tests ===============
+
+    def test_create_category_api_error(
+        self, client: WiilClient, mock_api, error_response
+    ):
+        """Test create category handles API errors."""
+        mock_api.add(
+            responses.POST,
+            f"{BASE_URL}/menu-management/categories",
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=error_response("VALIDATION_ERROR", "Name is required"),
+            status=400,
+        )
+
+        with pytest.raises(WiilAPIError) as exc_info:
+            client.menus.create_category(CreateMenuCategory(name=""))
+
+        assert exc_info.value.code == "VALIDATION_ERROR"
+
+    def test_get_item_not_found(
+        self, client: WiilClient, mock_api, error_response
+    ):
+        """Test get item handles not found errors."""
+        mock_api.add(
+            responses.GET,
+            f"{BASE_URL}/menu-management/items/nonexistent",
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=error_response("NOT_FOUND", "Menu item not found"),
+            status=404,
+        )
+
+        with pytest.raises(WiilAPIError) as exc_info:
+            client.menus.get_item("nonexistent")
+
+        assert exc_info.value.code == "NOT_FOUND"

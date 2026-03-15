@@ -23,6 +23,8 @@ from wiil.resources.business_mgt import (
     MenuOrdersResource,
     ProductsResource,
     ProductOrdersResource,
+    PropertyConfigResource,
+    PropertyInquiryResource,
     ReservationsResource,
     ReservationResourcesResource,
     ServiceAppointmentsResource,
@@ -30,6 +32,9 @@ from wiil.resources.business_mgt import (
 )
 from wiil.resources.service_mgt import (
     AgentConfigurationsResource,
+    DynamicAgentStatusResource,
+    DynamicPhoneAgentResource,
+    DynamicWebAgentResource,
     DeploymentConfigurationsResource,
     DeploymentChannelsResource,
     InstructionConfigurationsResource,
@@ -41,6 +46,7 @@ from wiil.resources.service_mgt import (
     SupportModelsResource,
     TelephonyProviderResource,
 )
+from wiil.services import OttService, TranslationService
 
 # Default configuration values
 DEFAULT_CONFIG = {
@@ -135,6 +141,8 @@ class WiilClient:
         self.menu_orders = MenuOrdersResource(self._http)
         self.products = ProductsResource(self._http)
         self.product_orders = ProductOrdersResource(self._http)
+        self.property_config = PropertyConfigResource(self._http)
+        self.property_inquiry = PropertyInquiryResource(self._http)
         self.reservations = ReservationsResource(self._http)
         self.reservation_resources = ReservationResourcesResource(self._http)
         self.service_appointments = ServiceAppointmentsResource(self._http)
@@ -152,6 +160,13 @@ class WiilClient:
         self.knowledge_sources = KnowledgeSourcesResource(self._http)
         self.support_models = SupportModelsResource(self._http)
         self.telephony_provider = TelephonyProviderResource(self._http)
+        self.dynamic_phone_agent = DynamicPhoneAgentResource(self._http)
+        self.dynamic_web_agent = DynamicWebAgentResource(self._http)
+        self.dynamic_agent_status = DynamicAgentStatusResource(self._http)
+
+        # Service layer helpers
+        self.ott = OttService(self._http)
+        self.translation = TranslationService(self._http)
 
     def _validate_config(
         self,

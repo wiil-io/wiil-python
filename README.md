@@ -17,8 +17,33 @@ Official Python SDK for the [WIIL Platform](https://console.wiil.io) - AI-powere
 
 ## Installation
 
+### 1. Create and activate a virtual environment
+
+Linux/macOS:
+
 ```bash
-pip install wiil
+python -m venv venv
+source venv/bin/activate
+```
+
+Windows (PowerShell):
+
+```powershell
+python -m venv venv
+venv\Scripts\Activate.ps1
+```
+
+Windows (Command Prompt):
+
+```bat
+python -m venv venv
+venv\Scripts\activate
+```
+
+### 2. Install the SDK
+
+```bash
+pip install wiil-python
 ```
 
 ## Quick Start
@@ -105,6 +130,7 @@ The platform integrates two core architectural domains through the **Conversatio
 |--------|----------------|---------------------|
 | **Appointment Management** | Business Services | Service Appointments |
 | **Reservation Management** | Reservable Assets (Resources) | Reservations |
+| **Property Management** | Properties & Listings | Property Inquiries |
 | **Menu Management** | Menu Categories & Items | Menu Orders |
 | **Product Management** | Product Categories & Products | Product Orders |
 
@@ -112,6 +138,7 @@ The platform integrates two core architectural domains through the **Conversatio
 
 - **Business Services** - Bookable services (salons, clinics, consulting)
 - **Reservable Assets** - Bookable resources (tables, rooms, equipment)
+- **Properties & Listings** - Managed properties and listing availability data
 - **Menu Categories & Items** - Food and beverage offerings
 - **Product Categories & Products** - Retail products
 
@@ -119,10 +146,11 @@ The platform integrates two core architectural domains through the **Conversatio
 
 - **Service Appointments** - Created through AI conversations
 - **Reservations** - Created through AI conversations
+- **Property Inquiries** - Created through AI conversations
 - **Menu Orders** - Created through AI conversations
 - **Product Orders** - Created through AI conversations
 
-**SDK Resources**: `business_services`, `reservation_resources`, `menus`, `products`, `customers`, `service_appointments`, `reservations`, `menu_orders`, `product_orders`
+**SDK Resources**: `business_services`, `reservation_resources`, `property_config`, `property_inquiry`, `menus`, `products`, `customers`, `service_appointments`, `reservations`, `menu_orders`, `product_orders`
 
 ### Integration Hub: Conversations
 
@@ -177,7 +205,8 @@ The **Conversations** entity serves as the central integration point, bridging S
          ↓
 6. Transaction Created
    • Service Appointment
-   • Reservation
+    • Reservation
+    • Property Inquiry
    • Menu Order
    • Product Order
          ↓
@@ -200,7 +229,125 @@ The **Conversations** entity serves as the central integration point, bridging S
 
 ## Usage Examples
 
-### Account Management
+### 1. Dynamic Agent Setup (Recommended)
+
+The Dynamic Agent Setup APIs are the fastest way to deploy agents. Instead of creating each service-management component separately, you can provision a deployable assistant in one call.
+
+#### Phone Agent - Single Call Deployment
+
+```python
+from wiil import WiilClient
+from wiil.models.service_mgt.dynamic_setup import DynamicPhoneAgentSetup
+from wiil.types import BusinessSupportServices
+
+client = WiilClient(api_key="your-api-key")
+
+result = client.dynamic_phone_agent.create(
+    DynamicPhoneAgentSetup(
+        assistant_name="Sarah",
+        language="en-US",
+        capabilities=[BusinessSupportServices.APPOINTMENT_MANAGEMENT],
+    )
+)
+
+print("Phone number:", result.phone_number)
+print("Agent ID:", result.agent_configuration_id)
+```
+
+#### Web Agent - Single Call Deployment
+
+```python
+from wiil import WiilClient
+from wiil.models.service_mgt.dynamic_setup import DynamicWebAgentSetup
+from wiil.types import BusinessSupportServices
+
+client = WiilClient(api_key="your-api-key")
+
+result = client.dynamic_web_agent.create(
+    DynamicWebAgentSetup(
+        assistant_name="Emma",
+        website_url="https://example.com",
+        communication_type="UNIFIED",
+        language="en-US",
+        capabilities=[BusinessSupportServices.APPOINTMENT_MANAGEMENT],
+    )
+)
+
+print("Integration snippets:", result.integration_snippets)
+print("Agent ID:", result.agent_configuration_id)
+```
+
+#### Dynamic Agent with Chained STT/TTS Configuration
+
+```python
+from wiil import WiilClient
+from wiil.models.service_mgt.dynamic_setup import DynamicWebAgentSetup
+from wiil.types import BusinessSupportServices
+
+client = WiilClient(api_key="your-api-key")
+
+result = client.dynamic_web_agent.create(
+    DynamicWebAgentSetup(
+        assistant_name="Marcus",
+        website_url="https://example.com",
+        communication_type="VOICE",
+        language="en-US",
+        capabilities=[
+            BusinessSupportServices.APPOINTMENT_MANAGEMENT,
+            BusinessSupportServices.PRODUCT_ORDER_MANAGEMENT,
+        ],
+        stt_configuration={
+            "provider_type": "Deepgram",
+            "provider_model_id": "nova-2",
+            "language_id": "en-US",
+        },
+        tts_configuration={
+            "provider_type": "ElevenLabs",
+            "provider_model_id": "eleven_turbo_v2",
+            "language_id": "en-US",
+            "voice_id": "voice_rachel",
+        },
+    )
+)
+
+print("Agent ID:", result.agent_configuration_id)
+```
+
+#### Dynamic Agent Operations
+
+```python
+from wiil import WiilClient
+from wiil.models.service_mgt.dynamic_setup import DynamicPhoneAgentSetup, UpdateDynamicPhoneAgent
+
+client = WiilClient(api_key="your-api-key")
+
+# Create
+created = client.dynamic_phone_agent.create(
+    DynamicPhoneAgentSetup(
+        assistant_name="Nathan",
+        language="en-US",
+        capabilities=[],
+    )
+)
+
+# Update (partial)
+updated = client.dynamic_phone_agent.update(
+    UpdateDynamicPhoneAgent(
+        id=created.id,
+        assistant_name="Nathan Updated",
+    )
+)
+
+# Delete
+deleted = client.dynamic_phone_agent.delete(created.id)
+print("Deleted:", deleted)
+```
+
+For full walkthroughs, see `../guides/dynamic-agent-setup-guide.md`.
+
+---
+
+### 2. Account Management
 
 ```python
 from wiil import WiilClient
@@ -233,7 +380,7 @@ deleted = client.projects.delete("proj_123")
 projects = client.projects.list(page=1, page_size=20)
 ```
 
-### Service Configuration
+### 3. Service Configuration
 
 ```python
 # Create an agent configuration
@@ -249,7 +396,7 @@ agent = client.agent_configs.get("agent_123")
 agents = client.agent_configs.list(page=1, page_size=20)
 ```
 
-### Business Management
+### 4. Business Management
 
 ```python
 # Create a business service
@@ -321,6 +468,40 @@ async def main():
 
 import asyncio
 asyncio.run(main())
+```
+
+## WillService (OTT + Translation)
+
+`WillService` is a service-focused client exposes high-level workflows for OTT and translation services.
+
+```python
+from wiil import WillService
+
+service = WillService(api_key="your-api-key")
+
+# Create translation connection config
+translation = service.translation.create_connection_config(
+    {
+        "initiatorId": "initiator_123",
+        "participantLanguageCode": "es",
+        "initiatorLanguageCode": "en",
+    }
+)
+
+print(translation.channel_identifier)
+
+# Fetch OTT chat connection configuration
+chat_config = service.ott.get_chat_connection_configuration(
+    {
+        "configId": "config_abc",
+        "contact": {
+            "email": "user@example.com",
+            "phone": "+12065551234",
+        },
+    }
+)
+
+print(chat_config.connection_url)
 ```
 
 ## Development

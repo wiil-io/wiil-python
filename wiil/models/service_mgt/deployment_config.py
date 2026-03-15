@@ -5,16 +5,17 @@ It brings together agent behavior, instructions, organizational context, and cha
 to create a complete deployable unit. Each deployment has exactly one channel (1:1 relationship).
 """
 
-from typing import Any, Optional
+from typing import Any, Dict, Literal, Optional
 
+from pydantic import BaseModel as PydanticBaseModel
 from pydantic import ConfigDict, Field
 
 from wiil.models.base import BaseModel
-from wiil.types.service_types import DeploymentProvisioningType, DeploymentStatus
+from wiil.models.type_definitions import DeploymentProvisioningType, DeploymentStatus
 
 
 class DeploymentConfiguration(BaseModel):
-    """Deployment Configuration model.
+    """Deployment configuration.
 
     The Deployment Configuration is the central composition entity that brings together agent behavior,
     instructions, and organizational context to create a deployable unit. It serves as the primary
@@ -30,7 +31,7 @@ class DeploymentConfiguration(BaseModel):
 
     Provisioning Types:
         - DIRECT: Agent processes interactions directly without additional chains
-        - CHAINED: Uses provisioning chain (STT → Agent → TTS) for voice processing
+        - CHAINED: Uses provisioning chain (STT -> Agent -> TTS) for voice processing
 
     Deployment Lifecycle:
         - PENDING: Created but not yet activated
@@ -39,263 +40,228 @@ class DeploymentConfiguration(BaseModel):
         - FAILED: Deployment encountered errors
 
     Attributes:
-        id: Unique identifier for the deployment configuration
         project_id: ID of the project this deployment belongs to
         deployment_channel_id: ID of the deployment channel (1:1 relationship)
         deployment_name: Optional human-readable name for administrative identification
-        agent_configuration_id: ID of the agent configuration defining core behavior (N:1)
-        instruction_configuration_id: ID of the instruction configuration providing guidelines (N:1)
+        agent_configuration_id: ID of the agent configuration defining core behavior
+        instruction_configuration_id: ID of the instruction configuration providing behavioral guidelines
         deployment_status: Current operational status
-        provisioning_type: How this deployment processes interactions (DIRECT or CHAINED)
+        provisioning_type: How this deployment processes interactions
         provisioning_config_chain_id: ID of the provisioning chain for voice processing
-        is_active: Whether this deployment is currently active and accepting interactions
-        channel: Populated deployment channel configuration (for detail views)
-        project: Populated project information (for detail views)
-        agent: Populated agent configuration (for detail views)
-        instruction: Populated instruction configuration (for detail views)
-        created_at: Timestamp when created
-        updated_at: Timestamp when last updated
-
-    Example:
-        ```python
-        deployment = DeploymentConfiguration(
-            id="123",
-            project_id="456",
-            deployment_channel_id="abc",
-            deployment_name="Production Customer Support",
-            agent_configuration_id="def",
-            instruction_configuration_id="ghi",
-            deployment_status=DeploymentStatus.ACTIVE,
-            provisioning_type=DeploymentProvisioningType.DIRECT,
-            is_active=True
-        )
-        ```
+        is_active: Whether this deployment is currently active
+        channel: Populated deployment channel configuration
+        project: Populated project information
+        agent: Populated agent configuration
+        instruction: Populated instruction configuration
     """
 
     model_config = ConfigDict(
-        validate_by_name=True, validate_by_alias=True,
+        validate_by_name=True,
+        validate_by_alias=True,
         use_enum_values=True,
     )
 
     project_id: str = Field(
         ...,
-        description="ID of the project this deployment belongs to for organizational grouping, access control, and resource management",
+        description="ID of the project this deployment belongs to for organizational grouping and access control",
         alias="projectId"
     )
     deployment_channel_id: str = Field(
         ...,
-        description="ID of the deployment channel through which this deployment is accessible (1:1 relationship - each deployment has exactly one channel)",
+        description="ID of the deployment channel through which this deployment is accessible (1:1 relationship)",
         alias="deploymentChannelId"
     )
     deployment_name: Optional[str] = Field(
         None,
-        description="Optional human-readable name for the deployment used in administrative interfaces and reporting",
+        description="Optional human-readable name for the deployment used in administrative interfaces",
         alias="deploymentName"
     )
     agent_configuration_id: str = Field(
         ...,
-        description="ID of the agent configuration that defines the agent's core behavior, capabilities, and LLM model (N:1 relationship - multiple deployments can share an agent)",
+        description="ID of the agent configuration that defines the agent's core behavior and capabilities (N:1)",
         alias="agentConfigurationId"
     )
     instruction_configuration_id: str = Field(
         ...,
-        description="ID of the instruction configuration that provides behavioral guidelines, role definition, and conversation patterns for the agent (N:1 relationship)",
+        description="ID of the instruction configuration that provides behavioral guidelines for the agent (N:1)",
         alias="instructionConfigurationId"
     )
     deployment_status: DeploymentStatus = Field(
         ...,
-        description="Current operational status of the deployment (PENDING: awaiting activation, ACTIVE: operational, SUSPENDED: temporarily paused, FAILED: encountered errors)",
+        description="Current operational status (PENDING, ACTIVE, SUSPENDED, FAILED)",
         alias="deploymentStatus"
     )
     provisioning_type: DeploymentProvisioningType = Field(
         DeploymentProvisioningType.DIRECT,
-        description="How this deployment processes interactions: DIRECT for direct agent processing, CHAINED for provisioning chain (STT → Agent → TTS) voice processing",
+        description="How this deployment processes interactions: DIRECT for direct agent processing, CHAINED for voice processing pipeline",
         alias="provisioningType"
     )
     provisioning_config_chain_id: Optional[str] = Field(
         None,
-        description="ID of the provisioning configuration chain for voice processing (required for CHAINED provisioning type, links STT, agent, and TTS models)",
+        description="ID of the provisioning configuration chain for voice processing (required for CHAINED type)",
         alias="provisioningConfigChainId"
     )
     is_active: bool = Field(
         False,
-        description="Whether this deployment is currently active and accepting user interactions (independent of deploymentStatus for granular control)",
+        description="Whether this deployment is currently active and accepting user interactions",
         alias="isActive"
     )
-    channel: Optional[Any] = Field(
+    channel: Optional[Dict[str, Any]] = Field(
         None,
-        description="Populated deployment channel configuration including type, identifier, and channel-specific settings (null if not loaded, populated for detail views)"
+        description="Populated deployment channel configuration (null if not loaded)"
     )
-    project: Optional[Any] = Field(
+    project: Optional[Dict[str, Any]] = Field(
         None,
-        description="Populated project information including name and organizational details (null if not loaded, populated for detail views)"
+        description="Populated project information (null if not loaded)"
     )
-    agent: Optional[Any] = Field(
+    agent: Optional[Dict[str, Any]] = Field(
         None,
-        description="Populated agent configuration including model, operational mode, and capabilities (null if not loaded, populated for detail views)"
+        description="Populated agent configuration (null if not loaded)"
     )
-    instruction: Optional[Any] = Field(
+    instruction: Optional[Dict[str, Any]] = Field(
         None,
-        description="Populated instruction configuration including role, guidelines, and knowledge sources (null if not loaded, populated for detail views)"
+        description="Populated instruction configuration (null if not loaded)"
     )
 
 
-class CreateDeploymentConfiguration(BaseModel):
+class CreateDeploymentConfiguration(PydanticBaseModel):
     """Schema for creating a new deployment configuration.
 
     Omits auto-generated fields and populated relations. Sets deployment to PENDING status
     with DIRECT provisioning by default.
-
-    This schema enforces required fields for deployment creation while excluding
-    fields that are automatically generated or populated by the system.
-
-    Attributes:
-        project_id: ID of the project this deployment belongs to
-        deployment_channel_id: ID of the deployment channel
-        deployment_name: Optional human-readable name
-        agent_configuration_id: ID of the agent configuration
-        instruction_configuration_id: ID of the instruction configuration
-        provisioning_config_chain_id: Optional ID of the provisioning chain
-        is_active: Whether deployment is active (default: False)
-
-    Example:
-        ```python
-        new_deployment = CreateDeploymentConfiguration(
-            project_id="456",
-            deployment_channel_id="abc",
-            deployment_name="Customer Support Line",
-            agent_configuration_id="def",
-            instruction_configuration_id="ghi",
-            is_active=False
-        )
-        ```
     """
 
     model_config = ConfigDict(
-        validate_by_name=True, validate_by_alias=True,
+        validate_by_name=True,
+        validate_by_alias=True,
         use_enum_values=True,
     )
 
-    project_id: str = Field(
-        ...,
-        description="ID of the project this deployment belongs to",
-        alias="projectId"
+    project_id: str = Field(..., alias="projectId")
+    deployment_channel_id: Optional[str] = Field(None, alias="deploymentChannelId")
+    deployment_name: Optional[str] = Field(None, alias="deploymentName")
+    agent_configuration_id: str = Field(..., alias="agentConfigurationId")
+    instruction_configuration_id: str = Field(..., alias="instructionConfigurationId")
+    deployment_status: Literal[DeploymentStatus.PENDING] = Field(
+        DeploymentStatus.PENDING,
+        alias="deploymentStatus"
     )
-    deployment_channel_id: str = Field(
-        ...,
-        description="ID of the deployment channel",
-        alias="deploymentChannelId"
+    provisioning_type: DeploymentProvisioningType = Field(
+        DeploymentProvisioningType.DIRECT,
+        alias="provisioningType"
     )
-    deployment_name: Optional[str] = Field(
-        None,
-        description="Optional human-readable name for the deployment",
-        alias="deploymentName"
-    )
-    agent_configuration_id: str = Field(
-        ...,
-        description="ID of the agent configuration",
-        alias="agentConfigurationId"
-    )
-    instruction_configuration_id: str = Field(
-        ...,
-        description="ID of the instruction configuration",
-        alias="instructionConfigurationId"
-    )
-    provisioning_config_chain_id: Optional[str] = Field(
-        None,
-        description="Optional ID of the provisioning configuration chain",
-        alias="provisioningConfigChainId"
-    )
-    is_active: bool = Field(
-        False,
-        description="Whether deployment is active",
-        alias="isActive"
-    )
+    provisioning_config_chain_id: Optional[str] = Field(None, alias="provisioningConfigChainId")
+    is_active: bool = Field(False, alias="isActive")
 
 
-class UpdateDeploymentConfiguration(BaseModel):
+class CreateChainDeploymentConfiguration(PydanticBaseModel):
+    """Schema for creating a chained deployment configuration.
+
+    Similar to CreateDeploymentConfiguration but requires a provisioningConfigChainId
+    and sets provisioningType to CHAINED by default.
+    """
+
+    model_config = ConfigDict(
+        validate_by_name=True,
+        validate_by_alias=True,
+        use_enum_values=True,
+    )
+
+    project_id: str = Field(..., alias="projectId")
+    deployment_channel_id: str = Field(..., alias="deploymentChannelId")
+    deployment_name: Optional[str] = Field(None, alias="deploymentName")
+    agent_configuration_id: str = Field(..., alias="agentConfigurationId")
+    instruction_configuration_id: str = Field(..., alias="instructionConfigurationId")
+    provisioning_config_chain_id: str = Field(..., alias="provisioningConfigChainId")
+    deployment_status: Literal[DeploymentStatus.PENDING] = Field(
+        DeploymentStatus.PENDING,
+        alias="deploymentStatus"
+    )
+    provisioning_type: DeploymentProvisioningType = Field(
+        DeploymentProvisioningType.CHAINED,
+        alias="provisioningType"
+    )
+    is_active: bool = Field(False, alias="isActive")
+
+
+class UpdateDeploymentConfiguration(PydanticBaseModel):
     """Schema for updating an existing deployment configuration.
 
     All fields from CreateDeploymentConfiguration are optional (partial),
     with the id field required to identify the deployment to update.
-
-    Supports partial updates - only include the fields you want to modify.
-    The id field is mandatory to specify which deployment configuration to update.
-
-    Attributes:
-        id: Unique identifier of the deployment to update
-        project_id: Optional update to the project association
-        deployment_channel_id: Optional update to the deployment channel
-        deployment_name: Optional update to the human-readable name
-        agent_configuration_id: Optional update to the agent configuration
-        instruction_configuration_id: Optional update to the instruction configuration
-        deployment_status: Optional update to the deployment status
-        provisioning_type: Optional update to the provisioning type
-        provisioning_config_chain_id: Optional update to the provisioning chain ID
-        is_active: Optional update to the active status
-
-    Example:
-        ```python
-        update_deployment = UpdateDeploymentConfiguration(
-            id="123",
-            deployment_name="Updated Support Line",
-            is_active=True,
-            deployment_status=DeploymentStatus.ACTIVE
-        )
-        ```
     """
 
     model_config = ConfigDict(
-        validate_by_name=True, validate_by_alias=True,
+        validate_by_name=True,
+        validate_by_alias=True,
         use_enum_values=True,
     )
 
-    id: str = Field(
-        ...,
-        description="Unique identifier of the deployment to update"
+    id: str
+    project_id: Optional[str] = Field(None, alias="projectId")
+    deployment_channel_id: Optional[str] = Field(None, alias="deploymentChannelId")
+    deployment_name: Optional[str] = Field(None, alias="deploymentName")
+    agent_configuration_id: Optional[str] = Field(None, alias="agentConfigurationId")
+    instruction_configuration_id: Optional[str] = Field(None, alias="instructionConfigurationId")
+    deployment_status: Optional[DeploymentStatus] = Field(None, alias="deploymentStatus")
+    provisioning_type: Optional[DeploymentProvisioningType] = Field(None, alias="provisioningType")
+    provisioning_config_chain_id: Optional[str] = Field(None, alias="provisioningConfigChainId")
+    is_active: Optional[bool] = Field(None, alias="isActive")
+
+
+class DeploymentConfigurationResult(BaseModel):
+    """Deployment configuration result (lightweight version).
+
+    Omits populated relation fields (channel, project, agent, instruction) to provide
+    a lighter payload suitable for list views and search results.
+    """
+
+    model_config = ConfigDict(
+        validate_by_name=True,
+        validate_by_alias=True,
+        use_enum_values=True,
     )
-    project_id: Optional[str] = Field(
-        None,
-        description="Optional update to the project association",
-        alias="projectId"
-    )
-    deployment_channel_id: Optional[str] = Field(
-        None,
-        description="Optional update to the deployment channel",
-        alias="deploymentChannelId"
-    )
-    deployment_name: Optional[str] = Field(
-        None,
-        description="Optional update to the human-readable name",
-        alias="deploymentName"
-    )
-    agent_configuration_id: Optional[str] = Field(
-        None,
-        description="Optional update to the agent configuration",
-        alias="agentConfigurationId"
-    )
-    instruction_configuration_id: Optional[str] = Field(
-        None,
-        description="Optional update to the instruction configuration",
-        alias="instructionConfigurationId"
-    )
-    deployment_status: Optional[DeploymentStatus] = Field(
-        None,
-        description="Optional update to the deployment status",
-        alias="deploymentStatus"
-    )
-    provisioning_type: Optional[DeploymentProvisioningType] = Field(
-        None,
-        description="Optional update to the provisioning type",
+
+    project_id: str = Field(..., alias="projectId")
+    deployment_channel_id: str = Field(..., alias="deploymentChannelId")
+    deployment_name: Optional[str] = Field(None, alias="deploymentName")
+    agent_configuration_id: str = Field(..., alias="agentConfigurationId")
+    instruction_configuration_id: str = Field(..., alias="instructionConfigurationId")
+    deployment_status: DeploymentStatus = Field(..., alias="deploymentStatus")
+    provisioning_type: DeploymentProvisioningType = Field(
+        DeploymentProvisioningType.DIRECT,
         alias="provisioningType"
     )
-    provisioning_config_chain_id: Optional[str] = Field(
-        None,
-        description="Optional update to the provisioning chain ID",
-        alias="provisioningConfigChainId"
+    provisioning_config_chain_id: Optional[str] = Field(None, alias="provisioningConfigChainId")
+    is_active: bool = Field(False, alias="isActive")
+
+
+class DeploymentConfigurationDetails(BaseModel):
+    """Deployment configuration details (full version with all relations).
+
+    Extends the base schema by requiring all relation fields to be fully populated.
+    Ideal for detail views where complete information is needed.
+    """
+
+    model_config = ConfigDict(
+        validate_by_name=True,
+        validate_by_alias=True,
+        use_enum_values=True,
     )
-    is_active: Optional[bool] = Field(
-        None,
-        description="Optional update to the active status",
-        alias="isActive"
+
+    project_id: str = Field(..., alias="projectId")
+    deployment_channel_id: str = Field(..., alias="deploymentChannelId")
+    deployment_name: Optional[str] = Field(None, alias="deploymentName")
+    agent_configuration_id: str = Field(..., alias="agentConfigurationId")
+    instruction_configuration_id: str = Field(..., alias="instructionConfigurationId")
+    deployment_status: DeploymentStatus = Field(..., alias="deploymentStatus")
+    provisioning_type: DeploymentProvisioningType = Field(
+        DeploymentProvisioningType.DIRECT,
+        alias="provisioningType"
     )
+    provisioning_config_chain_id: Optional[str] = Field(None, alias="provisioningConfigChainId")
+    is_active: bool = Field(False, alias="isActive")
+    channel: Dict[str, Any] = Field(..., description="Populated deployment channel configuration")
+    project: Dict[str, Any] = Field(..., description="Populated project information")
+    agent: Dict[str, Any] = Field(..., description="Populated agent configuration")
+    instruction: Dict[str, Any] = Field(..., description="Populated instruction configuration")

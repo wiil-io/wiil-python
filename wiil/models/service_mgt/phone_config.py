@@ -1,25 +1,25 @@
 """Phone configuration schema definitions for telephony management.
 
-Phone Configurations manage telephony resources including phone numbers from various
-providers (SignalWire, Twilio). They track provider information, channel associations,
-and operational status.
+Phone Configurations manage telephony resources including phone numbers from various providers
+(SignalWire, Twilio). They track provider information, channel associations, and operational status.
+Referenced by Phone Channel configurations for call and SMS deployments.
 """
 
 from typing import Any, Dict, Optional
 
+from pydantic import BaseModel as PydanticBaseModel
 from pydantic import ConfigDict, Field
 
 from wiil.models.base import BaseModel
-from wiil.types.service_types import PhoneStatus, ProviderType
+from wiil.models.type_definitions import PhoneStatus, ProviderType
 
 
 class PhoneConfiguration(BaseModel):
-    """Phone Configuration model.
+    """Phone configuration for telephony management.
 
-    Manages a phone number resource from a telephony provider, tracking its
-    configuration, status, and associations with deployment channels. A single
-    phone number can support both voice calls and SMS through separate channel
-    associations.
+    Manages a phone number resource from a telephony provider, tracking its configuration, status,
+    and associations with deployment channels. A single phone number can support both voice calls
+    and SMS through separate channel associations.
 
     Architecture Context:
         - Referenced By: PhoneChannelConfig (via phoneConfigurationId)
@@ -35,167 +35,137 @@ class PhoneConfiguration(BaseModel):
         - RELEASED: Disconnected and returned to provider
 
     Attributes:
-        id: Unique identifier
-        phone_number: Phone number in E.164 format
-        provider_phone_number_id: Provider's identifier for this number
-        phone_request_id: Original purchase transaction ID
-        friendly_name: Human-readable display name
-        region_id: Region where number is registered
-        monthly_price: Monthly recurring cost
-        region_or_country_name: Human-readable region/country name
+        phone_number: Phone number in E.164 international format
+        provider_phone_number_id: Unique identifier from the telephony provider
+        phone_request_id: Reference ID for the original purchase transaction
+        friendly_name: Human-readable display name for administrative interfaces
+        region_id: Region identifier where this number is registered
+        monthly_price: Monthly recurring cost for maintaining this phone number
+        region_or_country_name: Human-readable region or country name
         country_code: ISO 3166-1 alpha-2 country code
-        provider_type: Telephony service provider
-        provider_account_id: Provider account identifier
-        is_imported: Whether number was imported from external system
+        provider_type: Telephony service provider (SIGNALWIRE, TWILIO, etc.)
+        is_imported: Whether this number was imported from external system
         status: Current operational status
-        is_ported: Whether number was ported from another provider
+        is_ported: Whether this number was ported from another provider
         marked_for_release: Whether marked for disconnection
-        metadata: Provider-specific metadata
-        voice_channel_id: ID of voice deployment channel
-        sms_channel_id: ID of SMS deployment channel
+        metadata: Additional provider-specific metadata
+        voice_channel_id: ID of the voice/call deployment channel
+        sms_channel_id: ID of the SMS deployment channel
         voice_channel: Populated voice channel configuration
         sms_channel: Populated SMS channel configuration
-        is_ussms_permitted: Whether US SMS messaging is permitted
-        created_at: Timestamp when created
-        updated_at: Timestamp when last updated
-
-    Example:
-        ```python
-        phone_config = PhoneConfiguration(
-            id="123",
-            phone_number="+12125551234",
-            provider_phone_number_id="PN123abc",
-            phone_request_id="REQ456",
-            friendly_name="Customer Support Line",
-            region_id="us-ny",
-            monthly_price=1.00,
-            region_or_country_name="New York, United States",
-            country_code="US",
-            provider_type=ProviderType.SIGNALWIRE,
-            status=PhoneStatus.ACTIVE,
-            is_imported=False,
-            is_ported=False,
-            is_ussms_permitted=True
-        )
-        ```
+        is_us_sms_permitted: Whether US SMS messaging is permitted
     """
 
     model_config = ConfigDict(
-        validate_by_name=True, validate_by_alias=True,
+        validate_by_name=True,
+        validate_by_alias=True,
         use_enum_values=True,
     )
 
     phone_number: str = Field(
         ...,
-        description="Phone number in E.164 format (e.g., '+12125551234')",
+        description="Phone number in E.164 international format (e.g., '+12125551234')",
         alias="phoneNumber"
     )
     provider_phone_number_id: str = Field(
         ...,
-        description="Provider's unique identifier for this phone number",
+        description="Unique identifier for this phone number from the telephony provider's system",
         alias="providerPhoneNumberId"
     )
     phone_request_id: str = Field(
         ...,
-        description="Original phone number purchase transaction ID",
+        description="Reference ID for the original phone number purchase transaction",
         alias="phoneRequestId"
     )
     friendly_name: Optional[str] = Field(
         None,
-        description="Human-readable display name",
+        description="Human-readable display name for this phone number",
         alias="friendlyName"
     )
     region_id: Optional[str] = Field(
         None,
-        description="Region identifier where number is registered",
+        description="Region identifier where this phone number is registered",
         alias="regionId"
     )
     monthly_price: Optional[float] = Field(
         None,
-        description="Monthly recurring cost in USD",
+        description="Monthly recurring cost for maintaining this phone number",
         alias="monthlyPrice"
     )
     region_or_country_name: Optional[str] = Field(
         None,
-        description="Human-readable region or country name",
+        description="Human-readable name of the region or country",
         alias="regionOrCountryName"
     )
     country_code: Optional[str] = Field(
         None,
-        description="ISO 3166-1 alpha-2 country code (e.g., 'US', 'GB')",
+        description="ISO 3166-1 alpha-2 country code (e.g., 'US', 'GB', 'CA')",
         alias="countryCode"
     )
     provider_type: ProviderType = Field(
         ProviderType.SIGNALWIRE,
-        description="Telephony service provider",
+        description="Telephony service provider managing this phone number",
         alias="providerType"
     )
     is_imported: bool = Field(
         False,
-        description="Whether imported from external system",
+        description="Flag indicating if this phone number was imported from an external system",
         alias="isImported"
     )
     status: PhoneStatus = Field(
         PhoneStatus.INACTIVE,
-        description="Current operational status"
+        description="Current operational status (PENDING, ACTIVE, INACTIVE, SUSPENDED, RELEASED)"
     )
     is_ported: bool = Field(
         False,
-        description="Whether ported from another provider",
+        description="Flag indicating if this phone number was ported from another provider",
         alias="isPorted"
     )
     marked_for_release: Optional[bool] = Field(
         False,
-        description="Whether marked for disconnection",
+        description="Flag indicating if this phone number is marked for release/disconnection",
         alias="markedForRelease"
     )
     metadata: Optional[Dict[str, Any]] = Field(
         None,
-        description="Provider-specific metadata"
+        description="Additional provider-specific metadata or custom attributes"
     )
     voice_channel_id: Optional[str] = Field(
         None,
-        description="ID of voice deployment channel",
+        description="ID of the voice/call deployment channel associated with this phone number",
         alias="voiceChannelId"
     )
     sms_channel_id: Optional[str] = Field(
         None,
-        description="ID of SMS deployment channel",
+        description="ID of the SMS deployment channel associated with this phone number",
         alias="smsChannelId"
     )
-    voice_channel: Optional[Any] = Field(
+    voice_channel: Optional[Dict[str, Any]] = Field(
         None,
-        description="Populated voice channel configuration",
+        description="Populated voice deployment channel configuration",
         alias="voiceChannel"
     )
-    sms_channel: Optional[Any] = Field(
+    sms_channel: Optional[Dict[str, Any]] = Field(
         None,
-        description="Populated SMS channel configuration",
+        description="Populated SMS deployment channel configuration",
         alias="smsChannel"
     )
-    is_ussms_permitted: bool = Field(
+    is_us_sms_permitted: bool = Field(
         False,
-        description="Whether US SMS messaging is permitted",
+        description="Compliance flag indicating if US SMS messaging is permitted for this phone number",
         alias="isUSSMSPermitted"
     )
 
 
-class UpdatePhoneConfiguration(BaseModel):
+class UpdatePhoneConfiguration(PydanticBaseModel):
     """Schema for updating an existing phone configuration.
 
-    Only allows updating the friendly name.
-
-    Example:
-        ```python
-        update_data = UpdatePhoneConfiguration(
-            id="123",
-            friendly_name="Updated Support Line Name"
-        )
-        ```
+    Only allows updating the friendly name and requires the id to identify the configuration.
     """
 
     model_config = ConfigDict(
-        validate_by_name=True, validate_by_alias=True,
+        validate_by_name=True,
+        validate_by_alias=True,
         use_enum_values=True,
     )
 

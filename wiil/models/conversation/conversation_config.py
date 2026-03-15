@@ -6,7 +6,7 @@ to deployment configurations. Each conversation is scoped to a project and organ
 """
 
 from datetime import datetime
-from typing import Any, Dict, List, Literal, Optional, Union
+from typing import Any, Dict, List, Literal, Optional, TypedDict, Union
 
 from pydantic import BaseModel as PydanticBaseModel
 from pydantic import ConfigDict, Field
@@ -496,6 +496,40 @@ class DecommissionConfig(PydanticBaseModel):
         ...,
         description="Service ID of the active conversation session to decommission and shut down gracefully, releases resources and closes all active connections"
     )
+
+
+class DateRange(TypedDict, total=False):
+    """Date range for filtering conversations."""
+
+    start: Optional[datetime]
+    end: Optional[datetime]
+
+
+class ConversationFilters(TypedDict, total=False):
+    """Filters for querying conversations."""
+
+    search: Optional[str]
+    conversation_type: Optional[List[ServiceConversationType]]
+    channel_id: Optional[str]
+    customer_id: Optional[str]
+    has_messages: Optional[bool]
+    date_range: Optional[DateRange]
+
+
+class ConversationSorting(TypedDict):
+    """Sorting options for conversation queries."""
+
+    field: Literal["created_at", "customer_id"]
+    direction: Literal["asc", "desc"]
+
+
+class ConversationQueryOptions(TypedDict, total=False):
+    """Query options for paginated conversation retrieval."""
+
+    page: int
+    page_size: int
+    filters: Optional[ConversationFilters]
+    sorting: Optional[ConversationSorting]
 
 
 # Forward reference resolution

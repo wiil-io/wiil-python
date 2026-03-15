@@ -2,10 +2,12 @@
 
 from typing import Any, Dict, List, Optional
 
-from pydantic import ConfigDict, Field
+from pydantic import BaseModel as PydanticBaseModel
+from pydantic import ConfigDict, Field, ValidationError
 
 from wiil.models.base import BaseModel
-from wiil.types.account_types import ServiceStatus
+from wiil.models.type_definitions.account_definitions import ServiceStatus
+from wiil.errors import WiilValidationError
 
 
 class Project(BaseModel):
@@ -20,7 +22,6 @@ class Project(BaseModel):
         region_id: Geographic region ID for this project
         description: Optional description of the project's purpose
         compliance: Array of compliance standards this project adheres to
-        current_subscription_id: ID of the current subscription plan
         is_default: Whether this is the default project for the organization
         service_status: Current service status
         metadata: Additional custom metadata for the project
@@ -37,7 +38,6 @@ class Project(BaseModel):
             compliance=['SOC2', 'HIPAA'],
             is_default=True,
             service_status=ServiceStatus.ACTIVE,
-            current_subscription_id='789',
             metadata={'environment': 'production'},
             created_at=1234567890,
             updated_at=1234567890
@@ -68,11 +68,6 @@ class Project(BaseModel):
         None,
         description="Array of compliance standards this project adheres to (e.g., SOC2, HIPAA)"
     )
-    current_subscription_id: Optional[str] = Field(
-        None,
-        description="ID of the current subscription plan for this project",
-        alias="currentSubscriptionId"
-    )
     is_default: bool = Field(
         ...,
         description="Whether this is the default project for the organization (system-managed flag, set automatically on creation)",
@@ -89,7 +84,7 @@ class Project(BaseModel):
     )
 
 
-class CreateProject(BaseModel):
+class CreateProject(PydanticBaseModel):
     """Schema for creating a new project.
 
     Omits auto-generated fields (id, timestamps) and system-managed fields (isDefault).
@@ -99,7 +94,6 @@ class CreateProject(BaseModel):
         region_id: Geographic region ID for this project
         description: Optional description of the project's purpose
         compliance: Array of compliance standards this project adheres to
-        current_subscription_id: ID of the current subscription plan
         service_status: Current service status
         metadata: Additional custom metadata for the project
 
@@ -139,11 +133,6 @@ class CreateProject(BaseModel):
         None,
         description="Array of compliance standards this project adheres to (e.g., SOC2, HIPAA)"
     )
-    current_subscription_id: Optional[str] = Field(
-        None,
-        description="ID of the current subscription plan for this project",
-        alias="currentSubscriptionId"
-    )
     service_status: Optional[ServiceStatus] = Field(
         None,
         description="Current service status of the project",
@@ -154,8 +143,14 @@ class CreateProject(BaseModel):
         description="Additional custom metadata for the project"
     )
 
+    def __init__(self, **data: Any):
+        try:
+            super().__init__(**data)
+        except ValidationError as e:
+            raise WiilValidationError('Request validation failed', details=e.errors()) from e
 
-class UpdateProject(BaseModel):
+
+class UpdateProject(PydanticBaseModel):
     """Schema for updating an existing project.
 
     All CreateProject fields are optional (partial), with id required to identify the project.
@@ -166,7 +161,6 @@ class UpdateProject(BaseModel):
         region_id: Updated geographic region ID
         description: Updated description
         compliance: Updated compliance standards array
-        current_subscription_id: Updated subscription plan ID
         service_status: Updated service status
         metadata: Updated metadata
 
@@ -204,11 +198,6 @@ class UpdateProject(BaseModel):
     compliance: Optional[List[str]] = Field(
         None,
         description="Updated array of compliance standards"
-    )
-    current_subscription_id: Optional[str] = Field(
-        None,
-        description="Updated subscription plan ID",
-        alias="currentSubscriptionId"
     )
     service_status: Optional[ServiceStatus] = Field(
         None,

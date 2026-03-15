@@ -220,7 +220,7 @@ class MenuQRCode(PydanticBaseModel):
     )
 
 
-class CreateMenuCategory(BaseModel):
+class CreateMenuCategory(PydanticBaseModel):
     """Schema for creating a new menu category.
 
     Omits auto-generated fields (id, created_at, updated_at).
@@ -241,12 +241,12 @@ class CreateMenuCategory(BaseModel):
         use_enum_values=True,
     )
 
-    name: str = Field(..., min_length=1)
+    name: str = Field(...)
     description: Optional[str] = None
     display_order: Optional[int] = Field(None, alias="displayOrder")
 
 
-class CreateBusinessMenuItem(BaseModel):
+class CreateBusinessMenuItem(PydanticBaseModel):
     """Schema for creating a new business menu item.
 
     Omits auto-generated fields and allows optional category specification.
@@ -283,7 +283,7 @@ class CreateBusinessMenuItem(BaseModel):
     display_order: Optional[int] = Field(None, alias="displayOrder")
 
 
-class UpdateMenuCategory(BaseModel):
+class UpdateMenuCategory(PydanticBaseModel):
     """Schema for updating an existing menu category.
 
     All fields are optional except id.
@@ -310,7 +310,7 @@ class UpdateMenuCategory(BaseModel):
     display_order: Optional[int] = Field(None, alias="displayOrder")
 
 
-class UpdateBusinessMenuItem(BaseModel):
+class UpdateBusinessMenuItem(PydanticBaseModel):
     """Schema for updating an existing business menu item.
 
     All fields are optional except id.

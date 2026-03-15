@@ -11,7 +11,7 @@ from wiil.models.business_mgt import (
     ReservationSettings,
     UpdateReservationSettings,
 )
-from wiil.types import PaginatedResult
+from wiil.types import PaginatedResult, PaginationRequest
 
 
 class ReservationsResource:
@@ -26,9 +26,8 @@ class ReservationsResource:
         self._http = http
         self._base_path = '/reservations'
 
-    def create(self, **kwargs: Any) -> Reservation:
+    def create(self, data: CreateReservation) -> Reservation:
         """Create a new reservation."""
-        data = CreateReservation(**kwargs)
         return self._http.post(
             self._base_path,
             data.model_dump(by_alias=True, exclude_none=True),
@@ -42,38 +41,33 @@ class ReservationsResource:
     def get_by_customer(
         self,
         customer_id: str,
-        page: Optional[int] = None,
-        page_size: Optional[int] = None
+        params: Optional[PaginationRequest] = None
     ) -> PaginatedResult[Reservation]:
         """Retrieve reservations by customer."""
-        params: Dict[str, Any] = {}
-        if page is not None:
-            params['page'] = page
-        if page_size is not None:
-            params['pageSize'] = page_size
+        query_params: Dict[str, Any] = {}
+        if params:
+            query_params['page'] = params.page
+            query_params['pageSize'] = params.page_size
 
-        query_string = f'?{urlencode(params)}' if params else ''
+        query_string = f'?{urlencode(query_params)}' if query_params else ''
         return self._http.get(f'{self._base_path}/by-customer/{customer_id}{query_string}')
 
     def get_by_resource(
         self,
         resource_id: str,
-        page: Optional[int] = None,
-        page_size: Optional[int] = None
+        params: Optional[PaginationRequest] = None
     ) -> PaginatedResult[Reservation]:
         """Retrieve reservations by resource."""
-        params: Dict[str, Any] = {}
-        if page is not None:
-            params['page'] = page
-        if page_size is not None:
-            params['pageSize'] = page_size
+        query_params: Dict[str, Any] = {}
+        if params:
+            query_params['page'] = params.page
+            query_params['pageSize'] = params.page_size
 
-        query_string = f'?{urlencode(params)}' if params else ''
+        query_string = f'?{urlencode(query_params)}' if query_params else ''
         return self._http.get(f'{self._base_path}/by-resource/{resource_id}{query_string}')
 
-    def update(self, **kwargs: Any) -> Reservation:
+    def update(self, data: UpdateReservation) -> Reservation:
         """Update an existing reservation."""
-        data = UpdateReservation(**kwargs)
         return self._http.patch(
             self._base_path,
             data.model_dump(by_alias=True, exclude_none=True),
@@ -114,19 +108,14 @@ class ReservationsResource:
         """Delete a reservation."""
         return self._http.delete(f'{self._base_path}/{reservation_id}')
 
-    def list(
-        self,
-        page: Optional[int] = None,
-        page_size: Optional[int] = None
-    ) -> PaginatedResult[Reservation]:
+    def list(self, params: Optional[PaginationRequest] = None) -> PaginatedResult[Reservation]:
         """List reservations with pagination."""
-        params: Dict[str, Any] = {}
-        if page is not None:
-            params['page'] = page
-        if page_size is not None:
-            params['pageSize'] = page_size
+        query_params: Dict[str, Any] = {}
+        if params:
+            query_params['page'] = params.page
+            query_params['pageSize'] = params.page_size
 
-        query_string = f'?{urlencode(params)}' if params else ''
+        query_string = f'?{urlencode(query_params)}' if query_params else ''
         return self._http.get(f'{self._base_path}{query_string}')
 
     # =============== Reservation Settings Methods ===============
@@ -135,9 +124,8 @@ class ReservationsResource:
         """Retrieve reservation settings for the organization."""
         return self._http.get(f'{self._base_path}/settings')
 
-    def update_settings(self, **kwargs: Any) -> ReservationSettings:
+    def update_settings(self, data: UpdateReservationSettings) -> ReservationSettings:
         """Update reservation settings."""
-        data = UpdateReservationSettings(**kwargs)
         return self._http.patch(
             f'{self._base_path}/settings',
             data.model_dump(by_alias=True, exclude_none=True),

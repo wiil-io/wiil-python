@@ -1,12 +1,11 @@
 """Tests for Knowledge Sources resource."""
 
 import pytest
-import respx
-from httpx import Response
+import responses
 
 from wiil import WiilClient
 from wiil.errors import WiilAPIError
-
+from wiil.types import PaginationRequest
 
 BASE_URL = "https://api.wiil.io/v1"
 API_KEY = "test-api-key"
@@ -15,7 +14,9 @@ API_KEY = "test-api-key"
 class TestKnowledgeSourcesResource:
     """Test suite for KnowledgeSourcesResource."""
 
-    def test_get_knowledge_source(self, client: WiilClient, mock_api, api_response):
+    def test_get_knowledge_source(
+        self, client: WiilClient, mock_api, api_response
+    ):
         """Test retrieving a knowledge source by ID."""
         mock_response = {
             "id": "source_123",
@@ -44,10 +45,13 @@ class TestKnowledgeSourcesResource:
             "updatedAt": 1234567890,
         }
 
-        mock_api.get(
+        mock_api.add(
+            responses.GET,
             f"{BASE_URL}/knowledge-sources/source_123",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_response)))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(mock_response),
+            status=200,
+        )
 
         result = client.knowledge_sources.get("source_123")
 
@@ -58,13 +62,13 @@ class TestKnowledgeSourcesResource:
         self, client: WiilClient, mock_api, error_response
     ):
         """Test API error when knowledge source not found."""
-        mock_api.get(
+        mock_api.add(
+            responses.GET,
             f"{BASE_URL}/knowledge-sources/invalid_id",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(
-            404,
-            json=error_response("NOT_FOUND", "Knowledge source not found")
-        ))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=error_response("NOT_FOUND", "Knowledge source not found"),
+            status=404,
+        )
 
         with pytest.raises(WiilAPIError) as exc_info:
             client.knowledge_sources.get("invalid_id")
@@ -143,10 +147,13 @@ class TestKnowledgeSourcesResource:
             },
         }
 
-        mock_api.get(
+        mock_api.add(
+            responses.GET,
             f"{BASE_URL}/knowledge-sources",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_response)))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(mock_response),
+            status=200,
+        )
 
         result = client.knowledge_sources.list()
 
@@ -170,12 +177,17 @@ class TestKnowledgeSourcesResource:
             },
         }
 
-        mock_api.get(
+        mock_api.add(
+            responses.GET,
             f"{BASE_URL}/knowledge-sources?page=2&pageSize=50",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_response)))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(mock_response),
+            status=200,
+        )
 
-        result = client.knowledge_sources.list(page=2, page_size=50)
+        result = client.knowledge_sources.list(
+            PaginationRequest(page=2, page_size=50)
+        )
 
         assert result.meta.page == 2
         assert result.meta.page_size == 50

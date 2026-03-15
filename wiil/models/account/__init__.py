@@ -1,4 +1,7 @@
-"""Account management models."""
+"""Account management models.
+
+This module mirrors src/core/account/
+"""
 
 from wiil.models.account.organization import (
     Organization,
@@ -9,6 +12,10 @@ from wiil.models.account.project import (
     Project,
     UpdateProject,
 )
+from wiil.models.account.supported_business_verticals import (
+    SUPPORTED_BUSINESS_VERTICALS,
+    SupportedBusinessVerticalId,
+)
 
 __all__ = [
     "Organization",
@@ -16,4 +23,6 @@ __all__ = [
     "Project",
     "CreateProject",
     "UpdateProject",
+    "SUPPORTED_BUSINESS_VERTICALS",
+    "SupportedBusinessVerticalId",
 ]

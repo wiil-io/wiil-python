@@ -1,16 +1,15 @@
 """Deployment Configurations resource for managing deployment configuration entities."""
 
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Optional
 from urllib.parse import urlencode
 
 from wiil.client.http_client import HttpClient
 from wiil.models.service_mgt import (
-    DeploymentConfigurationResult,
+    DeploymentConfiguration,
     CreateDeploymentConfiguration,
-    CreateChainDeploymentConfiguration,
     UpdateDeploymentConfiguration,
 )
-from wiil.types import PaginatedResult
+from wiil.types import PaginatedResult, PaginationRequest
 
 
 class DeploymentConfigurationsResource:
@@ -25,35 +24,38 @@ class DeploymentConfigurationsResource:
         self._http = http
         self._base_path = '/deployment-configurations'
 
-    def create(self, **kwargs: Any) -> DeploymentConfigurationResult:
-        """Create a new deployment configuration."""
-        data = CreateDeploymentConfiguration(**kwargs)
+    def create(self, data: CreateDeploymentConfiguration) -> DeploymentConfiguration:
+        """Create a new deployment configuration.
+
+        Args:
+            data: Deployment configuration creation data
+
+        Returns:
+            The created deployment configuration
+        """
         return self._http.post(
             self._base_path,
             data.model_dump(by_alias=True, exclude_none=True),
             schema=CreateDeploymentConfiguration
         )
 
-    def create_chain(self, **kwargs: Any) -> DeploymentConfigurationResult:
-        """Create a chained deployment configuration."""
-        data = CreateChainDeploymentConfiguration(**kwargs)
-        return self._http.post(
-            self._base_path,
-            data.model_dump(by_alias=True, exclude_none=True),
-            schema=CreateChainDeploymentConfiguration
-        )
-
-    def get(self, config_id: str) -> DeploymentConfigurationResult:
+    def get(self, config_id: str) -> DeploymentConfiguration:
         """Retrieve a deployment configuration by ID."""
         return self._http.get(f'{self._base_path}/{config_id}')
 
-    def get_by_channel(self, channel_id: str) -> DeploymentConfigurationResult:
+    def get_by_channel(self, channel_id: str) -> DeploymentConfiguration:
         """Retrieve a deployment configuration by channel ID."""
         return self._http.get(f'{self._base_path}/by-channel/{channel_id}')
 
-    def update(self, **kwargs: Any) -> DeploymentConfigurationResult:
-        """Update an existing deployment configuration."""
-        data = UpdateDeploymentConfiguration(**kwargs)
+    def update(self, data: UpdateDeploymentConfiguration) -> DeploymentConfiguration:
+        """Update an existing deployment configuration.
+
+        Args:
+            data: Deployment configuration update data (must include id)
+
+        Returns:
+            The updated deployment configuration
+        """
         return self._http.patch(
             self._base_path,
             data.model_dump(by_alias=True, exclude_none=True),
@@ -66,65 +68,88 @@ class DeploymentConfigurationsResource:
 
     def list(
         self,
-        page: Optional[int] = None,
-        page_size: Optional[int] = None
-    ) -> PaginatedResult[DeploymentConfigurationResult]:
-        """List deployment configurations with pagination."""
-        params: Dict[str, Any] = {}
-        if page is not None:
-            params['page'] = page
-        if page_size is not None:
-            params['pageSize'] = page_size
+        params: Optional[PaginationRequest] = None
+    ) -> PaginatedResult[DeploymentConfiguration]:
+        """List deployment configurations with pagination.
 
-        query_string = f'?{urlencode(params)}' if params else ''
+        Args:
+            params: Pagination parameters
+
+        Returns:
+            Paginated list of deployment configurations
+        """
+        query_params: Dict[str, Any] = {}
+        if params:
+            query_params['page'] = params.page
+            query_params['pageSize'] = params.page_size
+
+        query_string = f'?{urlencode(query_params)}' if query_params else ''
         return self._http.get(f'{self._base_path}{query_string}')
 
     def list_by_project(
         self,
         project_id: str,
-        page: Optional[int] = None,
-        page_size: Optional[int] = None
-    ) -> PaginatedResult[DeploymentConfigurationResult]:
-        """List deployment configurations by project ID."""
-        params: Dict[str, Any] = {}
-        if page is not None:
-            params['page'] = page
-        if page_size is not None:
-            params['pageSize'] = page_size
+        params: Optional[PaginationRequest] = None
+    ) -> PaginatedResult[DeploymentConfiguration]:
+        """List deployment configurations by project ID.
 
-        query_string = f'?{urlencode(params)}' if params else ''
+        Args:
+            project_id: Project ID
+            params: Pagination parameters
+
+        Returns:
+            Paginated list of deployment configurations for the project
+        """
+        query_params: Dict[str, Any] = {}
+        if params:
+            query_params['page'] = params.page
+            query_params['pageSize'] = params.page_size
+
+        query_string = f'?{urlencode(query_params)}' if query_params else ''
         return self._http.get(f'{self._base_path}/by-project/{project_id}{query_string}')
 
     def list_by_agent(
         self,
         agent_id: str,
-        page: Optional[int] = None,
-        page_size: Optional[int] = None
-    ) -> PaginatedResult[DeploymentConfigurationResult]:
-        """List deployment configurations by agent configuration ID."""
-        params: Dict[str, Any] = {}
-        if page is not None:
-            params['page'] = page
-        if page_size is not None:
-            params['pageSize'] = page_size
+        params: Optional[PaginationRequest] = None
+    ) -> PaginatedResult[DeploymentConfiguration]:
+        """List deployment configurations by agent configuration ID.
 
-        query_string = f'?{urlencode(params)}' if params else ''
+        Args:
+            agent_id: Agent configuration ID
+            params: Pagination parameters
+
+        Returns:
+            Paginated list of deployment configurations using the agent
+        """
+        query_params: Dict[str, Any] = {}
+        if params:
+            query_params['page'] = params.page
+            query_params['pageSize'] = params.page_size
+
+        query_string = f'?{urlencode(query_params)}' if query_params else ''
         return self._http.get(f'{self._base_path}/by-agent/{agent_id}{query_string}')
 
     def list_by_instruction(
         self,
         instruction_id: str,
-        page: Optional[int] = None,
-        page_size: Optional[int] = None
-    ) -> PaginatedResult[DeploymentConfigurationResult]:
-        """List deployment configurations by instruction configuration ID."""
-        params: Dict[str, Any] = {}
-        if page is not None:
-            params['page'] = page
-        if page_size is not None:
-            params['pageSize'] = page_size
+        params: Optional[PaginationRequest] = None
+    ) -> PaginatedResult[DeploymentConfiguration]:
+        """List deployment configurations by instruction configuration ID.
 
-        query_string = f'?{urlencode(params)}' if params else ''
+        Args:
+            instruction_id: Instruction configuration ID
+            params: Pagination parameters
+
+        Returns:
+            Paginated list of deployment configurations using the instruction
+        """
+        query_params: Dict[str, Any] = {}
+        if params:
+            query_params['page'] = params.page
+            query_params['pageSize'] = params.page_size
+
+        query_string = f'?{urlencode(query_params)}' if query_params else ''
         return self._http.get(f'{self._base_path}/by-instruction/{instruction_id}{query_string}')
 
 

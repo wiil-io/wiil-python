@@ -55,7 +55,8 @@ class OrganizationsResource:
             >>> print('Platform Email:', org.platform_email)
             >>> print('Service Status:', org.service_status)
         """
-        return self._http.get('/organizations')
+        response_data: Any = self._http.get('/organizations')
+        return Organization.model_validate(response_data)
 
 
 __all__ = ['OrganizationsResource']

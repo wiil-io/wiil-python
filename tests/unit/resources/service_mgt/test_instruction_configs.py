@@ -1,12 +1,15 @@
 """Tests for Instruction Configurations resource."""
 
 import pytest
-import respx
-from httpx import Response
+import responses
 
 from wiil import WiilClient
 from wiil.errors import WiilAPIError
-
+from wiil.models.service_mgt import (
+    CreateInstructionConfiguration,
+    UpdateInstructionConfiguration,
+)
+from wiil.types import PaginationRequest
 
 BASE_URL = "https://api.wiil.io/v1"
 API_KEY = "test-api-key"
@@ -15,17 +18,10 @@ API_KEY = "test-api-key"
 class TestInstructionConfigurationsResource:
     """Test suite for InstructionConfigurationsResource."""
 
-    def test_create_instruction_configuration(self, client: WiilClient, mock_api, api_response):
+    def test_create_instruction_configuration(
+        self, client: WiilClient, mock_api, api_response
+    ):
         """Test creating a new instruction configuration."""
-        input_data = {
-            "instruction_name": "customer-support-agent",
-            "role": "Customer Support Specialist",
-            "introduction_message": "Hello! How can I help you today?",
-            "instructions": "You are a helpful customer support agent.",
-            "guardrails": "Never share sensitive customer data. Always be polite.",
-            "knowledge_source_ids": ["source_1", "source_2"],
-        }
-
         mock_response = {
             "id": "instruction_123",
             "instructionName": "customer-support-agent",
@@ -46,17 +42,29 @@ class TestInstructionConfigurationsResource:
             "updatedAt": 1234567890,
         }
 
-        mock_api.post(
+        mock_api.add(
+            responses.POST,
             f"{BASE_URL}/instruction-configurations",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_response)))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(mock_response),
+            status=200,
+        )
 
-        result = client.instruction_configs.create(**input_data)
+        result = client.instruction_configs.create(CreateInstructionConfiguration(
+            instruction_name="customer-support-agent",
+            role="Customer Support Specialist",
+            introduction_message="Hello! How can I help you today?",
+            instructions="You are a helpful customer support agent.",
+            guardrails="Never share sensitive customer data. Always be polite.",
+            knowledge_source_ids=["source_1", "source_2"]
+        ))
 
         assert result.id == "instruction_123"
-        assert result.name == "Customer Support Instructions"
+        assert result.instruction_name == "customer-support-agent"
 
-    def test_get_instruction_configuration(self, client: WiilClient, mock_api, api_response):
+    def test_get_instruction_configuration(
+        self, client: WiilClient, mock_api, api_response
+    ):
         """Test retrieving an instruction configuration by ID."""
         mock_response = {
             "id": "instruction_123",
@@ -78,10 +86,13 @@ class TestInstructionConfigurationsResource:
             "updatedAt": 1234567890,
         }
 
-        mock_api.get(
+        mock_api.add(
+            responses.GET,
             f"{BASE_URL}/instruction-configurations/instruction_123",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_response)))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(mock_response),
+            status=200,
+        )
 
         result = client.instruction_configs.get("instruction_123")
 
@@ -92,15 +103,15 @@ class TestInstructionConfigurationsResource:
         self, client: WiilClient, mock_api, error_response
     ):
         """Test API error when instruction configuration not found."""
-        mock_api.get(
+        mock_api.add(
+            responses.GET,
             f"{BASE_URL}/instruction-configurations/invalid_id",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(
-            404,
+            headers={"X-WIIL-API-Key": API_KEY},
             json=error_response(
                 "NOT_FOUND", "Instruction configuration not found"
-            )
-        ))
+            ),
+            status=404,
+        )
 
         with pytest.raises(WiilAPIError) as exc_info:
             client.instruction_configs.get("invalid_id")
@@ -112,12 +123,6 @@ class TestInstructionConfigurationsResource:
         self, client: WiilClient, mock_api, api_response
     ):
         """Test updating an instruction configuration."""
-        update_data = {
-            "id": "instruction_123",
-            "role": "Senior Customer Support Specialist",
-            "instructions": "You are an updated support agent.",
-        }
-
         mock_response = {
             "id": "instruction_123",
             "instructionName": "customer-support-agent",
@@ -138,12 +143,19 @@ class TestInstructionConfigurationsResource:
             "updatedAt": 1234567891,
         }
 
-        mock_api.patch(
+        mock_api.add(
+            responses.PATCH,
             f"{BASE_URL}/instruction-configurations",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_response)))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(mock_response),
+            status=200,
+        )
 
-        result = client.instruction_configs.update(**update_data)
+        result = client.instruction_configs.update(UpdateInstructionConfiguration(
+            id="instruction_123",
+            role="Senior Customer Support Specialist",
+            instructions="You are an updated support agent."
+        ))
 
         assert result.role == "Senior Customer Support Specialist"
         assert result.instructions == "You are an updated support agent."
@@ -152,10 +164,13 @@ class TestInstructionConfigurationsResource:
         self, client: WiilClient, mock_api, api_response
     ):
         """Test deleting an instruction configuration."""
-        mock_api.delete(
+        mock_api.add(
+            responses.DELETE,
             f"{BASE_URL}/instruction-configurations/instruction_123",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(True)))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(True),
+            status=200,
+        )
 
         result = client.instruction_configs.delete("instruction_123")
 
@@ -165,15 +180,15 @@ class TestInstructionConfigurationsResource:
         self, client: WiilClient, mock_api, error_response
     ):
         """Test API error when deleting non-existent instruction."""
-        mock_api.delete(
+        mock_api.add(
+            responses.DELETE,
             f"{BASE_URL}/instruction-configurations/invalid_id",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(
-            404,
+            headers={"X-WIIL-API-Key": API_KEY},
             json=error_response(
                 "NOT_FOUND", "Instruction configuration not found"
-            )
-        ))
+            ),
+            status=404,
+        )
 
         with pytest.raises(WiilAPIError) as exc_info:
             client.instruction_configs.delete("invalid_id")
@@ -237,10 +252,13 @@ class TestInstructionConfigurationsResource:
             },
         }
 
-        mock_api.get(
+        mock_api.add(
+            responses.GET,
             f"{BASE_URL}/instruction-configurations",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_response)))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(mock_response),
+            status=200,
+        )
 
         result = client.instruction_configs.list()
 
@@ -264,14 +282,17 @@ class TestInstructionConfigurationsResource:
             },
         }
 
-        mock_api.get(
+        mock_api.add(
+            responses.GET,
             f"{BASE_URL}/instruction-configurations?page=2&pageSize=50",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(
-            200, json=api_response(mock_response)
-        ))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(mock_response),
+            status=200,
+        )
 
-        result = client.instruction_configs.list(page=2, page_size=50)
+        result = client.instruction_configs.list(
+            PaginationRequest(page=2, page_size=50)
+        )
 
         assert result.meta.page == 2
         assert result.meta.page_size == 50

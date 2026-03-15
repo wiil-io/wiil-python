@@ -122,39 +122,23 @@ def check_pending_changes() -> bool:
 def build_project(project_root: Path) -> bool:
     """Build the Python project."""
     print("🔨 Building project...")
-    returncode, stdout, stderr = run_command(
-        ["python", "-m", "build"],
-        cwd=project_root
-    )
+    # Prefer uv build in this repository workflow.
+    returncode, stdout, stderr = run_command(["uv", "build"], cwd=project_root)
 
+    # Fallback for environments without uv.
     if returncode != 0:
-        print(f"❌ Build failed:\n{stderr}")
-        return False
+        fallback_code, fallback_stdout, fallback_stderr = run_command(
+            ["python", "-m", "build"],
+            cwd=project_root
+        )
+        if fallback_code != 0:
+            print(f"❌ Build failed with uv build:\n{stderr}")
+            print(f"❌ Build failed with python -m build:\n{fallback_stderr}")
+            return False
+
+        stdout = fallback_stdout
 
     print("✅ Build completed successfully")
-    return True
-
-
-def generate_docs(project_root: Path) -> bool:
-    """Generate documentation (if configured)."""
-    # Check if sphinx or pdoc is configured
-    docs_dir = project_root / "docs"
-    if not docs_dir.exists():
-        print("⚠️  No docs directory found, skipping documentation generation")
-        return True
-
-    print("📚 Generating documentation...")
-    # Try sphinx first
-    makefile = docs_dir / "Makefile"
-    if makefile.exists():
-        returncode, _, stderr = run_command(["make", "html"], cwd=docs_dir)
-        if returncode != 0:
-            print(f"⚠️  Documentation generation failed:\n{stderr}")
-            return False
-        print("✅ Documentation generated successfully")
-        return True
-
-    print("⚠️  No documentation build system found, skipping")
     return True
 
 
@@ -218,10 +202,6 @@ def main() -> int:
         if not confirm_action(f"Build, commit, and push tag v{new_version}?"):
             print("❌ Cancelled")
             return 1
-
-        # Generate documentation
-        if not generate_docs(project_root):
-            print("⚠️  Continuing despite documentation errors...")
 
         # Build the project
         if not build_project(project_root):

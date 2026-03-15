@@ -5,7 +5,7 @@ from urllib.parse import urlencode
 
 from wiil.client.http_client import HttpClient
 from wiil.models.conversation import ServiceConversationConfig
-from wiil.types import PaginatedResult
+from wiil.types import PaginatedResult, PaginationRequest
 
 
 class ConversationConfigurationsResource:
@@ -26,17 +26,22 @@ class ConversationConfigurationsResource:
 
     def list(
         self,
-        page: Optional[int] = None,
-        page_size: Optional[int] = None
+        params: Optional[PaginationRequest] = None
     ) -> PaginatedResult[ServiceConversationConfig]:
-        """List conversation configurations with pagination."""
-        params: Dict[str, Any] = {}
-        if page is not None:
-            params['page'] = page
-        if page_size is not None:
-            params['pageSize'] = page_size
+        """List conversation configurations with pagination.
 
-        query_string = f'?{urlencode(params)}' if params else ''
+        Args:
+            params: Pagination parameters
+
+        Returns:
+            Paginated list of conversation configurations
+        """
+        query_params: Dict[str, Any] = {}
+        if params:
+            query_params['page'] = params.page
+            query_params['pageSize'] = params.page_size
+
+        query_string = f'?{urlencode(query_params)}' if query_params else ''
         return self._http.get(f'{self._base_path}{query_string}')
 
 

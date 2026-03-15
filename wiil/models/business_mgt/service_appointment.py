@@ -6,6 +6,7 @@ calendar integration and service provider assignment.
 
 from typing import Optional
 
+from pydantic import BaseModel as PydanticBaseModel
 from pydantic import ConfigDict, EmailStr, Field
 
 from wiil.models.base import BaseModel
@@ -143,7 +144,7 @@ class ServiceAppointment(BaseModel):
     )
 
 
-class CreateServiceAppointment(BaseModel):
+class CreateServiceAppointment(PydanticBaseModel):
     """Schema for creating a new service appointment.
 
     Omits auto-generated fields (id, created_at, updated_at).
@@ -186,7 +187,7 @@ class CreateServiceAppointment(BaseModel):
     service_conversation_config_id: Optional[str] = Field(None, alias="serviceConversationConfigId")
 
 
-class UpdateServiceAppointment(BaseModel):
+class UpdateServiceAppointment(PydanticBaseModel):
     """Schema for updating an existing service appointment.
 
     All fields are optional except id.

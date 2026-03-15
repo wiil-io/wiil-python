@@ -1,8 +1,24 @@
 """Business Management Pydantic models.
 
 This module contains all business management models including customers, orders,
-reservations, appointments, and service configurations.
+reservations, appointments, property listings, and service configurations.
+
+This module mirrors src/core/business-mgt/
 """
+
+# Appointment additional info models
+from wiil.models.business_mgt.appointment_additional_info import (
+    AppointmentAdditionalInfo,
+    CreateAppointmentAdditionalInfo,
+    UpdateAppointmentAdditionalInfo,
+)
+
+# Appointment field config models
+from wiil.models.business_mgt.appointment_field_config import (
+    AppointmentFieldConfig,
+    CreateAppointmentFieldConfig,
+    UpdateAppointmentFieldConfig,
+)
 
 # Customer models
 from wiil.models.business_mgt.customer import (
@@ -106,7 +122,40 @@ from wiil.models.business_mgt.service_person import (
     UpdateServicePerson,
 )
 
+# Property configuration models
+from wiil.models.business_mgt.property_config import (
+    BusinessPropertyCatalog,
+    Coordinates,
+    CreateProperty,
+    CreatePropertyAddress,
+    CreatePropertyCategory,
+    Property,
+    PropertyAddress,
+    PropertyCatalog,
+    PropertyCategory,
+    PropertyFeatures,
+    UpdateProperty,
+    UpdatePropertyAddress,
+    UpdatePropertyCategory,
+)
+
+# Property inquiry models
+from wiil.models.business_mgt.property_inquiry import (
+    CreatePropertyInquiry,
+    PropertyInquiry,
+    UpdatePropertyInquiry,
+    UpdatePropertyInquiryStatus,
+)
+
 __all__ = [
+    # Appointment additional info models
+    "AppointmentAdditionalInfo",
+    "CreateAppointmentAdditionalInfo",
+    "UpdateAppointmentAdditionalInfo",
+    # Appointment field config models
+    "AppointmentFieldConfig",
+    "CreateAppointmentFieldConfig",
+    "UpdateAppointmentFieldConfig",
     # Customer models
     "Customer",
     "CreateCustomer",
@@ -176,4 +225,23 @@ __all__ = [
     "ServicePerson",
     "CreateServicePerson",
     "UpdateServicePerson",
+    # Property configuration models
+    "Property",
+    "CreateProperty",
+    "UpdateProperty",
+    "PropertyCategory",
+    "CreatePropertyCategory",
+    "UpdatePropertyCategory",
+    "PropertyAddress",
+    "CreatePropertyAddress",
+    "UpdatePropertyAddress",
+    "PropertyFeatures",
+    "PropertyCatalog",
+    "BusinessPropertyCatalog",
+    "Coordinates",
+    # Property inquiry models
+    "PropertyInquiry",
+    "CreatePropertyInquiry",
+    "UpdatePropertyInquiry",
+    "UpdatePropertyInquiryStatus",
 ]

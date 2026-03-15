@@ -137,7 +137,7 @@ class ServiceQRCode(PydanticBaseModel):
     )
 
 
-class CreateBusinessService(BaseModel):
+class CreateBusinessService(PydanticBaseModel):
     """Schema for creating a new business service.
 
     Omits auto-generated fields (id, created_at, updated_at).
@@ -172,7 +172,7 @@ class CreateBusinessService(BaseModel):
     display_order: Optional[int] = Field(None, alias="displayOrder")
 
 
-class UpdateBusinessService(BaseModel):
+class UpdateBusinessService(PydanticBaseModel):
     """Schema for updating an existing business service.
 
     All fields are optional except id.

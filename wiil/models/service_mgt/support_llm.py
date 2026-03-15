@@ -1,35 +1,50 @@
-"""Wiil support model schema definitions.
+"""WIIL Platform support model schema definitions.
 
-This module contains models for the Wiil Support Model Registry which maintains
-a curated list of LLM models from various providers.
+The WIIL Platform Support Model Registry maintains a curated list of LLM models from various providers
+(OpenAI, Anthropic, etc.) that are supported by the platform. This registry includes model metadata,
+capabilities, and associated voices/languages for configuration and deployment.
 """
 
-from typing import Any, Dict, List, Optional
+from typing import List, Optional
 
-from pydantic import ConfigDict, Field
 from pydantic import BaseModel as PydanticBaseModel
+from pydantic import ConfigDict, Field
 
 from wiil.models.service_mgt.voice_language import Language, Voice
-from wiil.types.service_types import LLMType, SupportedProprietor
+from wiil.models.type_definitions import LLMType, SupportedProprietor
 
 
 class WiilSupportModel(PydanticBaseModel):
-    """Wiil supported model configuration.
+    """WIIL Platform supported model configuration.
 
-    Represents a language model registered in the Wiil platform's support registry.
-    The registry provides a centralized catalog of available models with their capabilities,
-    supported languages, and voices.
+    Represents a language model registered in the WIIL Platform's support registry. The registry
+    provides a centralized catalog of available models with their capabilities, supported languages,
+    and voices. Agent Configurations reference these models via modelId.
+
+    Architecture Context:
+        - Used By: Agent Configuration (modelId reference)
+        - Purpose: Central registry of supported LLM models with their capabilities
+        - Model Types: TEXT (text-only), VOICE (speech), MULTI_MODE (combined), etc.
+        - Providers: OpenAI, Anthropic, Google, ElevenLabs, and other LLM proprietors
+
+    Model Lifecycle:
+        - Active: Available for new deployments (discontinued: false)
+        - Discontinued: Legacy support only, not recommended for new deployments (discontinued: true)
+
+    Model ID Distinction:
+        - modelId: WIIL Platform unique model identifier (NOT the provider's model ID)
+        - provider_model_id: Original model ID from the provider's system
 
     Attributes:
-        model_id: Unique identifier for the model in Wiil registry
-        proprietor: Model proprietor/provider organization
-        name: Human-readable name of the model
-        provider_model_id: Original model ID from provider if different
-        description: Description of model capabilities and use cases
-        type: Type of LLM functionality
-        discontinued: Whether model has been discontinued
-        supported_voices: Array of voice configurations for TTS models
-        support_languages: Array of supported languages
+        model_id: WIIL Platform unique model identifier used in Agent Configuration references
+        proprietor: Model proprietor/provider organization (OPENAI, ANTHROPIC, etc.)
+        name: Human-readable name of the model for display in UI
+        provider_model_id: Original model ID from the provider's system
+        description: Description of the model's capabilities and use cases
+        type: Type of LLM functionality (TEXT, VOICE, MULTI_MODE, etc.)
+        discontinued: Whether this model has been discontinued
+        supported_voices: Array of voice configurations supported by this model
+        support_languages: Array of languages supported by this model
 
     Example:
         ```python
@@ -39,62 +54,54 @@ class WiilSupportModel(PydanticBaseModel):
             name="GPT-4 Turbo",
             provider_model_id="gpt-4-1106-preview",
             description="Latest GPT-4 model with improved performance",
-            type=LLMType.TEXT_PROCESSING,
-            discontinued=False,
-            supported_voices=None,
-            support_languages=[
-                Language(
-                    language_id="en",
-                    name="English",
-                    code="en-US",
-                    is_default=True
-                )
-            ]
+            type=LLMType.TEXT,
+            discontinued=False
         )
         ```
     """
 
     model_config = ConfigDict(
-        validate_by_name=True, validate_by_alias=True,
+        validate_by_name=True,
+        validate_by_alias=True,
         use_enum_values=True,
     )
 
     model_id: str = Field(
         ...,
-        description="Unique identifier for the model in Wiil registry (e.g., 'YUSI21217J1')",
+        description="WIIL Platform unique model identifier (NOT the provider's model ID) used in Agent Configuration references",
         alias="modelId"
     )
     proprietor: SupportedProprietor = Field(
         ...,
-        description="Model proprietor/provider organization"
+        description="Model proprietor/provider organization that developed and maintains the model (OPENAI, ANTHROPIC, GOOGLE, ELEVENLABS, etc.)"
     )
     name: str = Field(
         ...,
-        description="Human-readable name for display in UI"
+        description="Human-readable name of the model for display in administrative interfaces and model selection UI"
     )
     provider_model_id: Optional[str] = Field(
         None,
-        description="Original model ID from provider if different"
+        description="Original model identifier from the provider's system (e.g., 'gpt-4-1106-preview' for OpenAI)"
     )
     description: str = Field(
         ...,
-        description="Comprehensive description of model capabilities"
+        description="Comprehensive description of the model's capabilities, recommended use cases, strengths, and limitations"
     )
     type: LLMType = Field(
         ...,
-        description="Type of LLM functionality provided"
+        description="Type of LLM functionality provided by this model (TEXT, VOICE, STT, MULTI_MODE, etc.)"
     )
     discontinued: bool = Field(
         False,
-        description="Whether model has been discontinued"
+        description="Whether this model has been discontinued by the provider and is only available for legacy support"
     )
     supported_voices: Optional[List[Voice]] = Field(
         None,
-        description="Array of voice configurations for TTS models",
+        description="Array of voice configurations supported by this model (populated for TTS/voice models, null for text-only models)",
         alias="supportedVoices"
     )
     support_languages: Optional[List[Language]] = Field(
         None,
-        description="Array of languages supported by this model",
+        description="Array of languages supported by this model for processing and generation (null if language-agnostic)",
         alias="supportLanguages"
     )

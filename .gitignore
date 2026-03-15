@@ -83,3 +83,11 @@ dmypy.json
 docs/_build/
 site/
 session-instr.txt
+
+/.claude
+/scripts
+dev.txt
+/background
+test.txt
+/ref
+/.venv

@@ -1,11 +1,11 @@
 """Tests for Translation Sessions resource."""
 
 import pytest
-import respx
-from httpx import Response
+import responses
 
 from wiil import WiilClient
 from wiil.errors import WiilAPIError
+from wiil.types import PaginationRequest
 
 
 BASE_URL = "https://api.wiil.io/v1"
@@ -39,10 +39,13 @@ class TestTranslationSessionsResource:
             "updatedAt": 1234567890,
         }
 
-        mock_api.get(
+        mock_api.add(
+            responses.GET,
             f"{BASE_URL}/translation-sessions/session_123",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_response)))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(mock_response),
+            status=200,
+        )
 
         result = client.translation_sessions.get("session_123")
 
@@ -54,13 +57,13 @@ class TestTranslationSessionsResource:
         self, client: WiilClient, mock_api, error_response
     ):
         """Test API error when translation session not found."""
-        mock_api.get(
+        mock_api.add(
+            responses.GET,
             f"{BASE_URL}/translation-sessions/invalid_id",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(
-            404,
-            json=error_response("NOT_FOUND", "Translation session not found")
-        ))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=error_response("NOT_FOUND", "Translation session not found"),
+            status=404,
+        )
 
         with pytest.raises(WiilAPIError) as exc_info:
             client.translation_sessions.get("invalid_id")
@@ -125,10 +128,13 @@ class TestTranslationSessionsResource:
             },
         }
 
-        mock_api.get(
+        mock_api.add(
+            responses.GET,
             f"{BASE_URL}/translation-sessions",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_response)))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(mock_response),
+            status=200,
+        )
 
         result = client.translation_sessions.list()
 
@@ -152,12 +158,17 @@ class TestTranslationSessionsResource:
             },
         }
 
-        mock_api.get(
+        mock_api.add(
+            responses.GET,
             f"{BASE_URL}/translation-sessions?page=2&pageSize=50",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_response)))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(mock_response),
+            status=200,
+        )
 
-        result = client.translation_sessions.list(page=2, page_size=50)
+        result = client.translation_sessions.list(
+            PaginationRequest(page=2, page_size=50)
+        )
 
         assert result.meta.page == 2
         assert result.meta.page_size == 50

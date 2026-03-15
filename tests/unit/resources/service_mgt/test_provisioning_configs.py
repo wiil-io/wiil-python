@@ -1,12 +1,15 @@
 """Tests for Provisioning Configurations resource."""
 
 import pytest
-import respx
-from httpx import Response
+import responses
 
 from wiil import WiilClient
 from wiil.errors import WiilAPIError
-
+from wiil.models.service_mgt import (
+    CreateProvisioningConfig,
+    UpdateProvisioningConfig,
+)
+from wiil.types import PaginationRequest
 
 BASE_URL = "https://api.wiil.io/v1"
 API_KEY = "test-api-key"
@@ -19,21 +22,6 @@ class TestProvisioningConfigurationsResource:
         self, client: WiilClient, mock_api, api_response
     ):
         """Test creating a new provisioning configuration chain."""
-        input_data = {
-            "chain_name": "main-processing-chain",
-            "description": "Main processing chain for customer calls",
-            "stt_config": {
-                "model_id": "whisper-v3",
-                "default_language": "en-US",
-            },
-            "tts_config": {
-                "model_id": "eleven-labs-v2",
-                "voice_id": "adam",
-                "default_language": "en-US",
-            },
-            "agent_configuration_id": "agent_456",
-        }
-
         mock_response = {
             "id": "prov_123",
             "chainName": "main-processing-chain",
@@ -53,63 +41,37 @@ class TestProvisioningConfigurationsResource:
             "updatedAt": 1234567890,
         }
 
-        mock_api.post(
+        mock_api.add(
+            responses.POST,
             f"{BASE_URL}/provisioning-configurations",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_response)))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(mock_response),
+            status=200,
+        )
 
-        result = client.provisioning_configs.create(**input_data)
+        result = client.provisioning_configs.create(CreateProvisioningConfig(
+            chain_name="main-processing-chain",
+            description="Main processing chain for customer calls",
+            stt_config={
+                "provider_type": "Deepgram",
+                "provider_model_id": "nova-2",
+                "language_id": "en",
+            },
+            processing_config={
+                "provider_type": "OpenAI",
+                "provider_model_id": "gpt-4o-mini",
+            },
+            tts_config={
+                "provider_type": "ElevenLabs",
+                "provider_model_id": "eleven_multilingual_v2",
+                "language_id": "en",
+                "voice_id": "adam",
+            }
+        ))
 
         assert result.id == "prov_123"
         assert result.chain_name == "main-processing-chain"
 
-    def test_create_translation_chain(
-        self, client: WiilClient, mock_api, api_response
-    ):
-        """Test creating a new translation configuration chain."""
-        input_data = {
-            "chain_name": "translation-chain",
-            "description": "Translation chain for multilingual support",
-            "stt_config": {
-                "model_id": "whisper-v3",
-                "default_language": "en-US",
-            },
-            "tts_config": {
-                "model_id": "google-tts-wavenet",
-                "voice_id": "en-us-neural-female",
-                "default_language": "en-US",
-            },
-            "agent_configuration_id": "agent_789",
-        }
-
-        mock_response = {
-            "id": "trans_123",
-            "chainName": "translation-chain",
-            "description": "Translation chain for multilingual support",
-            "sttConfig": {
-                "modelId": "whisper-v3",
-                "defaultLanguage": "en-US",
-            },
-            "ttsConfig": {
-                "modelId": "google-tts-wavenet",
-                "voiceId": "en-us-neural-female",
-                "defaultLanguage": "en-US",
-                "voiceSettings": None,
-            },
-            "agentConfigurationId": "agent_789",
-            "createdAt": 1234567890,
-            "updatedAt": 1234567890,
-        }
-
-        mock_api.post(
-            f"{BASE_URL}/provisioning-configurations",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_response)))
-
-        result = client.provisioning_configs.create_translation(**input_data)
-
-        assert result.id == "trans_123"
-        assert result.chain_name == "translation-chain"
 
     def test_get_provisioning_configuration(
         self, client: WiilClient, mock_api, api_response
@@ -134,10 +96,13 @@ class TestProvisioningConfigurationsResource:
             "updatedAt": 1234567890,
         }
 
-        mock_api.get(
+        mock_api.add(
+            responses.GET,
             f"{BASE_URL}/provisioning-configurations/prov_123",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_response)))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(mock_response),
+            status=200,
+        )
 
         result = client.provisioning_configs.get("prov_123")
 
@@ -148,13 +113,13 @@ class TestProvisioningConfigurationsResource:
         self, client: WiilClient, mock_api, error_response
     ):
         """Test API error when provisioning configuration not found."""
-        mock_api.get(
+        mock_api.add(
+            responses.GET,
             f"{BASE_URL}/provisioning-configurations/invalid_id",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(
-            404,
-            json=error_response("NOT_FOUND", "Provisioning configuration not found")
-        ))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=error_response("NOT_FOUND", "Provisioning configuration not found"),
+            status=404,
+        )
 
         with pytest.raises(WiilAPIError) as exc_info:
             client.provisioning_configs.get("invalid_id")
@@ -185,10 +150,13 @@ class TestProvisioningConfigurationsResource:
             "updatedAt": 1234567890,
         }
 
-        mock_api.get(
+        mock_api.add(
+            responses.GET,
             f"{BASE_URL}/provisioning-configurations/by-chain-name/main-processing-chain",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_response)))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(mock_response),
+            status=200,
+        )
 
         result = client.provisioning_configs.get_by_chain_name("main-processing-chain")
 
@@ -199,11 +167,6 @@ class TestProvisioningConfigurationsResource:
         self, client: WiilClient, mock_api, api_response
     ):
         """Test updating a provisioning configuration."""
-        update_data = {
-            "id": "prov_123",
-            "description": "Updated processing chain",
-        }
-
         mock_response = {
             "id": "prov_123",
             "chainName": "main-processing-chain",
@@ -223,12 +186,18 @@ class TestProvisioningConfigurationsResource:
             "updatedAt": 1234567891,
         }
 
-        mock_api.patch(
+        mock_api.add(
+            responses.PATCH,
             f"{BASE_URL}/provisioning-configurations",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_response)))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(mock_response),
+            status=200,
+        )
 
-        result = client.provisioning_configs.update(**update_data)
+        result = client.provisioning_configs.update(UpdateProvisioningConfig(
+            id="prov_123",
+            description="Updated processing chain"
+        ))
 
         assert result.description == "Updated processing chain"
         assert result.updated_at == 1234567891
@@ -237,10 +206,13 @@ class TestProvisioningConfigurationsResource:
         self, client: WiilClient, mock_api, api_response
     ):
         """Test deleting a provisioning configuration."""
-        mock_api.delete(
+        mock_api.add(
+            responses.DELETE,
             f"{BASE_URL}/provisioning-configurations/prov_123",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(True)))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(True),
+            status=200,
+        )
 
         result = client.provisioning_configs.delete("prov_123")
 
@@ -250,13 +222,13 @@ class TestProvisioningConfigurationsResource:
         self, client: WiilClient, mock_api, error_response
     ):
         """Test API error when deleting non-existent provisioning config."""
-        mock_api.delete(
+        mock_api.add(
+            responses.DELETE,
             f"{BASE_URL}/provisioning-configurations/invalid_id",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(
-            404,
-            json=error_response("NOT_FOUND", "Provisioning configuration not found")
-        ))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=error_response("NOT_FOUND", "Provisioning configuration not found"),
+            status=404,
+        )
 
         with pytest.raises(WiilAPIError) as exc_info:
             client.provisioning_configs.delete("invalid_id")
@@ -318,10 +290,13 @@ class TestProvisioningConfigurationsResource:
             },
         }
 
-        mock_api.get(
+        mock_api.add(
+            responses.GET,
             f"{BASE_URL}/provisioning-configurations",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_response)))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(mock_response),
+            status=200,
+        )
 
         result = client.provisioning_configs.list()
 
@@ -345,12 +320,17 @@ class TestProvisioningConfigurationsResource:
             },
         }
 
-        mock_api.get(
+        mock_api.add(
+            responses.GET,
             f"{BASE_URL}/provisioning-configurations?page=2&pageSize=50",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_response)))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(mock_response),
+            status=200,
+        )
 
-        result = client.provisioning_configs.list(page=2, page_size=50)
+        result = client.provisioning_configs.list(
+            PaginationRequest(page=2, page_size=50)
+        )
 
         assert result.meta.page == 2
         assert result.meta.page_size == 50
@@ -372,10 +352,13 @@ class TestProvisioningConfigurationsResource:
             },
         }
 
-        mock_api.get(
+        mock_api.add(
+            responses.GET,
             f"{BASE_URL}/provisioning-configurations?includeDeleted=true",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_response)))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(mock_response),
+            status=200,
+        )
 
         result = client.provisioning_configs.list(include_deleted=True)
 
@@ -436,10 +419,13 @@ class TestProvisioningConfigurationsResource:
             },
         }
 
-        mock_api.get(
+        mock_api.add(
+            responses.GET,
             f"{BASE_URL}/provisioning-configurations/provisioning",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_response)))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(mock_response),
+            status=200,
+        )
 
         result = client.provisioning_configs.list_provisioning_chains()
 
@@ -462,104 +448,18 @@ class TestProvisioningConfigurationsResource:
             },
         }
 
-        mock_api.get(
+        mock_api.add(
+            responses.GET,
             f"{BASE_URL}/provisioning-configurations/provisioning?page=3&pageSize=10",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_response)))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(mock_response),
+            status=200,
+        )
 
-        result = client.provisioning_configs.list_provisioning_chains(page=3, page_size=10)
+        result = client.provisioning_configs.list_provisioning_chains(
+            PaginationRequest(page=3, page_size=10)
+        )
 
         assert result.meta.page == 3
         assert result.meta.page_size == 10
 
-    def test_list_translation_chains(
-        self, client: WiilClient, mock_api, api_response
-    ):
-        """Test listing translation configuration chains."""
-        mock_configs = [
-            {
-                "id": "trans_1",
-                "chainName": "translation-1",
-                "description": "Translation Chain 1",
-                "sttConfig": {
-                    "modelId": "whisper-v3",
-                    "defaultLanguage": "en-US",
-                },
-                "ttsConfig": {
-                    "modelId": "google-tts-wavenet",
-                    "voiceId": "es-neural",
-                    "defaultLanguage": "es-ES",
-                    "voiceSettings": None,
-                },
-                "agentConfigurationId": "agent_trans_001",
-                "createdAt": 1234567890,
-                "updatedAt": 1234567890,
-            },
-            {
-                "id": "trans_2",
-                "chainName": "translation-2",
-                "description": "Translation Chain 2",
-                "sttConfig": {
-                    "modelId": "whisper-v3",
-                    "defaultLanguage": "en-US",
-                },
-                "ttsConfig": {
-                    "modelId": "google-tts-wavenet",
-                    "voiceId": "de-neural",
-                    "defaultLanguage": "de-DE",
-                    "voiceSettings": None,
-                },
-                "agentConfigurationId": "agent_trans_002",
-                "createdAt": 1234567891,
-                "updatedAt": 1234567891,
-            },
-        ]
-
-        mock_response = {
-            "data": mock_configs,
-            "meta": {
-                "page": 1,
-                "pageSize": 20,
-                "totalCount": 2,
-                "totalPages": 1,
-                "hasNextPage": False,
-                "hasPreviousPage": False,
-            },
-        }
-
-        mock_api.get(
-            f"{BASE_URL}/provisioning-configurations/translations",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_response)))
-
-        result = client.provisioning_configs.list_translation_chains()
-
-        assert len(result.data) == 2
-        assert result.meta.total_count == 2
-
-    def test_list_translation_chains_with_pagination(
-        self, client: WiilClient, mock_api, api_response
-    ):
-        """Test listing translation chains with pagination."""
-        mock_response = {
-            "data": [],
-            "meta": {
-                "page": 2,
-                "pageSize": 25,
-                "totalCount": 30,
-                "totalPages": 2,
-                "hasNextPage": False,
-                "hasPreviousPage": True,
-            },
-        }
-
-        mock_api.get(
-            f"{BASE_URL}/provisioning-configurations/translations?page=2&pageSize=25",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_response)))
-
-        result = client.provisioning_configs.list_translation_chains(page=2, page_size=25)
-
-        assert result.meta.page == 2
-        assert result.meta.page_size == 25
-        assert result.meta.has_previous_page is True

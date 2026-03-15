@@ -1,12 +1,11 @@
 """Tests for Conversation Configurations resource."""
 
 import pytest
-import respx
-from httpx import Response
+import responses
 
 from wiil import WiilClient
 from wiil.errors import WiilAPIError
-
+from wiil.types import PaginationRequest
 
 BASE_URL = "https://api.wiil.io/v1"
 API_KEY = "test-api-key"
@@ -15,7 +14,9 @@ API_KEY = "test-api-key"
 class TestConversationConfigurationsResource:
     """Test suite for ConversationConfigurationsResource."""
 
-    def test_get_conversation_configuration(self, client: WiilClient, mock_api, api_response):
+    def test_get_conversation_configuration(
+        self, client: WiilClient, mock_api, api_response
+    ):
         """Test retrieving a conversation configuration by ID."""
         mock_response = {
             "id": "conv_123",
@@ -31,10 +32,13 @@ class TestConversationConfigurationsResource:
             "updatedAt": 1234567890,
         }
 
-        mock_api.get(
+        mock_api.add(
+            responses.GET,
             f"{BASE_URL}/conversation-configs/conv_123",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_response)))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(mock_response),
+            status=200,
+        )
 
         result = client.conversation_configs.get("conv_123")
 
@@ -43,15 +47,17 @@ class TestConversationConfigurationsResource:
         assert result.organization_id == "org_789"
         assert result.conversation_type == "TELEPHONY_CALL"
 
-    def test_get_conversation_configuration_not_found(self, client: WiilClient, mock_api, error_response):
+    def test_get_conversation_configuration_not_found(
+        self, client: WiilClient, mock_api, error_response
+    ):
         """Test API error when conversation configuration not found."""
-        mock_api.get(
+        mock_api.add(
+            responses.GET,
             f"{BASE_URL}/conversation-configs/invalid_id",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(
-            404,
-            json=error_response("NOT_FOUND", "Conversation configuration not found")
-        ))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=error_response("NOT_FOUND", "Conversation configuration not found"),
+            status=404,
+        )
 
         with pytest.raises(WiilAPIError) as exc_info:
             client.conversation_configs.get("invalid_id")
@@ -59,7 +65,9 @@ class TestConversationConfigurationsResource:
         assert exc_info.value.status_code == 404
         assert exc_info.value.code == "NOT_FOUND"
 
-    def test_list_conversation_configurations(self, client: WiilClient, mock_api, api_response):
+    def test_list_conversation_configurations(
+        self, client: WiilClient, mock_api, api_response
+    ):
         """Test listing conversation configurations with pagination."""
         mock_configs = [
             {
@@ -102,10 +110,13 @@ class TestConversationConfigurationsResource:
             },
         }
 
-        mock_api.get(
+        mock_api.add(
+            responses.GET,
             f"{BASE_URL}/conversation-configs",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_response)))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(mock_response),
+            status=200,
+        )
 
         result = client.conversation_configs.list()
 
@@ -117,7 +128,9 @@ class TestConversationConfigurationsResource:
         assert result.data[1].id == "conv_2"
         assert result.data[1].conversation_type == "SMS"
 
-    def test_list_conversation_configurations_with_pagination(self, client: WiilClient, mock_api, api_response):
+    def test_list_conversation_configurations_with_pagination(
+        self, client: WiilClient, mock_api, api_response
+    ):
         """Test listing conversation configurations with custom pagination parameters."""
         mock_response = {
             "data": [],
@@ -131,12 +144,17 @@ class TestConversationConfigurationsResource:
             },
         }
 
-        mock_api.get(
+        mock_api.add(
+            responses.GET,
             f"{BASE_URL}/conversation-configs?page=2&pageSize=50",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_response)))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(mock_response),
+            status=200,
+        )
 
-        result = client.conversation_configs.list(page=2, page_size=50)
+        result = client.conversation_configs.list(
+            PaginationRequest(page=2, page_size=50)
+        )
 
         assert result.meta.page == 2
         assert result.meta.page_size == 50

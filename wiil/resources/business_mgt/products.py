@@ -12,7 +12,7 @@ from wiil.models.business_mgt import (
     CreateBusinessProduct,
     UpdateBusinessProduct,
 )
-from wiil.types import PaginatedResult
+from wiil.types import PaginatedResult, PaginationRequest
 
 
 class ProductsResource:
@@ -24,9 +24,8 @@ class ProductsResource:
 
     # =============== Product Category Methods ===============
 
-    def create_category(self, **kwargs: Any) -> ProductCategory:
+    def create_category(self, data: CreateProductCategory) -> ProductCategory:
         """Create a new product category."""
-        data = CreateProductCategory(**kwargs)
         return self._http.post(
             f'{self._base_path}/categories',
             data.model_dump(by_alias=True, exclude_none=True),
@@ -39,22 +38,19 @@ class ProductsResource:
 
     def list_categories(
         self,
-        page: Optional[int] = None,
-        page_size: Optional[int] = None
+        params: Optional[PaginationRequest] = None
     ) -> PaginatedResult[ProductCategory]:
         """List product categories with pagination."""
-        params: Dict[str, Any] = {}
-        if page is not None:
-            params['page'] = page
-        if page_size is not None:
-            params['pageSize'] = page_size
+        query_params: Dict[str, Any] = {}
+        if params:
+            query_params['page'] = params.page
+            query_params['pageSize'] = params.page_size
 
-        query_string = f'?{urlencode(params)}' if params else ''
+        query_string = f'?{urlencode(query_params)}' if query_params else ''
         return self._http.get(f'{self._base_path}/categories{query_string}')
 
-    def update_category(self, **kwargs: Any) -> ProductCategory:
+    def update_category(self, data: UpdateProductCategory) -> ProductCategory:
         """Update a product category."""
-        data = UpdateProductCategory(**kwargs)
         return self._http.patch(
             f'{self._base_path}/categories',
             data.model_dump(by_alias=True, exclude_none=True),
@@ -67,9 +63,8 @@ class ProductsResource:
 
     # =============== Product Methods ===============
 
-    def create(self, **kwargs: Any) -> BusinessProduct:
+    def create(self, data: CreateBusinessProduct) -> BusinessProduct:
         """Create a new product."""
-        data = CreateBusinessProduct(**kwargs)
         return self._http.post(
             f'{self._base_path}/products',
             data.model_dump(by_alias=True, exclude_none=True),
@@ -90,56 +85,49 @@ class ProductsResource:
 
     def list(
         self,
-        page: Optional[int] = None,
-        page_size: Optional[int] = None,
+        params: Optional[PaginationRequest] = None,
         include_deleted: Optional[bool] = None
     ) -> PaginatedResult[BusinessProduct]:
         """List products with pagination."""
-        params: Dict[str, Any] = {}
-        if page is not None:
-            params['page'] = page
-        if page_size is not None:
-            params['pageSize'] = page_size
+        query_params: Dict[str, Any] = {}
+        if params:
+            query_params['page'] = params.page
+            query_params['pageSize'] = params.page_size
         if include_deleted is not None:
-            params['includeDeleted'] = str(include_deleted).lower()
+            query_params['includeDeleted'] = str(include_deleted).lower()
 
-        query_string = f'?{urlencode(params)}' if params else ''
+        query_string = f'?{urlencode(query_params)}' if query_params else ''
         return self._http.get(f'{self._base_path}/products{query_string}')
 
     def get_by_category(
         self,
         category_id: str,
-        page: Optional[int] = None,
-        page_size: Optional[int] = None
+        params: Optional[PaginationRequest] = None
     ) -> PaginatedResult[BusinessProduct]:
         """Retrieve products by category."""
-        params: Dict[str, Any] = {}
-        if page is not None:
-            params['page'] = page
-        if page_size is not None:
-            params['pageSize'] = page_size
+        query_params: Dict[str, Any] = {}
+        if params:
+            query_params['page'] = params.page
+            query_params['pageSize'] = params.page_size
 
-        query_string = f'?{urlencode(params)}' if params else ''
+        query_string = f'?{urlencode(query_params)}' if query_params else ''
         return self._http.get(f'{self._base_path}/products/by-category/{category_id}{query_string}')
 
     def search(
         self,
         query: str,
-        page: Optional[int] = None,
-        page_size: Optional[int] = None
+        params: Optional[PaginationRequest] = None
     ) -> PaginatedResult[BusinessProduct]:
         """Search products by query string."""
-        params: Dict[str, Any] = {'query': query}
-        if page is not None:
-            params['page'] = page
-        if page_size is not None:
-            params['pageSize'] = page_size
+        query_params: Dict[str, Any] = {'query': query}
+        if params:
+            query_params['page'] = params.page
+            query_params['pageSize'] = params.page_size
 
-        return self._http.get(f'{self._base_path}/products/search?{urlencode(params)}')
+        return self._http.get(f'{self._base_path}/products/search?{urlencode(query_params)}')
 
-    def update(self, **kwargs: Any) -> BusinessProduct:
+    def update(self, data: UpdateBusinessProduct) -> BusinessProduct:
         """Update a product."""
-        data = UpdateBusinessProduct(**kwargs)
         return self._http.patch(
             f'{self._base_path}/products',
             data.model_dump(by_alias=True, exclude_none=True),

@@ -5,9 +5,10 @@ menu items, and menu QR codes in the WIIL Platform API.
 
 Example:
     >>> from wiil import WiilClient
+    >>> from wiil.models.business_mgt import CreateMenuCategory, CreateBusinessMenuItem
     >>> client = WiilClient(api_key='your-api-key')
-    >>> category = client.menus.create_category(name='Appetizers')
-    >>> item = client.menus.create_item(name='Caesar Salad', category_id=category.id)
+    >>> category = client.menus.create_category(CreateMenuCategory(name='Appetizers'))
+    >>> item = client.menus.create_item(CreateBusinessMenuItem(name='Caesar Salad', category_id=category.id))
 """
 
 from typing import Any, Dict, List, Optional
@@ -23,7 +24,7 @@ from wiil.models.business_mgt import (
     UpdateBusinessMenuItem,
     MenuQRCode,
 )
-from wiil.types import PaginatedResult
+from wiil.types import PaginatedResult, PaginationRequest
 
 
 class MenusResource:
@@ -44,11 +45,11 @@ class MenusResource:
 
     # =============== Menu Category Methods ===============
 
-    def create_category(self, **kwargs: Any) -> MenuCategory:
+    def create_category(self, data: CreateMenuCategory) -> MenuCategory:
         """Create a new menu category.
 
         Args:
-            **kwargs: Menu category data fields
+            data: Menu category creation data
 
         Returns:
             The created menu category
@@ -58,7 +59,6 @@ class MenusResource:
             WiilAPIError: When the API returns an error
             WiilNetworkError: When network communication fails
         """
-        data = CreateMenuCategory(**kwargs)
         return self._http.post(
             f'{self._base_path}/categories',
             data.model_dump(by_alias=True, exclude_none=True),
@@ -84,16 +84,15 @@ class MenusResource:
         """
         return self._http.get(f'{self._base_path}/categories')
 
-    def update_category(self, **kwargs: Any) -> MenuCategory:
+    def update_category(self, data: UpdateMenuCategory) -> MenuCategory:
         """Update a menu category.
 
         Args:
-            **kwargs: Menu category update data (must include id)
+            data: Menu category update data (must include id)
 
         Returns:
             The updated menu category
         """
-        data = UpdateMenuCategory(**kwargs)
         return self._http.patch(
             f'{self._base_path}/categories',
             data.model_dump(by_alias=True, exclude_none=True),
@@ -113,16 +112,15 @@ class MenusResource:
 
     # =============== Menu Item Methods ===============
 
-    def create_item(self, **kwargs: Any) -> BusinessMenuItem:
+    def create_item(self, data: CreateBusinessMenuItem) -> BusinessMenuItem:
         """Create a new menu item.
 
         Args:
-            **kwargs: Menu item data fields
+            data: Menu item creation data
 
         Returns:
             The created menu item
         """
-        data = CreateBusinessMenuItem(**kwargs)
         return self._http.post(
             f'{self._base_path}/items',
             data.model_dump(by_alias=True, exclude_none=True),
@@ -142,29 +140,26 @@ class MenusResource:
 
     def list_items(
         self,
-        page: Optional[int] = None,
-        page_size: Optional[int] = None,
+        params: Optional[PaginationRequest] = None,
         include_deleted: Optional[bool] = None
     ) -> PaginatedResult[BusinessMenuItem]:
         """List menu items with pagination.
 
         Args:
-            page: Page number (1-indexed)
-            page_size: Number of items per page
+            params: Pagination parameters
             include_deleted: Include deleted items
 
         Returns:
             Paginated list of menu items
         """
-        params: Dict[str, Any] = {}
-        if page is not None:
-            params['page'] = page
-        if page_size is not None:
-            params['pageSize'] = page_size
+        query_params: Dict[str, Any] = {}
+        if params:
+            query_params['page'] = params.page
+            query_params['pageSize'] = params.page_size
         if include_deleted is not None:
-            params['includeDeleted'] = str(include_deleted).lower()
+            query_params['includeDeleted'] = str(include_deleted).lower()
 
-        query_string = f'?{urlencode(params)}' if params else ''
+        query_string = f'?{urlencode(query_params)}' if query_params else ''
         return self._http.get(f'{self._base_path}/items{query_string}')
 
     def get_items_by_category(
@@ -188,11 +183,11 @@ class MenusResource:
         query_string = f'?{urlencode(params)}' if params else ''
         return self._http.get(f'{self._base_path}/items/by-category/{category_id}{query_string}')
 
-    def get_popular_items(self, pageSize: Optional[int] = None) -> List[BusinessMenuItem]:
+    def get_popular_items(self, limit: Optional[int] = None) -> List[BusinessMenuItem]:
         """Retrieve popular menu items.
 
         Args:
-            pageSize: Maximum number of items to return
+            limit: Maximum number of items to return
 
         Returns:
             List of popular menu items
@@ -204,16 +199,15 @@ class MenusResource:
         query_string = f'?{urlencode(params)}' if params else ''
         return self._http.get(f'{self._base_path}/items/popular{query_string}')
 
-    def update_item(self, **kwargs: Any) -> BusinessMenuItem:
+    def update_item(self, data: UpdateBusinessMenuItem) -> BusinessMenuItem:
         """Update a menu item.
 
         Args:
-            **kwargs: Menu item update data (must include id)
+            data: Menu item update data (must include id)
 
         Returns:
             The updated menu item
         """
-        data = UpdateBusinessMenuItem(**kwargs)
         return self._http.patch(
             f'{self._base_path}/items',
             data.model_dump(by_alias=True, exclude_none=True),

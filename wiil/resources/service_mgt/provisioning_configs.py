@@ -5,13 +5,11 @@ from urllib.parse import urlencode
 
 from wiil.client.http_client import HttpClient
 from wiil.models.service_mgt import (
-    ProvisioningConfigChain,
-    TranslationChainConfig,
     CreateProvisioningConfig,
-    CreateTranslationChainConfig,
+    ProvisioningConfigChain,
     UpdateProvisioningConfig,
 )
-from wiil.types import PaginatedResult
+from wiil.types import PaginatedResult, PaginationRequest
 
 
 class ProvisioningConfigurationsResource:
@@ -26,35 +24,38 @@ class ProvisioningConfigurationsResource:
         self._http = http
         self._base_path = '/provisioning-configurations'
 
-    def create(self, **kwargs: Any) -> ProvisioningConfigChain:
-        """Create a new provisioning configuration chain."""
-        data = CreateProvisioningConfig(**kwargs)
+    def create(self, data: CreateProvisioningConfig) -> ProvisioningConfigChain:
+        """Create a new provisioning configuration chain.
+
+        Args:
+            data: Provisioning configuration creation data
+
+        Returns:
+            The created provisioning configuration chain
+        """
         return self._http.post(
             self._base_path,
             data.model_dump(by_alias=True, exclude_none=True),
             schema=CreateProvisioningConfig
         )
 
-    def create_translation(self, **kwargs: Any) -> TranslationChainConfig:
-        """Create a new translation configuration chain."""
-        data = CreateTranslationChainConfig(**kwargs)
-        return self._http.post(
-            self._base_path,
-            data.model_dump(by_alias=True, exclude_none=True),
-            schema=CreateTranslationChainConfig
-        )
-
-    def get(self, config_id: str) -> Union[ProvisioningConfigChain, TranslationChainConfig]:
+    def get(self, config_id: str) -> ProvisioningConfigChain:
         """Retrieve a provisioning configuration by ID."""
         return self._http.get(f'{self._base_path}/{config_id}')
 
-    def get_by_chain_name(self, chain_name: str) -> Union[ProvisioningConfigChain, TranslationChainConfig]:
+    def get_by_chain_name(self, chain_name: str) -> ProvisioningConfigChain:
         """Retrieve a provisioning configuration by chain name."""
         return self._http.get(f'{self._base_path}/by-chain-name/{chain_name}')
 
-    def update(self, **kwargs: Any) -> ProvisioningConfigChain:
-        """Update an existing provisioning configuration."""
-        data = UpdateProvisioningConfig(**kwargs)
+    def update(self, data: UpdateProvisioningConfig) -> ProvisioningConfigChain:
+        """Update an existing provisioning configuration.
+
+        Args:
+            data: Provisioning configuration update data (must include id)
+
+        Returns:
+            The updated provisioning configuration chain
+        """
         return self._http.patch(
             self._base_path,
             data.model_dump(by_alias=True, exclude_none=True),
@@ -67,51 +68,47 @@ class ProvisioningConfigurationsResource:
 
     def list(
         self,
-        page: Optional[int] = None,
-        page_size: Optional[int] = None,
+        params: Optional[PaginationRequest] = None,
         include_deleted: Optional[bool] = None
-    ) -> PaginatedResult[Union[ProvisioningConfigChain, TranslationChainConfig]]:
-        """List all provisioning configurations with pagination."""
-        params: Dict[str, Any] = {}
-        if page is not None:
-            params['page'] = page
-        if page_size is not None:
-            params['pageSize'] = page_size
-        if include_deleted is not None:
-            params['includeDeleted'] = str(include_deleted).lower()
+    ) -> PaginatedResult[ProvisioningConfigChain]:
+        """List all provisioning configurations with pagination.
 
-        query_string = f'?{urlencode(params)}' if params else ''
+        Args:
+            params: Pagination parameters
+            include_deleted: Include deleted configurations
+
+        Returns:
+            Paginated list of provisioning configurations
+        """
+        query_params: Dict[str, Any] = {}
+        if params:
+            query_params['page'] = params.page
+            query_params['pageSize'] = params.page_size
+        if include_deleted is not None:
+            query_params['includeDeleted'] = str(include_deleted).lower()
+
+        query_string = f'?{urlencode(query_params)}' if query_params else ''
         return self._http.get(f'{self._base_path}{query_string}')
 
     def list_provisioning_chains(
         self,
-        page: Optional[int] = None,
-        page_size: Optional[int] = None
+        params: Optional[PaginationRequest] = None
     ) -> PaginatedResult[ProvisioningConfigChain]:
-        """List provisioning configuration chains with pagination."""
-        params: Dict[str, Any] = {}
-        if page is not None:
-            params['page'] = page
-        if page_size is not None:
-            params['pageSize'] = page_size
+        """List provisioning configuration chains with pagination.
 
-        query_string = f'?{urlencode(params)}' if params else ''
+        Args:
+            params: Pagination parameters
+
+        Returns:
+            Paginated list of provisioning configuration chains
+        """
+        query_params: Dict[str, Any] = {}
+        if params:
+            query_params['page'] = params.page
+            query_params['pageSize'] = params.page_size
+
+        query_string = f'?{urlencode(query_params)}' if query_params else ''
         return self._http.get(f'{self._base_path}/provisioning{query_string}')
-
-    def list_translation_chains(
-        self,
-        page: Optional[int] = None,
-        page_size: Optional[int] = None
-    ) -> PaginatedResult[TranslationChainConfig]:
-        """List translation configuration chains with pagination."""
-        params: Dict[str, Any] = {}
-        if page is not None:
-            params['page'] = page
-        if page_size is not None:
-            params['pageSize'] = page_size
-
-        query_string = f'?{urlencode(params)}' if params else ''
-        return self._http.get(f'{self._base_path}/translations{query_string}')
 
 
 __all__ = ['ProvisioningConfigurationsResource']

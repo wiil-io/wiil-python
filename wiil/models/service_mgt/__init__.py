@@ -1,114 +1,235 @@
-"""Service Management Pydantic models."""
+"""Central export point for all service configuration schemas.
 
+This module contains all service configuration models including agent configurations,
+deployment configurations, instruction configurations, knowledge sources, phone configurations,
+provisioning chains, and channel configurations.
+
+This module mirrors src/core/service-configuration/
+"""
+
+# Agent configuration models
 from wiil.models.service_mgt.agent_config import (
     AgentConfiguration,
+    AgentConfigurationDeleteRequest,
     CreateAgentConfiguration,
     UpdateAgentConfiguration,
 )
+
+# Call transfer configuration models
 from wiil.models.service_mgt.call_transfer_config import (
     CallTransferConfig,
     TransferType,
 )
-from wiil.models.service_mgt.deployment_channels import (
-    CallChannel,
-    CreateDeploymentChannel,
-    DeploymentChannel,
-    MobileAppChannel,
-    MobileAppChannelConfig,
-    PhoneChannelConfig,
-    SmsChannel,
-    UpdateDeploymentChannel,
-    WebChannel,
-    WebChannelConfig,
-    WidgetConfiguration,
-)
+
+# Deployment configuration models
 from wiil.models.service_mgt.deployment_config import (
+    CreateChainDeploymentConfiguration,
     CreateDeploymentConfiguration,
     DeploymentConfiguration,
+    DeploymentConfigurationDetails,
+    DeploymentConfigurationResult,
     UpdateDeploymentConfiguration,
 )
+
+# Instruction configuration models
 from wiil.models.service_mgt.instruction_config import (
     CreateInstructionConfiguration,
     InstructionConfiguration,
     UpdateInstructionConfiguration,
 )
-from wiil.models.service_mgt.knowledge import (
-    CreateKnowledgeSource,
-    KnowledgeSource,
-    UpdateKnowledgeSource,
+
+# Interaction channels models
+from wiil.models.service_mgt.interaction_channels import (
+    CallChannel,
+    CallChannelType,
+    ChannelConfiguration,
+    ChannelSetupRequest,
+    ChannelUpdateRequest,
+    CreateDeploymentChannel,
+    CreateMobileAppChannel,
+    CreateWebChannel,
+    DeploymentChannel,
+    DeploymentChannelDeletionRequest,
+    DeploymentChannelInfo,
+    DeploymentChannelRequest,
+    DeploymentChannelType,
+    DeploymentChannelUpdate,
+    DeploymentChannelUpdateRequest,
+    DeploymentChannelUpdateRequestType,
+    DeploymentChannelWithDeployment,
+    MobileAppChannel,
+    MobileAppChannelConfig,
+    MobileAppChannelType,
+    PhoneChannelConfig,
+    SmsChannel,
+    SmsChannelType,
+    UpdateDeploymentChannel,
+    WebChannel,
+    WebChannelConfig,
+    WebChannelType,
 )
+
+# Knowledge source models
+from wiil.models.service_mgt.knowledge import KnowledgeSource
+
+# Phone configuration models
 from wiil.models.service_mgt.phone_config import (
     PhoneConfiguration,
     UpdatePhoneConfiguration,
 )
+
+# Phone number models
 from wiil.models.service_mgt.phone_number import (
     BasePhoneNumberInfo,
+    BusinessPhoneNumberPurchaseRequest,
+    CreatePhoneNumberPurchase,
     PhoneCapabilities,
-    PhoneProviderRegion,
-    SWPhoneNumberInfo,
-    TwilioPhoneNumberInfo,
+    PhoneNumberPrice,
+    PhoneNumberPricing,
+    PhoneNumberPurchase,
+    PhoneNumberPurchaseRequest,
+    PhoneProviderResponse,
 )
+
+# Provisioning configuration models
 from wiil.models.service_mgt.provisioning_config import (
-    CreateProvisioningConfigChain,
+    ChainConfiguration,
+    CreateChainConfiguration,
+    CreateProvisioningConfig,
+    CreateTranslationChainConfig,
     ProvisioningConfigChain,
     SttModelConfig,
+    TranslationChainConfig,
     TtsModelConfig,
-    UpdateProvisioningConfigChain,
+    UpdateChainConfiguration,
+    UpdateProvisioningConfig,
+    UpdateTranslationChainConfig,
 )
+
+# Support LLM models
 from wiil.models.service_mgt.support_llm import WiilSupportModel
-from wiil.models.service_mgt.voice_language import Language, Voice, VoiceGender
+
+# Voice and language models
+from wiil.models.service_mgt.voice_language import (
+    Language,
+    SupportedLanguages,
+    SupportedVoices,
+    Voice,
+    VoiceGender,
+)
+
+# Dynamic setup models
+from wiil.models.service_mgt.dynamic_setup import (
+    DynamicAgentProcessingState,
+    DynamicAgentSetupResult,
+    DynamicBaseAgentSetup,
+    DynamicModelConfiguration,
+    DynamicPhoneAgentSetup,
+    DynamicPhoneAgentSetupResult,
+    DynamicSTTModelConfiguration,
+    DynamicTTSModelConfiguration,
+    DynamicWebAgentSetup,
+    DynamicWebAgentSetupResult,
+    ProcessingStatus,
+    UpdateDynamicPhoneAgent,
+    UpdateDynamicWebAgent,
+)
 
 __all__ = [
-    # Agent Configuration
+    # Agent configuration models
     "AgentConfiguration",
+    "AgentConfigurationDeleteRequest",
     "CreateAgentConfiguration",
     "UpdateAgentConfiguration",
-    # Call Transfer
+    # Call transfer configuration models
     "CallTransferConfig",
     "TransferType",
-    # Deployment Channels
-    "DeploymentChannel",
-    "CreateDeploymentChannel",
-    "UpdateDeploymentChannel",
-    "CallChannel",
-    "SmsChannel",
-    "WebChannel",
-    "MobileAppChannel",
-    "PhoneChannelConfig",
-    "WebChannelConfig",
-    "WidgetConfiguration",
-    "MobileAppChannelConfig",
-    # Deployment Configuration
-    "DeploymentConfiguration",
+    # Deployment configuration models
+    "CreateChainDeploymentConfiguration",
     "CreateDeploymentConfiguration",
+    "DeploymentConfiguration",
+    "DeploymentConfigurationDetails",
+    "DeploymentConfigurationResult",
     "UpdateDeploymentConfiguration",
-    # Instruction Configuration
-    "InstructionConfiguration",
+    # Instruction configuration models
     "CreateInstructionConfiguration",
+    "InstructionConfiguration",
     "UpdateInstructionConfiguration",
-    # Knowledge Source
+    # Interaction channels models
+    "CallChannel",
+    "CallChannelType",
+    "ChannelConfiguration",
+    "ChannelSetupRequest",
+    "ChannelUpdateRequest",
+    "CreateDeploymentChannel",
+    "CreateMobileAppChannel",
+    "CreateWebChannel",
+    "DeploymentChannel",
+    "DeploymentChannelDeletionRequest",
+    "DeploymentChannelInfo",
+    "DeploymentChannelRequest",
+    "DeploymentChannelType",
+    "DeploymentChannelUpdate",
+    "DeploymentChannelUpdateRequest",
+    "DeploymentChannelUpdateRequestType",
+    "DeploymentChannelWithDeployment",
+    "MobileAppChannel",
+    "MobileAppChannelConfig",
+    "MobileAppChannelType",
+    "PhoneChannelConfig",
+    "SmsChannel",
+    "SmsChannelType",
+    "UpdateDeploymentChannel",
+    "WebChannel",
+    "WebChannelConfig",
+    "WebChannelType",
+    # Knowledge source models
     "KnowledgeSource",
-    "CreateKnowledgeSource",
-    "UpdateKnowledgeSource",
-    # Phone Configuration
+    # Phone configuration models
     "PhoneConfiguration",
     "UpdatePhoneConfiguration",
-    # Phone Number
-    "PhoneProviderRegion",
-    "PhoneCapabilities",
+    # Phone number models
     "BasePhoneNumberInfo",
-    "SWPhoneNumberInfo",
-    "TwilioPhoneNumberInfo",
-    # Provisioning Configuration
+    "BusinessPhoneNumberPurchaseRequest",
+    "CreatePhoneNumberPurchase",
+    "PhoneCapabilities",
+    "PhoneNumberPrice",
+    "PhoneNumberPricing",
+    "PhoneNumberPurchase",
+    "PhoneNumberPurchaseRequest",
+    "PhoneProviderResponse",
+    # Provisioning configuration models
+    "ChainConfiguration",
+    "CreateChainConfiguration",
+    "CreateProvisioningConfig",
+    "CreateTranslationChainConfig",
     "ProvisioningConfigChain",
-    "CreateProvisioningConfigChain",
-    "UpdateProvisioningConfigChain",
     "SttModelConfig",
+    "TranslationChainConfig",
     "TtsModelConfig",
-    # Support Models
+    "UpdateChainConfiguration",
+    "UpdateProvisioningConfig",
+    "UpdateTranslationChainConfig",
+    # Support LLM models
     "WiilSupportModel",
-    # Voice & Language
-    "Voice",
+    # Voice and language models
     "Language",
+    "SupportedLanguages",
+    "SupportedVoices",
+    "Voice",
     "VoiceGender",
+    # Dynamic setup models
+    "DynamicAgentProcessingState",
+    "DynamicAgentSetupResult",
+    "DynamicBaseAgentSetup",
+    "DynamicModelConfiguration",
+    "DynamicPhoneAgentSetup",
+    "DynamicPhoneAgentSetupResult",
+    "DynamicSTTModelConfiguration",
+    "DynamicTTSModelConfiguration",
+    "DynamicWebAgentSetup",
+    "DynamicWebAgentSetupResult",
+    "ProcessingStatus",
+    "UpdateDynamicPhoneAgent",
+    "UpdateDynamicWebAgent",
 ]

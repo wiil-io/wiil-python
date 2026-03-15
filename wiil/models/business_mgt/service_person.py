@@ -6,6 +6,7 @@ perform bookable services.
 
 from typing import Optional
 
+from pydantic import BaseModel as PydanticBaseModel
 from pydantic import ConfigDict, Field
 
 from wiil.models.base import BaseModel
@@ -54,7 +55,7 @@ class ServicePerson(BaseModel):
     )
 
 
-class CreateServicePerson(BaseModel):
+class CreateServicePerson(PydanticBaseModel):
     """Schema for creating a new service person.
 
     Omits auto-generated fields (id, created_at, updated_at).
@@ -80,7 +81,7 @@ class CreateServicePerson(BaseModel):
     service_id: str = Field(..., alias="serviceId")
 
 
-class UpdateServicePerson(BaseModel):
+class UpdateServicePerson(PydanticBaseModel):
     """Schema for updating an existing service person.
 
     All fields are optional except id.

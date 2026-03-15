@@ -6,6 +6,7 @@ and inventory information for retail operations.
 
 from typing import Literal, Optional
 
+from pydantic import BaseModel as PydanticBaseModel
 from pydantic import ConfigDict, Field
 
 from wiil.models.base import BaseModel
@@ -214,7 +215,7 @@ class BusinessProduct(BaseModel):
     )
 
 
-class CreateProductCategory(BaseModel):
+class CreateProductCategory(PydanticBaseModel):
     """Schema for creating a new product category.
 
     Omits auto-generated fields (id, created_at, updated_at).
@@ -240,7 +241,7 @@ class CreateProductCategory(BaseModel):
     display_order: Optional[int] = Field(None, alias="displayOrder")
 
 
-class UpdateProductCategory(BaseModel):
+class UpdateProductCategory(PydanticBaseModel):
     """Schema for updating an existing product category.
 
     All fields are optional except id.
@@ -266,7 +267,7 @@ class UpdateProductCategory(BaseModel):
     display_order: Optional[int] = Field(None, alias="displayOrder")
 
 
-class CreateBusinessProduct(BaseModel):
+class CreateBusinessProduct(PydanticBaseModel):
     """Schema for creating a new business product.
 
     Omits auto-generated fields and category object.
@@ -306,7 +307,7 @@ class CreateBusinessProduct(BaseModel):
     is_active: bool = Field(True, alias="isActive")
 
 
-class UpdateBusinessProduct(BaseModel):
+class UpdateBusinessProduct(PydanticBaseModel):
     """Schema for updating an existing business product.
 
     All fields are optional except id.

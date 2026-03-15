@@ -8,38 +8,41 @@ Comprehensive test suite for the WIIL Python SDK covering all resources, error h
 tests/
 ├── conftest.py                    # Shared fixtures and configuration
 ├── README.md                      # This file
-├── unit/                          # Unit tests
-│   ├── __init__.py
-│   └── resources/                 # Resource tests
-│       ├── __init__.py
-│       ├── account/               # Account resource tests
-│       │   ├── __init__.py
-│       │   ├── test_organizations.py
-│       │   └── test_projects.py
-│       ├── business_mgt/          # Business management resource tests
-│       │   ├── __init__.py
-│       │   ├── test_customers.py
-│       │   ├── test_menus.py
-│       │   ├── test_products.py
-│       │   ├── test_menu_orders.py
-│       │   ├── test_product_orders.py
-│       │   ├── test_reservations.py
-│       │   ├── test_reservation_resources.py
-│       │   ├── test_service_appointments.py
-│       │   └── test_business_services.py
-│       └── service_mgt/           # Service management resource tests
-│           ├── __init__.py
-│           ├── test_agent_configs.py
-│           ├── test_deployment_configs.py
-│           ├── test_deployment_channels.py
-│           ├── test_instruction_configs.py
-│           ├── test_phone_configs.py
-│           ├── test_provisioning_configs.py
-│           ├── test_conversation_configs.py
-│           ├── test_translation_sessions.py
-│           └── test_knowledge_sources.py
-└── integration/                   # Integration tests (future)
-    └── __init__.py
+└── unit/                          # Unit tests
+    ├── __init__.py
+    └── resources/                 # Resource tests
+        ├── __init__.py
+        ├── account/               # Account resource tests
+        │   ├── __init__.py
+        │   ├── test_organizations.py
+        │   └── test_projects.py
+        ├── business_mgt/          # Business management resource tests
+        │   ├── __init__.py
+        │   ├── test_customers.py
+        │   ├── test_menus.py
+        │   ├── test_products.py
+        │   ├── test_menu_orders.py
+        │   ├── test_product_orders.py
+        │   ├── test_reservations.py
+        │   ├── test_reservation_resources.py
+        │   ├── test_service_appointments.py
+        │   ├── test_business_services.py
+        │   ├── test_property_config.py
+        │   └── test_property_inquiry.py
+        └── service_mgt/           # Service management resource tests
+            ├── __init__.py
+            ├── test_agent_configs.py
+            ├── test_deployment_configs.py
+            ├── test_deployment_channels.py
+            ├── test_instruction_configs.py
+            ├── test_phone_configs.py
+            ├── test_provisioning_configs.py
+            ├── test_conversation_configs.py
+            ├── test_translation_sessions.py
+            ├── test_knowledge_sources.py
+            ├── test_support_models.py
+            ├── test_dynamic_web_agent.py
+            └── test_dynamic_phone_agent.py
 ```
 
 ## Prerequisites
@@ -346,40 +349,45 @@ def test_list_with_pagination(self, client, mock_api, api_response):
 
 ## Test Coverage by Resource
 
-### Service Management Resources (9 resources)
+### Service Management Resources (12 resources)
 
 | Resource | Test File | Status |
 |----------|-----------|--------|
 | Agent Configurations | `test_agent_configs.py` | ✅ Implemented |
-| Deployment Configurations | `test_deployment_configs.py` | 📝 Template Ready |
-| Deployment Channels | `test_deployment_channels.py` | 📝 Template Ready |
-| Instruction Configurations | `test_instruction_configs.py` | 📝 Template Ready |
-| Phone Configurations | `test_phone_configs.py` | 📝 Template Ready |
-| Provisioning Configurations | `test_provisioning_configs.py` | 📝 Template Ready |
-| Conversation Configurations | `test_conversation_configs.py` | 📝 Template Ready |
-| Translation Sessions | `test_translation_sessions.py` | 📝 Template Ready |
-| Knowledge Sources | `test_knowledge_sources.py` | 📝 Template Ready |
+| Deployment Configurations | `test_deployment_configs.py` | ✅ Implemented |
+| Deployment Channels | `test_deployment_channels.py` | ✅ Implemented |
+| Instruction Configurations | `test_instruction_configs.py` | ✅ Implemented |
+| Phone Configurations | `test_phone_configs.py` | ✅ Implemented |
+| Provisioning Configurations | `test_provisioning_configs.py` | ✅ Implemented |
+| Conversation Configurations | `test_conversation_configs.py` | ✅ Implemented |
+| Translation Sessions | `test_translation_sessions.py` | ✅ Implemented |
+| Knowledge Sources | `test_knowledge_sources.py` | ✅ Implemented |
+| Support Models | `test_support_models.py` | ✅ Implemented |
+| Dynamic Web Agent | `test_dynamic_web_agent.py` | ✅ Implemented |
+| Dynamic Phone Agent | `test_dynamic_phone_agent.py` | ✅ Implemented |
 
-### Business Management Resources (9 resources)
+### Business Management Resources (11 resources)
 
 | Resource | Test File | Status |
 |----------|-----------|--------|
 | Customers | `test_customers.py` | ✅ Implemented |
-| Menus | `test_menus.py` | 📝 Template Ready |
-| Menu Orders | `test_menu_orders.py` | 📝 Template Ready |
-| Products | `test_products.py` | 📝 Template Ready |
-| Product Orders | `test_product_orders.py` | 📝 Template Ready |
-| Reservations | `test_reservations.py` | 📝 Template Ready |
-| Reservation Resources | `test_reservation_resources.py` | 📝 Template Ready |
-| Service Appointments | `test_service_appointments.py` | 📝 Template Ready |
-| Business Services | `test_business_services.py` | 📝 Template Ready |
+| Menus | `test_menus.py` | ✅ Implemented |
+| Menu Orders | `test_menu_orders.py` | ✅ Implemented |
+| Products | `test_products.py` | ✅ Implemented |
+| Product Orders | `test_product_orders.py` | ✅ Implemented |
+| Reservations | `test_reservations.py` | ✅ Implemented |
+| Reservation Resources | `test_reservation_resources.py` | ✅ Implemented |
+| Service Appointments | `test_service_appointments.py` | ✅ Implemented |
+| Business Services | `test_business_services.py` | ✅ Implemented |
+| Property Configuration | `test_property_config.py` | ✅ Implemented |
+| Property Inquiry | `test_property_inquiry.py` | ✅ Implemented |
 
 ### Account Resources (2 resources)
 
 | Resource | Test File | Status |
 |----------|-----------|--------|
-| Organizations | `test_organizations.py` | 📝 Template Ready |
-| Projects | `test_projects.py` | 📝 Template Ready |
+| Organizations | `test_organizations.py` | ✅ Implemented |
+| Projects | `test_projects.py` | ✅ Implemented |
 
 ## Continuous Integration
 

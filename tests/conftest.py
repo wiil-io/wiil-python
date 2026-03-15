@@ -1,8 +1,7 @@
 """Pytest configuration and shared fixtures for WIIL SDK tests."""
 
 import pytest
-import respx
-from httpx import Response
+import responses
 
 from wiil import WiilClient
 
@@ -20,9 +19,9 @@ def client() -> WiilClient:
 
 @pytest.fixture
 def mock_api():
-    """Enable respx HTTP mocking for tests."""
-    with respx.mock:
-        yield respx
+    """Enable responses HTTP mocking for tests."""
+    with responses.RequestsMock() as rsps:
+        yield rsps
 
 
 def create_api_response(data: any, success: bool = True) -> dict:

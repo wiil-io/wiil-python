@@ -1,95 +1,42 @@
 """Phone number configuration and purchase schema definitions.
 
-Phone number schemas manage the complete lifecycle of phone number acquisition from
-telephony providers: discovery of available inventory, purchase transactions, and
-provisioning into Phone Configurations.
+Phone number schemas manage the complete lifecycle of phone number acquisition from telephony providers:
+discovery of available inventory, purchase transactions, and provisioning into Phone Configurations.
+Supports multiple providers (SignalWire, Twilio) with provider-specific extensions.
 """
 
-from typing import Any, Dict, List, Literal, Optional
+from typing import Any, Dict, List, Optional
 
-from pydantic import ConfigDict, Field
 from pydantic import BaseModel as PydanticBaseModel
+from pydantic import ConfigDict, Field
 
 from wiil.models.base import BaseModel
-from wiil.types.service_types import PhoneNumberType, PhonePurchaseStatus, ProviderType
-
-
-class PhoneProviderRegion(PydanticBaseModel):
-    """Phone provider region information.
-
-    Represents geographic region information from telephony providers, used for
-    filtering and searching available phone numbers by location.
-
-    Attributes:
-        region_id: Unique identifier for the region from provider
-        region_name: Human-readable region name
-        country_code: ISO 3166-1 alpha-2 country code
-        country_name: Full country name
-        provider_type: Telephony provider offering numbers in this region
-
-    Example:
-        ```python
-        region = PhoneProviderRegion(
-            region_id="us-west",
-            region_name="US West",
-            country_code="US",
-            country_name="United States",
-            provider_type=ProviderType.TWILIO
-        )
-        ```
-    """
-
-    model_config = ConfigDict(
-        validate_by_name=True, validate_by_alias=True,
-        use_enum_values=True,
-    )
-
-    region_id: str = Field(
-        ...,
-        description="Unique identifier for the region (e.g., 'us-west', 'uk-london')",
-        alias="regionId"
-    )
-    region_name: str = Field(
-        ...,
-        description="Human-readable region name (e.g., 'US West', 'United Kingdom')",
-        alias="regionName"
-    )
-    country_code: Optional[str] = Field(
-        None,
-        description="ISO 3166-1 alpha-2 country code (e.g., 'US', 'GB')",
-        alias="countryCode"
-    )
-    country_name: Optional[str] = Field(
-        None,
-        description="Full country name (e.g., 'United States')",
-        alias="countryName"
-    )
-    provider_type: ProviderType = Field(
-        ...,
-        description="Telephony provider offering numbers in this region",
-        alias="providerType"
-    )
+from wiil.models.type_definitions import PhoneNumberType, PhonePurchaseStatus
 
 
 class PhoneCapabilities(PydanticBaseModel):
-    """Phone number capabilities.
-
-    Defines which features are supported by a phone number.
-
-    Attributes:
-        voice: Supports voice calls
-        sms: Supports SMS messaging
-        mms: Supports MMS messaging
-    """
+    """Phone number capabilities."""
 
     model_config = ConfigDict(
-        validate_by_name=True, validate_by_alias=True,
+        validate_by_name=True,
+        validate_by_alias=True,
         use_enum_values=True,
     )
 
-    voice: bool = Field(..., description="Whether this number supports voice calls")
-    sms: bool = Field(..., description="Whether this number supports SMS", alias="SMS")
-    mms: bool = Field(..., description="Whether this number supports MMS", alias="MMS")
+    voice: bool = Field(
+        ...,
+        description="Whether this phone number supports voice calls"
+    )
+    sms: bool = Field(
+        ...,
+        description="Whether this phone number supports SMS text messaging",
+        alias="SMS"
+    )
+    mms: bool = Field(
+        ...,
+        description="Whether this phone number supports MMS multimedia messaging",
+        alias="MMS"
+    )
 
 
 class BasePhoneNumberInfo(PydanticBaseModel):
@@ -99,65 +46,54 @@ class BasePhoneNumberInfo(PydanticBaseModel):
 
     Attributes:
         friendly_name: Human-readable name for the phone number
-        phone_number: Phone number in E.164 format
+        phone_number: The phone number in E.164 format
         lata: Local Access and Transport Area code
         rate_center: Rate center for the phone number
         region: Geographic region
-        postal_code: Postal/ZIP code
+        postal_code: Postal/ZIP code for the phone number
         country_code: ISO country code
         capabilities: Phone number capabilities
         beta: Whether this is a beta number
-        number_type: Type of phone number
-
-    Example:
-        ```python
-        phone_info = BasePhoneNumberInfo(
-            friendly_name="Customer Support Line",
-            phone_number="+12125551234",
-            country_code="US",
-            capabilities=PhoneCapabilities(voice=True, sms=True, mms=False),
-            beta=False,
-            number_type=PhoneNumberType.LOCAL
-        )
-        ```
+        number_type: Type of phone number (local, toll-free, etc.)
     """
 
     model_config = ConfigDict(
-        validate_by_name=True, validate_by_alias=True,
+        validate_by_name=True,
+        validate_by_alias=True,
         use_enum_values=True,
     )
 
     friendly_name: str = Field(
         ...,
-        description="Human-readable display name",
+        description="Human-readable display name for this phone number",
         alias="friendlyName"
     )
     phone_number: str = Field(
         ...,
-        description="Phone number in E.164 format (e.g., '+12125551234')",
+        description="Phone number in E.164 international format",
         alias="phoneNumber"
     )
     lata: Optional[str] = Field(
         None,
-        description="Local Access and Transport Area code"
+        description="Local Access and Transport Area (LATA) code for North American numbers"
     )
     rate_center: Optional[str] = Field(
         None,
-        description="Rate center for billing and routing",
+        description="Rate center name for billing and routing purposes",
         alias="rateCenter"
     )
     region: Optional[str] = Field(
         None,
-        description="State or province code (e.g., 'NY', 'CA')"
+        description="State or province code where the number is registered"
     )
     postal_code: Optional[str] = Field(
         None,
-        description="Postal or ZIP code",
+        description="Postal or ZIP code associated with this phone number",
         alias="postalCode"
     )
     country_code: str = Field(
         ...,
-        description="ISO 3166-1 alpha-2 country code (e.g., 'US', 'GB')",
+        description="ISO 3166-1 alpha-2 country code for this phone number",
         alias="countryCode"
     )
     capabilities: PhoneCapabilities = Field(
@@ -166,148 +102,17 @@ class BasePhoneNumberInfo(PydanticBaseModel):
     )
     beta: bool = Field(
         ...,
-        description="Whether this is a beta phone number"
+        description="Whether this is a beta phone number (experimental or limited availability)"
     )
     number_type: PhoneNumberType = Field(
         ...,
-        description="Type of phone number (LOCAL, TOLL_FREE, etc.)",
+        description="Type of phone number (LOCAL, TOLL_FREE, MOBILE, etc.)",
         alias="numberType"
     )
 
 
-class SWPhoneNumberInfo(BasePhoneNumberInfo):
-    """SignalWire-specific phone number information.
-
-    Extends base phone number schema with SignalWire-specific fields.
-
-    Attributes:
-        latitude: Geographic latitude
-        longitude: Geographic longitude
-        provider_type: Always SIGNALWIRE
-
-    Example:
-        ```python
-        sw_phone = SWPhoneNumberInfo(
-            friendly_name="SW Support Line",
-            phone_number="+12125551234",
-            country_code="US",
-            capabilities=PhoneCapabilities(voice=True, sms=True, mms=False),
-            beta=False,
-            number_type=PhoneNumberType.LOCAL,
-            latitude="40.7128",
-            longitude="-74.0060",
-            provider_type=ProviderType.SIGNALWIRE
-        )
-        ```
-    """
-
-    model_config = ConfigDict(
-        validate_by_name=True, validate_by_alias=True,
-        use_enum_values=True,
-    )
-
-    latitude: Optional[str] = None
-    longitude: Optional[str] = None
-    provider_type: Literal[ProviderType.SIGNALWIRE] = Field(
-        ProviderType.SIGNALWIRE,
-        alias="providerType"
-    )
-
-
-class TwilioPhoneNumberInfo(BasePhoneNumberInfo):
-    """Twilio-specific phone number information.
-
-    Extends base phone number schema with Twilio-specific fields.
-
-    Attributes:
-        locality: City or locality name
-        latitude: Geographic latitude
-        longitude: Geographic longitude
-        provider_type: Always TWILIO
-
-    Example:
-        ```python
-        twilio_phone = TwilioPhoneNumberInfo(
-            friendly_name="Twilio Support Line",
-            phone_number="+12125551234",
-            country_code="US",
-            capabilities=PhoneCapabilities(voice=True, sms=True, mms=True),
-            beta=False,
-            number_type=PhoneNumberType.LOCAL,
-            locality="New York",
-            latitude=40.7128,
-            longitude=-74.0060,
-            provider_type=ProviderType.TWILIO
-        )
-        ```
-    """
-
-    model_config = ConfigDict(
-        validate_by_name=True, validate_by_alias=True,
-        use_enum_values=True,
-    )
-
-    locality: Optional[str] = None
-    latitude: Optional[float] = None
-    longitude: Optional[float] = None
-    provider_type: Literal[ProviderType.TWILIO] = Field(
-        ProviderType.TWILIO,
-        alias="providerType"
-    )
-
-
-class PhoneProviderRequest(PydanticBaseModel):
-    """Phone provider request schema.
-
-    Used to request available phone numbers from a specific provider and region.
-
-    Attributes:
-        provider_type: Telephony provider type
-        region: Geographic region identifier
-
-    Example:
-        ```python
-        request = PhoneProviderRequest(
-            provider_type=ProviderType.TWILIO,
-            region="us-west"
-        )
-        ```
-    """
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
-
-    provider_type: ProviderType = Field(
-        ...,
-        alias="providerType"
-    )
-    region: str
-
-
 class PhoneProviderResponse(PydanticBaseModel):
-    """Phone provider response schema.
-
-    Response from phone number provider API calls.
-
-    Attributes:
-        provider_type: Telephony provider type
-        success: Whether the request was successful
-        status: HTTP status code
-        data: Response data from provider
-
-    Example:
-        ```python
-        response = PhoneProviderResponse(
-            provider_type=ProviderType.TWILIO,
-            success=True,
-            status=200,
-            data={"availableNumbers": [...]}
-        )
-        ```
-    """
+    """Response from phone number provider API calls."""
 
     model_config = ConfigDict(
         validate_by_name=True,
@@ -315,46 +120,26 @@ class PhoneProviderResponse(PydanticBaseModel):
         use_enum_values=True,
     )
 
-    provider_type: ProviderType = Field(
-        ...,
-        alias="providerType"
-    )
     success: bool
     status: Optional[int] = None
-    data: Any
+    data: Any = None
 
 
 class PhoneNumberPurchase(BaseModel):
-    """Phone number purchase transaction schema.
+    """Phone number purchase transaction.
 
     Represents a phone number purchase request and its lifecycle through the purchase process.
 
     Attributes:
         friendly_name: Human-readable name for the purchased number
         phone_number: The phone number being purchased
-        provider_type: Provider from which the number is being purchased
-        amount: Purchase amount (must be positive)
-        currency: Currency code (3 characters, default: "USD")
-        status: Current status of the purchase (default: PENDING)
-        number_type: Type of phone number (default: LOCAL)
+        country_code: ISO country code for the phone number
+        charged_credits: Amount charged for the phone number purchase
+        status: Current status of the purchase
+        number_type: Type of phone number
         status_details: Additional details about the current status
         completed_at: Timestamp when purchase was completed
         metadata: Additional metadata for the purchase
-
-    Example:
-        ```python
-        purchase = PhoneNumberPurchase(
-            id="32422DEGER56",
-            friendly_name="Main Support Line",
-            phone_number="+12125551234",
-            provider_type=ProviderType.TWILIO,
-            amount=1.00,
-            currency="USD",
-            status=PhonePurchaseStatus.COMPLETED,
-            number_type=PhoneNumberType.LOCAL,
-            completed_at=1234567890
-        )
-        ```
     """
 
     model_config = ConfigDict(
@@ -373,21 +158,18 @@ class PhoneNumberPurchase(BaseModel):
         description="Phone number in E.164 international format being purchased",
         alias="phoneNumber"
     )
-    provider_type: ProviderType = Field(
+    country_code: str = Field(
         ...,
-        description="Telephony provider from which the number is being purchased",
-        alias="providerType"
+        min_length=2,
+        max_length=2,
+        description="ISO 3166-1 alpha-2 country code for the phone number",
+        alias="countryCode"
     )
-    amount: float = Field(
+    charged_credits: float = Field(
         ...,
         gt=0,
-        description="Purchase price for this phone number"
-    )
-    currency: str = Field(
-        "USD",
-        min_length=3,
-        max_length=3,
-        description="ISO 4217 currency code for the purchase amount"
+        description="Amount charged for the phone number purchase",
+        alias="chargedCredits"
     )
     status: PhonePurchaseStatus = Field(
         PhonePurchaseStatus.PENDING,
@@ -418,22 +200,6 @@ class CreatePhoneNumberPurchase(PydanticBaseModel):
     """Schema for creating a new phone number purchase.
 
     Omits auto-generated and transaction-specific fields.
-
-    Attributes:
-        friendly_name: Human-readable name for the purchased number
-        phone_number: The phone number being purchased
-        provider_type: Provider from which the number is being purchased
-        number_type: Type of phone number (default: LOCAL)
-
-    Example:
-        ```python
-        new_purchase = CreatePhoneNumberPurchase(
-            friendly_name="New Support Line",
-            phone_number="+12125551234",
-            provider_type=ProviderType.TWILIO,
-            number_type=PhoneNumberType.LOCAL
-        )
-        ```
     """
 
     model_config = ConfigDict(
@@ -444,15 +210,50 @@ class CreatePhoneNumberPurchase(PydanticBaseModel):
 
     friendly_name: str = Field(..., alias="friendlyName")
     phone_number: str = Field(..., alias="phoneNumber")
-    provider_type: ProviderType = Field(..., alias="providerType")
-    number_type: PhoneNumberType = Field(
-        PhoneNumberType.LOCAL,
-        alias="numberType"
+    country_code: str = Field(..., min_length=2, max_length=2, alias="countryCode")
+    number_type: PhoneNumberType = Field(PhoneNumberType.LOCAL, alias="numberType")
+
+
+class BusinessPhoneNumberPurchaseRequest(PydanticBaseModel):
+    """Schema for business phone number purchase request."""
+
+    model_config = ConfigDict(
+        validate_by_name=True,
+        validate_by_alias=True,
+        use_enum_values=True,
+    )
+
+    phone_number: str = Field(
+        ...,
+        description="Phone number in international format to be purchased",
+        alias="phoneNumber"
+    )
+    friendly_name: Optional[str] = Field(
+        None,
+        description="Human-readable display name for the phone number being purchased",
+        alias="friendlyName"
     )
 
 
+# Legacy type aliases
+PhoneNumberPurchaseRequest = CreatePhoneNumberPurchase
+
+
+class PhoneNumberPrice(PydanticBaseModel):
+    """Phone number price tier."""
+
+    model_config = ConfigDict(
+        validate_by_name=True,
+        validate_by_alias=True,
+        use_enum_values=True,
+    )
+
+    base_price: str = Field(..., alias="base_price")
+    current_price: str = Field(..., alias="current_price")
+
+
 class PhoneNumberPricing(PydanticBaseModel):
-    """Phone number pricing information schema.
+    """Phone number pricing information.
 
     Represents pricing details for phone numbers from various providers.
 
@@ -463,24 +264,7 @@ class PhoneNumberPricing(PydanticBaseModel):
         phone_number_prices: Array of pricing tiers
         price: Final price for the number
         price_unit: Unit of pricing (e.g., "per month")
-        provider_type: Provider offering the number
         currency: Currency code (3 characters, default: "USD")
-
-    Example:
-        ```python
-        pricing = PhoneNumberPricing(
-            number_type=PhoneNumberType.LOCAL,
-            country="United States",
-            country_code="US",
-            phone_number_prices=[
-                {"base_price": "1.00", "current_price": "1.00"}
-            ],
-            price=1.00,
-            price_unit="per month",
-            provider_type=ProviderType.TWILIO,
-            currency="USD"
-        )
-        ```
     """
 
     model_config = ConfigDict(
@@ -489,21 +273,10 @@ class PhoneNumberPricing(PydanticBaseModel):
         use_enum_values=True,
     )
 
-    number_type: PhoneNumberType = Field(
-        ...,
-        alias="number_type"
-    )
+    number_type: PhoneNumberType = Field(..., alias="number_type")
     country: str
     country_code: str = Field(..., alias="countryCode")
-    phone_number_prices: List[Dict[str, str]] = Field(
-        ...,
-        alias="phoneNumberPrices"
-    )
+    phone_number_prices: List[PhoneNumberPrice] = Field(..., alias="phoneNumberPrices")
     price: float
     price_unit: str = Field(..., alias="priceUnit")
-    provider_type: ProviderType = Field(..., alias="providerType")
-    currency: str = Field(
-        "USD",
-        min_length=3,
-        max_length=3
-    )
+    currency: str = Field("USD", min_length=3, max_length=3)

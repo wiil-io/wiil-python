@@ -1,6 +1,7 @@
 """Business management type definitions and enumerations."""
 
 from enum import Enum
+from typing import List, TypedDict
 
 
 class BusinessServiceType(str, Enum):
@@ -376,3 +377,146 @@ class BusinessDocumentTypes(str, Enum):
     RTF = "application/rtf"
     JPEG = "image/jpeg"
     PNG = "image/png"
+
+
+class DayOfWeek(TypedDict):
+    """Day of week structure."""
+
+    id: int
+    name: str
+    short: str
+
+
+DAYS_OF_WEEK: List[DayOfWeek] = [
+    {"id": 0, "name": "Sunday", "short": "Sun"},
+    {"id": 1, "name": "Monday", "short": "Mon"},
+    {"id": 2, "name": "Tuesday", "short": "Tue"},
+    {"id": 3, "name": "Wednesday", "short": "Wed"},
+    {"id": 4, "name": "Thursday", "short": "Thu"},
+    {"id": 5, "name": "Friday", "short": "Fri"},
+    {"id": 6, "name": "Saturday", "short": "Sat"},
+]
+
+
+TIMEZONES: List[str] = [
+    "UTC",
+    "America/New_York",
+    "America/Chicago",
+    "America/Denver",
+    "America/Los_Angeles",
+    "Europe/London",
+    "Europe/Paris",
+    "Asia/Tokyo",
+    "Asia/Shanghai",
+    "Australia/Sydney",
+]
+
+
+class PropertyType(str, Enum):
+    """Property type enumeration."""
+
+    RESIDENTIAL = "residential"
+    COMMERCIAL = "commercial"
+    LAND = "land"
+
+
+class PropertySubType(str, Enum):
+    """Property subtype enumeration."""
+
+    HOUSE = "house"
+    APARTMENT = "apartment"
+    CONDO = "condo"
+    TOWNHOUSE = "townhouse"
+    VILLA = "villa"
+    OFFICE = "office"
+    RETAIL = "retail"
+    WAREHOUSE = "warehouse"
+    INDUSTRIAL = "industrial"
+    LOT = "lot"
+    FARM = "farm"
+    ACREAGE = "acreage"
+
+
+class ListingType(str, Enum):
+    """Listing type enumeration."""
+
+    SALE = "sale"
+    RENT = "rent"
+    BOTH = "both"
+
+
+class ListingStatus(str, Enum):
+    """Listing status enumeration."""
+
+    DRAFT = "draft"
+    ACTIVE = "active"
+    UNDER_OFFER = "under_offer"
+    SOLD = "sold"
+    LEASED = "leased"
+    WITHDRAWN = "withdrawn"
+
+
+class PropertyCondition(str, Enum):
+    """Property condition enumeration."""
+
+    NEW = "new"
+    EXCELLENT = "excellent"
+    GOOD = "good"
+    FAIR = "fair"
+    NEEDS_WORK = "needs_work"
+
+
+class RentalPeriod(str, Enum):
+    """Rental period enumeration."""
+
+    DAILY = "daily"
+    WEEKLY = "weekly"
+    MONTHLY = "monthly"
+    YEARLY = "yearly"
+
+
+class PropertyPurchaseStatus(str, Enum):
+    """Property purchase status enumeration."""
+
+    INQUIRY = "inquiry"
+    OFFER_MADE = "offer_made"
+    UNDER_CONTRACT = "under_contract"
+    COMPLETED = "completed"
+    CANCELLED = "cancelled"
+
+
+class PropertyLeaseStatus(str, Enum):
+    """Property lease status enumeration."""
+
+    PENDING = "pending"
+    ACTIVE = "active"
+    RENEWED = "renewed"
+    TERMINATED = "terminated"
+    EXPIRED = "expired"
+
+
+class DepositStatus(str, Enum):
+    """Deposit status enumeration."""
+
+    PENDING = "pending"
+    PAID = "paid"
+    RETURNED = "returned"
+    FORFEITED = "forfeited"
+
+
+class PropertyInquiryType(str, Enum):
+    """Property inquiry type enumeration."""
+
+    OFFER = "offer"
+    GENERAL = "general"
+
+
+class PropertyInquiryStatus(str, Enum):
+    """Property inquiry status enumeration."""
+
+    NEW = "new"
+    CONTACTED = "contacted"
+    VIEWING_SCHEDULED = "viewing_scheduled"
+    FOLLOW_UP = "follow_up"
+    CONVERTED = "converted"
+    CLOSED = "closed"

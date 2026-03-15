@@ -5,12 +5,13 @@ in the WIIL Platform API.
 
 Example:
     >>> from wiil import WiilClient
+    >>> from wiil.models.account import CreateProject
     >>> client = WiilClient(api_key='your-api-key')
-    >>> project = client.projects.create(name='Production')
+    >>> project = client.projects.create(CreateProject(name='Production'))
     >>> print(project.id)
 """
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 from urllib.parse import urlencode
 
 from wiil.client.http_client import HttpClient
@@ -19,7 +20,7 @@ from wiil.models.account import (
     CreateProject,
     UpdateProject,
 )
-from wiil.types import PaginatedResult
+from wiil.types import PaginatedResult, PaginationMeta, PaginationRequest
 
 
 class ProjectsResource:
@@ -34,11 +35,11 @@ class ProjectsResource:
         >>> client = WiilClient(api_key='your-api-key')
         >>>
         >>> # Create a new project
-        >>> project = client.projects.create(
+        >>> project = client.projects.create(CreateProject(
         ...     name='Production Environment',
         ...     description='Main production deployment',
         ...     compliance=['SOC2', 'HIPAA']
-        ... )
+        ... ))
         >>>
         >>> # Get a project by ID
         >>> proj = client.projects.get('proj_123')
@@ -47,14 +48,13 @@ class ProjectsResource:
         >>> default_proj = client.projects.get_default()
         >>>
         >>> # Update a project
-        >>> updated = client.projects.update(
+        >>> updated = client.projects.update(UpdateProject(
         ...     id='proj_123',
         ...     description='Updated production deployment',
-        ...     region_id='us-west-2'
-        ... )
+        ... ))
         >>>
         >>> # List all projects
-        >>> projects = client.projects.list(page=1, page_size=20)
+        >>> projects = client.projects.list(PaginationRequest(page=1, page_size=20))
         >>>
         >>> # Delete a project
         >>> client.projects.delete('proj_123')
@@ -69,11 +69,11 @@ class ProjectsResource:
         self._http = http
         self._base_path = '/projects'
 
-    def create(self, **kwargs: Any) -> Project:
+    def create(self, data: CreateProject) -> Project:
         """Create a new project.
 
         Args:
-            **kwargs: Project data fields (name, description, compliance, etc.)
+            data: Project creation data
 
         Returns:
             The created project
@@ -84,7 +84,7 @@ class ProjectsResource:
             WiilNetworkError: When network communication fails
 
         Example:
-            >>> project = client.projects.create(
+            >>> project = client.projects.create(CreateProject(
             ...     name='Development Environment',
             ...     description='Development and testing project',
             ...     compliance=['SOC2'],
@@ -92,15 +92,15 @@ class ProjectsResource:
             ...         'environment': 'development',
             ...         'team': 'engineering'
             ...     }
-            ... )
+            ... ))
             >>> print('Created project:', project.id)
         """
-        data = CreateProject(**kwargs)
-        return self._http.post(
+        response_data = self._http.post(
             self._base_path,
             data.model_dump(by_alias=True, exclude_none=True),
             schema=CreateProject
         )
+        return Project.model_validate(response_data)
 
     def get(self, project_id: str) -> Project:
         """Retrieve a project by ID.
@@ -120,7 +120,8 @@ class ProjectsResource:
             >>> print('Project:', project.name)
             >>> print('Is Default:', project.is_default)
         """
-        return self._http.get(f'{self._base_path}/{project_id}')
+        response_data = self._http.get(f'{self._base_path}/{project_id}')
+        return Project.model_validate(response_data)
 
     def get_default(self) -> Project:
         """Retrieve the default project for the current organization.
@@ -140,13 +141,14 @@ class ProjectsResource:
             >>> print('Default Project:', default_project.name)
             >>> print('Project ID:', default_project.id)
         """
-        return self._http.get(f'{self._base_path}/default')
+        response_data = self._http.get(f'{self._base_path}/default')
+        return Project.model_validate(response_data)
 
-    def update(self, **kwargs: Any) -> Project:
+    def update(self, data: UpdateProject) -> Project:
         """Update an existing project.
 
         Args:
-            **kwargs: Project update data (must include id)
+            data: Project update data (must include id)
 
         Returns:
             The updated project
@@ -157,7 +159,7 @@ class ProjectsResource:
             WiilNetworkError: When network communication fails
 
         Example:
-            >>> updated = client.projects.update(
+            >>> updated = client.projects.update(UpdateProject(
             ...     id='proj_123',
             ...     name='Production Environment v2',
             ...     description='Updated production deployment',
@@ -165,15 +167,15 @@ class ProjectsResource:
             ...         'updated_by': 'admin-user',
             ...         'version': '2.0'
             ...     }
-            ... )
+            ... ))
             >>> print('Updated project:', updated.name)
         """
-        data = UpdateProject(**kwargs)
-        return self._http.patch(
+        response_data = self._http.patch(
             self._base_path,
             data.model_dump(by_alias=True, exclude_none=True),
             schema=UpdateProject
         )
+        return Project.model_validate(response_data)
 
     def delete(self, project_id: str) -> bool:
         """Delete a project.
@@ -199,20 +201,11 @@ class ProjectsResource:
         """
         return self._http.delete(f'{self._base_path}/{project_id}')
 
-    def list(
-        self,
-        page: Optional[int] = None,
-        page_size: Optional[int] = None,
-        sort_by: Optional[str] = None,
-        sort_direction: Optional[str] = None
-    ) -> PaginatedResult[Project]:
+    def list(self, params: Optional[PaginationRequest] = None) -> PaginatedResult[Project]:
         """List projects with optional pagination.
 
         Args:
-            page: Page number (1-indexed)
-            page_size: Number of items per page
-            sort_by: Field to sort by
-            sort_direction: Sort direction ('asc' or 'desc')
+            params: Pagination parameters (page, pageSize, sortBy, sortDirection)
 
         Returns:
             Paginated list of projects
@@ -226,30 +219,32 @@ class ProjectsResource:
             >>> result = client.projects.list()
             >>>
             >>> # List with custom pagination
-            >>> page2 = client.projects.list(
+            >>> page2 = client.projects.list(PaginationRequest(
             ...     page=2,
             ...     page_size=50,
             ...     sort_by='name',
             ...     sort_direction='desc'
-            ... )
+            ... ))
             >>>
             >>> print(f"Found {page2.meta.total_count} projects")
             >>> print(f"Page {page2.meta.page} of {page2.meta.total_pages}")
             >>> for project in page2.data:
             ...     print(f"- {project.name} ({project.id})")
         """
-        params: Dict[str, Any] = {}
-        if page is not None:
-            params['page'] = page
-        if page_size is not None:
-            params['pageSize'] = page_size
-        if sort_by is not None:
-            params['sortBy'] = sort_by
-        if sort_direction is not None:
-            params['sortDirection'] = sort_direction
+        query_params: Dict[str, Any] = {}
+        if params:
+            query_params['page'] = params.page
+            query_params['pageSize'] = params.page_size
+            if params.sort_by:
+                query_params['sortBy'] = params.sort_by
+            if params.sort_by and params.sort_direction:
+                query_params['sortDirection'] = params.sort_direction
 
-        query_string = f'?{urlencode(params)}' if params else ''
-        return self._http.get(f'{self._base_path}{query_string}')
+        query_string = f'?{urlencode(query_params)}' if query_params else ''
+        response_data = self._http.get(f'{self._base_path}{query_string}')
+        items = [Project.model_validate(item) for item in response_data.get('data', [])]
+        meta = PaginationMeta.model_validate(response_data.get('meta', {}))
+        return PaginatedResult[Project](data=items, meta=meta)
 
 
 __all__ = ['ProjectsResource']

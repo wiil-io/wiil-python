@@ -103,9 +103,9 @@ class HttpClient:
 
             # Return the data field from the APIResponse wrapper
             if isinstance(response_data, dict) and 'data' in response_data:
-                return response_data['data']
+                return self._to_attr_obj(response_data['data'])
 
-            return response_data
+            return self._to_attr_obj(response_data)
 
         except Timeout:
             raise WiilNetworkError(
@@ -193,9 +193,9 @@ class HttpClient:
 
             # Return the data field from the APIResponse wrapper
             if isinstance(response_data, dict) and 'data' in response_data:
-                return response_data['data']
+                return self._to_attr_obj(response_data['data'])
 
-            return response_data
+            return self._to_attr_obj(response_data)
 
         except Timeout:
             raise WiilNetworkError(
@@ -279,9 +279,9 @@ class HttpClient:
 
             # Return the data field from the APIResponse wrapper
             if isinstance(response_data, dict) and 'data' in response_data:
-                return response_data['data']
+                return self._to_attr_obj(response_data['data'])
 
-            return response_data
+            return self._to_attr_obj(response_data)
 
         except Timeout:
             raise WiilNetworkError(
@@ -365,9 +365,9 @@ class HttpClient:
 
             # Return the data field from the APIResponse wrapper
             if isinstance(response_data, dict) and 'data' in response_data:
-                return response_data['data']
+                return self._to_attr_obj(response_data['data'])
 
-            return response_data
+            return self._to_attr_obj(response_data)
 
         except Timeout:
             raise WiilNetworkError(
@@ -425,9 +425,9 @@ class HttpClient:
 
                 # Return the data field from the APIResponse wrapper
                 if isinstance(response_data, dict) and 'data' in response_data:
-                    return response_data['data']
+                    return self._to_attr_obj(response_data['data'])
 
-                return response_data
+                return self._to_attr_obj(response_data)
 
             return None
 
@@ -498,10 +498,40 @@ class HttpClient:
             details={'response_text': response.text}
         )
 
+    def _to_attr_obj(self, value: Any) -> Any:
+        """Recursively convert dict payloads into attribute-accessible mappings."""
+        if isinstance(value, dict):
+            return AttrDict({k: self._to_attr_obj(v) for k, v in value.items()})
+        if isinstance(value, list):
+            return [self._to_attr_obj(item) for item in value]
+        return value
+
     def __del__(self):
         """Close the session when the client is destroyed."""
         if hasattr(self, 'session'):
             self.session.close()
+
+
+class AttrDict(dict):
+    """Dictionary wrapper that allows attribute-style access."""
+
+    @staticmethod
+    def _snake_to_camel(value: str) -> str:
+        """Convert snake_case names to camelCase for API payload lookups."""
+        if '_' not in value:
+            return value
+        parts = value.split('_')
+        return parts[0] + ''.join(part.capitalize() for part in parts[1:])
+
+    def __getattr__(self, key: str) -> Any:
+        if key in self:
+            return self[key]
+
+        camel_key = self._snake_to_camel(key)
+        if camel_key in self:
+            return self[camel_key]
+
+        raise AttributeError(key)
 
 
 __all__ = ['HttpClient']

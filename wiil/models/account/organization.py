@@ -1,27 +1,15 @@
 """Organization schema definitions for account management."""
 
-from typing import Any, Dict, List, Literal, Optional
+from typing import Any, Dict, List, Optional
 
 from pydantic import ConfigDict, Field
 
+from wiil.models.account.supported_business_verticals import SupportedBusinessVerticalId
 from wiil.models.base import BaseModel
-from wiil.types.account_types import ServiceStatus, ServiceSuspensionType
-
-# Supported business vertical IDs
-SupportedBusinessVerticalId = Literal[
-    "healthcare",
-    "health-wellness",
-    "retail",
-    "finance",
-    "real-estate",
-    "technology",
-    "education",
-    "legal",
-    "automotive",
-    "hospitality",
-    "professional",
-    "others"
-]
+from wiil.models.type_definitions.account_definitions import (
+    ServiceStatus,
+    ServiceSuspensionType,
+)
 
 
 class OrganizationServiceStatusRecord(BaseModel):

@@ -1,8 +1,9 @@
 """Telephony Provider resource for managing phone numbers and telephony services.
 
-This module provides methods for retrieving available regions, searching for phone numbers,
-and getting pricing information from various telephony providers (SignalWire, Twilio, etc.).
-All methods require proper authentication via API key.
+This module provides methods for searching available phone numbers,
+getting pricing information, purchasing phone numbers, and checking
+purchase status from various telephony providers (SignalWire, Twilio,
+etc.). All methods require proper authentication via API key.
 
 Example:
     ```python
@@ -10,9 +11,6 @@ Example:
     from wiil.types.service_types import ProviderType
 
     client = WiilClient(api_key='your-api-key')
-
-    # Get available regions for SignalWire
-    regions = client.telephony_provider.get_regions(ProviderType.SIGNALWIRE)
 
     # Search for phone numbers in a specific region
     numbers = client.telephony_provider.get_phone_numbers(
@@ -26,14 +24,16 @@ Example:
     ```
 """
 
-from typing import Any, Dict, List, Optional
+import time
+from typing import Any, Dict, List, Optional, Union
 from urllib.parse import urlencode
 
 from wiil.client.http_client import HttpClient
 from wiil.models.service_mgt.phone_number import (
     BasePhoneNumberInfo,
+    BusinessPhoneNumberPurchaseRequest,
     PhoneNumberPricing,
-    PhoneProviderRegion,
+    PhoneNumberPurchase,
 )
 from wiil.types.service_types import ProviderType
 
@@ -41,10 +41,14 @@ from wiil.types.service_types import ProviderType
 class TelephonyProviderResource:
     """Resource class for managing telephony provider services.
 
-    Provides methods for retrieving available regions, searching for phone numbers,
-    and getting pricing information from various telephony providers (SignalWire, Twilio, etc.).
+    Provides methods for searching for phone numbers, getting pricing information,
+    purchasing phone numbers, and checking purchase status.
     All methods require proper authentication via API key.
     """
+
+    _POLL_INTERVAL_SECONDS = 5
+    _POLL_TIMEOUT_SECONDS = 120
+    _TERMINAL_PURCHASE_STATES = {"completed", "failed", "cancelled"}
 
     def __init__(self, http: HttpClient):
         """Initialize the TelephonyProviderResource.
@@ -54,29 +58,6 @@ class TelephonyProviderResource:
         """
         self._http = http
         self._resource_path = "/phone-configurations/telephony-provider"
-
-    def get_regions(self, provider: ProviderType) -> List[PhoneProviderRegion]:
-        """Retrieve available regions for phone numbers by provider.
-
-        Args:
-            provider: Telephony provider (e.g., ProviderType.SIGNALWIRE, ProviderType.TWILIO)
-
-        Returns:
-            List of available regions with region information
-
-        Raises:
-            WiilAPIError: When the API returns an error
-            WiilNetworkError: When network communication fails
-
-        Example:
-            ```python
-            regions = client.telephony_provider.get_regions(ProviderType.SIGNALWIRE)
-            print(f"Found {len(regions)} regions")
-            for region in regions:
-                print(f"- {region.region_name} ({region.region_id})")
-            ```
-        """
-        return self._http.get(f"{self._resource_path}/{provider}/regions")
 
     def get_phone_numbers(
         self,
@@ -174,6 +155,74 @@ class TelephonyProviderResource:
 
         query_string = f'?{urlencode(params)}'
         return self._http.get(f"{self._resource_path}/{provider}/pricing{query_string}")
+
+    def purchase(
+        self,
+        data: Union[BusinessPhoneNumberPurchaseRequest, Dict[str, Any]]
+    ) -> PhoneNumberPurchase:
+        """Purchase a phone number and poll until terminal state.
+
+        Args:
+            data: Purchase request payload
+
+        Returns:
+            Final purchase result after polling completes
+
+        Raises:
+            TimeoutError: If purchase does not reach terminal status in time
+        """
+        payload = (
+            data.model_dump(by_alias=True, exclude_none=True)
+            if isinstance(data, BusinessPhoneNumberPurchaseRequest)
+            else data
+        )
+
+        initial_result = self._http.post(
+            f"{self._resource_path}/purchase",
+            payload,
+            schema=BusinessPhoneNumberPurchaseRequest,
+        )
+
+        initial_status = self._normalize_status(initial_result)
+        if initial_status in self._TERMINAL_PURCHASE_STATES:
+            return initial_result
+
+        request_id = self._extract_field(initial_result, "id")
+        if not request_id:
+            raise TimeoutError("Purchase polling failed: missing purchase request id")
+
+        start = time.monotonic()
+        while (time.monotonic() - start) < self._POLL_TIMEOUT_SECONDS:
+            time.sleep(self._POLL_INTERVAL_SECONDS)
+            status_result = self.get_purchase_status(request_id)
+            status = self._normalize_status(status_result)
+
+            if status in self._TERMINAL_PURCHASE_STATES:
+                return status_result
+
+        raise TimeoutError(
+            "Phone number purchase timed out after "
+            f"{self._POLL_TIMEOUT_SECONDS}s. Last status: {initial_status}"
+        )
+
+    def get_purchase_status(self, request_id: str) -> PhoneNumberPurchase:
+        """Get current status for a phone purchase request."""
+        return self._http.get(f"{self._resource_path}/purchase-request/{request_id}")
+
+    @staticmethod
+    def _extract_field(payload: Any, field_name: str) -> Optional[Any]:
+        """Read a field from either model objects or plain dictionaries."""
+        if isinstance(payload, dict):
+            return payload.get(field_name)
+        return getattr(payload, field_name, None)
+
+    @classmethod
+    def _normalize_status(cls, payload: Any) -> str:
+        """Normalize status values to lowercase text for comparisons."""
+        status = cls._extract_field(payload, "status")
+        if status is None:
+            return ""
+        return str(status).lower()
 
 
 __all__ = ['TelephonyProviderResource']

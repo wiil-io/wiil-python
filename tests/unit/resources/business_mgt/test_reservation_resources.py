@@ -1,12 +1,15 @@
 """Tests for Reservation Resources resource."""
 
 import pytest
-import respx
-from httpx import Response
+import responses
 
 from wiil import WiilClient
 from wiil.errors import WiilAPIError
-
+from wiil.models.business_mgt import (
+    CreateResource,
+    UpdateResource,
+)
+from wiil.types import PaginationRequest
 
 BASE_URL = "https://api.wiil.io/v1"
 API_KEY = "test-api-key"
@@ -17,13 +20,6 @@ class TestReservationResourcesResource:
 
     def test_create(self, client: WiilClient, mock_api, api_response):
         """Test creating a new reservation resource."""
-        input_data = {
-            "name": "Table 1",
-            "type": "table",
-            "capacity": 4,
-            "description": "Window side table",
-        }
-
         mock_response = {
             "id": "res_123",
             "resourceType": "table",
@@ -45,12 +41,19 @@ class TestReservationResourcesResource:
             "updatedAt": 1234567890,
         }
 
-        mock_api.post(
+        mock_api.add(
+            responses.POST,
             f"{BASE_URL}/reservation-resources",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_response)))
+            json=api_response(mock_response),
+            status=200
+        )
 
-        result = client.reservation_resources.create(**input_data)
+        result = client.reservation_resources.create(CreateResource(
+            name="Table 1",
+            resource_type="table",
+            capacity=4,
+            description="Window side table"
+        ))
 
         assert result.id == "res_123"
         assert result.name == "Table 1"
@@ -79,10 +82,12 @@ class TestReservationResourcesResource:
             "updatedAt": 1234567890,
         }
 
-        mock_api.get(
+        mock_api.add(
+            responses.GET,
             f"{BASE_URL}/reservation-resources/res_123",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_response)))
+            json=api_response(mock_response),
+            status=200
+        )
 
         result = client.reservation_resources.get("res_123")
 
@@ -91,12 +96,6 @@ class TestReservationResourcesResource:
 
     def test_update(self, client: WiilClient, mock_api, api_response):
         """Test updating a reservation resource."""
-        update_data = {
-            "id": "res_123",
-            "name": "Updated Table 1",
-            "capacity": 6,
-        }
-
         mock_response = {
             "id": "res_123",
             "resourceType": "table",
@@ -118,22 +117,30 @@ class TestReservationResourcesResource:
             "updatedAt": 1234567891,
         }
 
-        mock_api.patch(
+        mock_api.add(
+            responses.PATCH,
             f"{BASE_URL}/reservation-resources",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_response)))
+            json=api_response(mock_response),
+            status=200
+        )
 
-        result = client.reservation_resources.update(**update_data)
+        result = client.reservation_resources.update(UpdateResource(
+            id="res_123",
+            name="Updated Table 1",
+            capacity=6
+        ))
 
         assert result.name == "Updated Table 1"
         assert result.capacity == 6
 
     def test_delete(self, client: WiilClient, mock_api, api_response):
         """Test deleting a reservation resource."""
-        mock_api.delete(
+        mock_api.add(
+            responses.DELETE,
             f"{BASE_URL}/reservation-resources/res_123",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(True)))
+            json=api_response(True),
+            status=200
+        )
 
         result = client.reservation_resources.delete("res_123")
 
@@ -196,12 +203,16 @@ class TestReservationResourcesResource:
             },
         }
 
-        mock_api.get(
+        mock_api.add(
+            responses.GET,
             f"{BASE_URL}/reservation-resources?page=1&pageSize=10",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_response)))
+            json=api_response(mock_response),
+            status=200
+        )
 
-        result = client.reservation_resources.list(page=1, page_size=10)
+        result = client.reservation_resources.list(
+            PaginationRequest(page=1, page_size=10)
+        )
 
         assert len(result.data) == 2
         assert result.meta.total_count == 2
@@ -263,47 +274,54 @@ class TestReservationResourcesResource:
             },
         }
 
-        mock_api.get(
+        mock_api.add(
+            responses.GET,
             f"{BASE_URL}/reservation-resources/by-type/table?page=1&pageSize=10",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_response)))
+            json=api_response(mock_response),
+            status=200
+        )
 
-        result = client.reservation_resources.get_by_type("table", page=1, page_size=10)
+        result = client.reservation_resources.get_by_type(
+            "table",
+            PaginationRequest(page=1, page_size=10)
+        )
 
         assert len(result.data) == 2
         assert result.data[0].resource_type == "table"
 
-    def test_get_available(self, client: WiilClient, mock_api, api_response):
-        """Test retrieving available reservation resources."""
-        mock_resources = [
-            {
-                "id": "res_1",
-                "resourceType": "table",
-                "name": "Table 1",
-                "description": None,
-                "capacity": 4,
-                "isAvailable": True,
-                "location": None,
-                "amenities": [],
-                "reservationDuration": None,
-                "reservationDurationUnit": None,
-                "calendarId": None,
-                "syncEnabled": False,
-                "lastSyncAt": None,
-                "roomResource": None,
-                "rentalResource": None,
-                "metadata": None,
-                "createdAt": 1234567890,
-                "updatedAt": 1234567890,
-            },
-        ]
+    # =============== Error Handling Tests ===============
 
-        mock_api.get(
-            f"{BASE_URL}/reservation-resources/available",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_resources)))
+    def test_create_api_error(
+        self, client: WiilClient, mock_api, error_response
+    ):
+        """Test create resource handles API errors."""
+        mock_api.add(
+            responses.POST,
+            f"{BASE_URL}/reservation-resources",
+            json=error_response("VALIDATION_ERROR", "Name is required"),
+            status=400
+        )
 
-        result = client.reservation_resources.get_available()
+        with pytest.raises(WiilAPIError) as exc_info:
+            client.reservation_resources.create(CreateResource(
+                name="",
+                resource_type="table"
+            ))
 
-        assert len(result) == 1
-        assert result[0].is_available is True
+        assert exc_info.value.code == "VALIDATION_ERROR"
+
+    def test_get_not_found(
+        self, client: WiilClient, mock_api, error_response
+    ):
+        """Test get resource handles not found errors."""
+        mock_api.add(
+            responses.GET,
+            f"{BASE_URL}/reservation-resources/nonexistent",
+            json=error_response("NOT_FOUND", "Resource not found"),
+            status=404
+        )
+
+        with pytest.raises(WiilAPIError) as exc_info:
+            client.reservation_resources.get("nonexistent")
+
+        assert exc_info.value.code == "NOT_FOUND"

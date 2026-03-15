@@ -1,12 +1,12 @@
 """Tests for Service Appointments resource."""
 
 import pytest
-import respx
-from httpx import Response
+import responses
 
 from wiil import WiilClient
 from wiil.errors import WiilAPIError
-
+from wiil.models.business_mgt import CreateServiceAppointment
+from wiil.types import PaginationRequest
 
 BASE_URL = "https://api.wiil.io/v1"
 API_KEY = "test-api-key"
@@ -17,13 +17,6 @@ class TestServiceAppointmentsResource:
 
     def test_create(self, client: WiilClient, mock_api, api_response):
         """Test creating a new service appointment."""
-        input_data = {
-            "customer_id": "cust_123",
-            "business_service_id": "svc_123",
-            "start_time": 1234567890,
-            "end_time": 1234567950,
-        }
-
         mock_response = {
             "id": "appt_123",
             "businessServiceId": "svc_123",
@@ -46,12 +39,20 @@ class TestServiceAppointmentsResource:
             "updatedAt": 1234567890,
         }
 
-        mock_api.post(
+        mock_api.add(
+            responses.POST,
             f"{BASE_URL}/service-appointments",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_response)))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(mock_response),
+            status=200,
+        )
 
-        result = client.service_appointments.create(**input_data)
+        result = client.service_appointments.create(CreateServiceAppointment(
+            customer_id="cust_123",
+            business_service_id="svc_123",
+            start_time=1234567890,
+            end_time=1234567950
+        ))
 
         assert result.id == "appt_123"
         assert result.customer_id == "cust_123"
@@ -81,60 +82,28 @@ class TestServiceAppointmentsResource:
             "updatedAt": 1234567890,
         }
 
-        mock_api.get(
+        mock_api.add(
+            responses.GET,
             f"{BASE_URL}/service-appointments/appt_123",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_response)))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(mock_response),
+            status=200,
+        )
 
         result = client.service_appointments.get("appt_123")
 
         assert result.id == "appt_123"
         assert result.status == "confirmed"
 
-    def test_update(self, client: WiilClient, mock_api, api_response):
-        """Test updating a service appointment."""
-        update_data = {
-            "id": "appt_123",
-            "status": "confirmed",
-        }
-
-        mock_response = {
-            "id": "appt_123",
-            "businessServiceId": "svc_123",
-            "customerId": "cust_123",
-            "customerName": None,
-            "customerEmail": None,
-            "startTime": 1234567890,
-            "endTime": 1234567950,
-            "duration": 30,
-            "totalPrice": 0.0,
-            "depositPaid": 0.0,
-            "status": "confirmed",
-            "assignedUserAccountId": None,
-            "calendarId": None,
-            "calendarEventId": None,
-            "calendarProvider": None,
-            "cancelReason": None,
-            "serviceConversationConfigId": None,
-            "createdAt": 1234567890,
-            "updatedAt": 1234567891,
-        }
-
-        mock_api.patch(
-            f"{BASE_URL}/service-appointments",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_response)))
-
-        result = client.service_appointments.update(**update_data)
-
-        assert result.status == "confirmed"
-
     def test_delete(self, client: WiilClient, mock_api, api_response):
         """Test deleting a service appointment."""
-        mock_api.delete(
+        mock_api.add(
+            responses.DELETE,
             f"{BASE_URL}/service-appointments/appt_123",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(True)))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(True),
+            status=200,
+        )
 
         result = client.service_appointments.delete("appt_123")
 
@@ -199,12 +168,17 @@ class TestServiceAppointmentsResource:
             },
         }
 
-        mock_api.get(
+        mock_api.add(
+            responses.GET,
             f"{BASE_URL}/service-appointments?page=1&pageSize=10",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_response)))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(mock_response),
+            status=200,
+        )
 
-        result = client.service_appointments.list(page=1, page_size=10)
+        result = client.service_appointments.list(
+            PaginationRequest(page=1, page_size=10)
+        )
 
         assert len(result.data) == 2
         assert result.meta.total_count == 2
@@ -247,12 +221,18 @@ class TestServiceAppointmentsResource:
             },
         }
 
-        mock_api.get(
+        mock_api.add(
+            responses.GET,
             f"{BASE_URL}/service-appointments/by-customer/cust_123?page=1&pageSize=10",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_response)))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(mock_response),
+            status=200,
+        )
 
-        result = client.service_appointments.get_by_customer("cust_123", page=1, page_size=10)
+        result = client.service_appointments.get_by_customer(
+            "cust_123",
+            PaginationRequest(page=1, page_size=10)
+        )
 
         assert len(result.data) == 1
         assert result.data[0].customer_id == "cust_123"
@@ -281,36 +261,94 @@ class TestServiceAppointmentsResource:
             "updatedAt": 1234567891,
         }
 
-        mock_api.patch(
+        mock_api.add(
+            responses.PATCH,
             f"{BASE_URL}/service-appointments/appt_123/status",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_response)))
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(mock_response),
+            status=200,
+        )
 
         result = client.service_appointments.update_status("appt_123", "completed")
 
         assert result.status == "completed"
 
-    def test_get_available_slots(self, client: WiilClient, mock_api, api_response):
-        """Test retrieving available appointment slots."""
-        mock_slots = [
-            {
-                "startTime": 1234567890,
-                "endTime": 1234567950,
-                "available": True,
-            },
-            {
-                "startTime": 1234567950,
-                "endTime": 1234568010,
-                "available": True,
-            },
-        ]
+    def test_cancel(self, client: WiilClient, mock_api, api_response):
+        """Test canceling a service appointment."""
+        mock_response = {
+            "id": "appt_123",
+            "businessServiceId": "svc_123",
+            "customerId": "cust_123",
+            "customerName": None,
+            "customerEmail": None,
+            "startTime": 1234567890,
+            "endTime": 1234567950,
+            "duration": 30,
+            "totalPrice": 0.0,
+            "depositPaid": 0.0,
+            "status": "cancelled",
+            "assignedUserAccountId": None,
+            "calendarId": None,
+            "calendarEventId": None,
+            "calendarProvider": None,
+            "cancelReason": "Customer request",
+            "serviceConversationConfigId": None,
+            "createdAt": 1234567890,
+            "updatedAt": 1234567891,
+        }
 
-        mock_api.get(
-            f"{BASE_URL}/service-appointments/available-slots",
-            headers={"X-WIIL-API-Key": API_KEY}
-        ).mock(return_value=Response(200, json=api_response(mock_slots)))
+        mock_api.add(
+            responses.POST,
+            f"{BASE_URL}/service-appointments/appt_123/cancel",
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=api_response(mock_response),
+            status=200,
+        )
 
-        result = client.service_appointments.get_available_slots()
+        result = client.service_appointments.cancel(
+            "appt_123",
+            reason="Customer request"
+        )
 
-        assert len(result) == 2
-        assert result[0].available is True
+        assert result.status == "cancelled"
+        assert result.cancel_reason == "Customer request"
+
+    # =============== Error Handling Tests ===============
+
+    def test_create_api_error(
+        self, client: WiilClient, mock_api, error_response
+    ):
+        """Test create appointment handles API errors."""
+        mock_api.add(
+            responses.POST,
+            f"{BASE_URL}/service-appointments",
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=error_response("VALIDATION_ERROR", "Service ID is required"),
+            status=400,
+        )
+
+        with pytest.raises(WiilAPIError) as exc_info:
+            client.service_appointments.create(CreateServiceAppointment(
+                customer_id="cust_123",
+                business_service_id="svc_123",
+                start_time=1234567890
+            ))
+
+        assert exc_info.value.code == "VALIDATION_ERROR"
+
+    def test_get_not_found(
+        self, client: WiilClient, mock_api, error_response
+    ):
+        """Test get appointment handles not found errors."""
+        mock_api.add(
+            responses.GET,
+            f"{BASE_URL}/service-appointments/nonexistent",
+            headers={"X-WIIL-API-Key": API_KEY},
+            json=error_response("NOT_FOUND", "Appointment not found"),
+            status=404,
+        )
+
+        with pytest.raises(WiilAPIError) as exc_info:
+            client.service_appointments.get("nonexistent")
+
+        assert exc_info.value.code == "NOT_FOUND"

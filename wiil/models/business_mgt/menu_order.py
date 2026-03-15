@@ -370,7 +370,7 @@ class MenuOrder(BaseModel):
     )
 
 
-class CreateMenuOrder(BaseModel):
+class CreateMenuOrder(PydanticBaseModel):
     """Schema for creating a new menu order.
 
     Omits auto-generated fields and uses base items without IDs.
@@ -414,7 +414,7 @@ class CreateMenuOrder(BaseModel):
     delivery_address: Optional[DeliveryAddress] = Field(None, alias="deliveryAddress")
 
 
-class UpdateMenuOrder(BaseModel):
+class UpdateMenuOrder(PydanticBaseModel):
     """Schema for updating an existing menu order.
 
     All fields are optional except id.

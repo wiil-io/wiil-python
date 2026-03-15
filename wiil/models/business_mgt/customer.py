@@ -6,6 +6,7 @@ contact information, preferences, and custom fields.
 
 from typing import Any, Dict, List, Optional
 
+from pydantic import BaseModel as PydanticBaseModel
 from pydantic import ConfigDict, EmailStr, Field
 
 from wiil.models.base import Address, BaseModel
@@ -139,7 +140,7 @@ class Customer(BaseModel):
     )
 
 
-class CreateCustomer(BaseModel):
+class CreateCustomer(PydanticBaseModel):
     """Schema for creating a new customer.
 
     Omits auto-generated fields (id, created_at, updated_at).
@@ -183,7 +184,7 @@ class CreateCustomer(BaseModel):
     is_validated_names: bool = Field(False, alias="isValidatedNames")
 
 
-class UpdateCustomer(BaseModel):
+class UpdateCustomer(PydanticBaseModel):
     """Schema for updating an existing customer.
 
     All fields are optional except id.
