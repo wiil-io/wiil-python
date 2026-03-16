@@ -20,7 +20,7 @@ from wiil.models.account import (
     CreateProject,
     UpdateProject,
 )
-from wiil.types import PaginatedResult, PaginationMeta, PaginationRequest
+from wiil.types import PaginatedResult, PaginationRequest
 
 
 class ProjectsResource:
@@ -95,12 +95,12 @@ class ProjectsResource:
             ... ))
             >>> print('Created project:', project.id)
         """
-        response_data = self._http.post(
+        return self._http.post(
             self._base_path,
             data.model_dump(by_alias=True, exclude_none=True),
-            schema=CreateProject
+            schema=CreateProject,
+            response_model=Project
         )
-        return Project.model_validate(response_data)
 
     def get(self, project_id: str) -> Project:
         """Retrieve a project by ID.
@@ -120,8 +120,7 @@ class ProjectsResource:
             >>> print('Project:', project.name)
             >>> print('Is Default:', project.is_default)
         """
-        response_data = self._http.get(f'{self._base_path}/{project_id}')
-        return Project.model_validate(response_data)
+        return self._http.get(f'{self._base_path}/{project_id}', response_model=Project)
 
     def get_default(self) -> Project:
         """Retrieve the default project for the current organization.
@@ -141,8 +140,7 @@ class ProjectsResource:
             >>> print('Default Project:', default_project.name)
             >>> print('Project ID:', default_project.id)
         """
-        response_data = self._http.get(f'{self._base_path}/default')
-        return Project.model_validate(response_data)
+        return self._http.get(f'{self._base_path}/default', response_model=Project)
 
     def update(self, data: UpdateProject) -> Project:
         """Update an existing project.
@@ -170,12 +168,12 @@ class ProjectsResource:
             ... ))
             >>> print('Updated project:', updated.name)
         """
-        response_data = self._http.patch(
+        return self._http.patch(
             self._base_path,
             data.model_dump(by_alias=True, exclude_none=True),
-            schema=UpdateProject
+            schema=UpdateProject,
+            response_model=Project
         )
-        return Project.model_validate(response_data)
 
     def delete(self, project_id: str) -> bool:
         """Delete a project.
@@ -241,10 +239,10 @@ class ProjectsResource:
                 query_params['sortDirection'] = params.sort_direction
 
         query_string = f'?{urlencode(query_params)}' if query_params else ''
-        response_data = self._http.get(f'{self._base_path}{query_string}')
-        items = [Project.model_validate(item) for item in response_data.get('data', [])]
-        meta = PaginationMeta.model_validate(response_data.get('meta', {}))
-        return PaginatedResult[Project](data=items, meta=meta)
+        return self._http.get(
+            f'{self._base_path}{query_string}',
+            response_model=PaginatedResult[Project]
+        )
 
 
 __all__ = ['ProjectsResource']

@@ -1,34 +1,36 @@
 # Deployment Channels Guide
 
-This guide covers creating and managing deployment channels using the WIIL Platform JS SDK. Deployment channels define the communication endpoints (phone numbers, web URLs, mobile apps) through which AI agents are accessible.
+This guide covers creating and managing deployment channels using the WIIL Platform Python SDK. Deployment channels define the communication endpoints (phone numbers, web URLs, mobile apps) through which AI agents are accessible.
 
 ## Quick Start
 
-```typescript
-import { WiilClient, DeploymentType } from 'wiil-js';
+```python
+from wiil import WiilClient
+from wiil.models.service_mgt import CreateDeploymentChannel
+from wiil.models.type_definitions import DeploymentType
 
-const client = new WiilClient({
-  apiKey: 'your-api-key',
-});
+client = WiilClient(api_key='your-api-key')
 
-// Create a web deployment channel
-const channel = await client.deploymentChannels.create({
-  channelIdentifier: 'https://example.com',
-  deploymentType: DeploymentType.WEB,
-  channelName: 'Main Website Chat',
-  recordingEnabled: true,
-  configuration: {
-    communicationType: 'unified',
-    widgetConfiguration: {
-      position: 'right',
-      customTheme: {
-        primaryColor: '#007bff',
-      },
-    },
-  },
-});
+# Create a web deployment channel
+channel = client.deployment_channels.create(
+    CreateDeploymentChannel(
+        channel_identifier='https://example.com',
+        deployment_type=DeploymentType.WEB.value,
+        channel_name='Main Website Chat',
+        recording_enabled=True,
+        configuration={
+            'communicationType': 'unified',
+            'widgetConfiguration': {
+                'position': 'right',
+                'customTheme': {
+                    'primaryColor': '#007bff',
+                },
+            },
+        },
+    )
+)
 
-console.log('Channel created:', channel.id);
+print(f'Channel created: {channel.id}')
 ```
 
 ## Architecture Overview
@@ -43,61 +45,63 @@ Deployment channels define the single communication endpoint through which a dep
 
 ### DeploymentType
 
-```typescript
-enum DeploymentType {
-  CALLS = 'calls',      // Voice phone calls
-  SMS = 'sms',          // SMS text messaging
-  WEB = 'web',          // Browser-based chat widget
-  MOBILE = 'mobile-app' // Native mobile applications
-}
+```python
+from wiil.models.type_definitions import DeploymentType
+
+# Available values:
+DeploymentType.CALLS   # 'calls' - Voice phone calls
+DeploymentType.SMS     # 'sms' - SMS text messaging
+DeploymentType.WEB     # 'web' - Browser-based chat widget
+DeploymentType.MOBILE  # 'mobile-app' - Native mobile applications
 ```
 
 ### DeploymentStatus
 
-```typescript
-enum DeploymentStatus {
-  PENDING = 'pending',   // Created but not yet activated
-  ACTIVE = 'active',     // Operational
-  PAUSED = 'paused',     // Temporarily suspended
-  ARCHIVED = 'archived'  // Decommissioned
-}
+```python
+from wiil.models.type_definitions import DeploymentStatus
+
+# Available values:
+DeploymentStatus.PENDING   # 'pending' - Created but not yet activated
+DeploymentStatus.ACTIVE    # 'active' - Operational
+DeploymentStatus.PAUSED    # 'paused' - Temporarily suspended
+DeploymentStatus.ARCHIVED  # 'archived' - Decommissioned
 ```
 
 ## Deployment Channel Schema
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| channelIdentifier | string | Yes | Phone number (E.164), URL, or package name |
-| deploymentType | DeploymentType | Yes | Channel type (CALLS, SMS, WEB, MOBILE) |
-| channelName | string | No | Human-readable name |
-| recordingEnabled | boolean | No | Record interactions (default: true) |
-| configuration | object | Yes | Type-specific configuration |
+| channel_identifier | str | Yes | Phone number (E.164), URL, or package name |
+| deployment_type | str | Yes | Channel type (calls, sms, web, mobile-app) |
+| channel_name | str | No | Human-readable name |
+| recording_enabled | bool | No | Record interactions (default: True) |
+| configuration | dict | Yes | Type-specific configuration |
 
 ### Channel Configuration by Type
 
-**Phone Channels (CALLS/SMS)**:
-```typescript
+**Phone Channels (calls/sms)**:
+```python
 {
-  phoneConfigurationId: string  // Reference to PhoneConfiguration resource
+    'phoneConfigurationId': 'phone_config_123'  # Reference to PhoneConfiguration
 }
 ```
 
 **Web Channels**:
-```typescript
+```python
 {
-  communicationType: 'text' | 'voice' | 'unified',
-  widgetConfiguration?: {
-    position: 'left' | 'right',
-    customTheme?: Record<string, string>
-  }
+    'communicationType': 'text' | 'voice' | 'unified',
+    'widgetConfiguration': {
+        'position': 'left' | 'right',
+        'customTheme': {'primaryColor': '#007bff'}
+    }
 }
 ```
 
 **Mobile Channels**:
-```typescript
+```python
 {
-  packageName: string,
-  platform: 'ios' | 'android'
+    'packageName': 'com.example.app',
+    'platform': 'ios' | 'android'
 }
 ```
 
@@ -105,204 +109,249 @@ enum DeploymentStatus {
 
 ### Create Deployment Channel
 
-```typescript
-// Web Channel
-const webChannel = await client.deploymentChannels.create({
-  channelIdentifier: 'https://example.com',
-  deploymentType: DeploymentType.WEB,
-  channelName: 'Website Chat Widget',
-  recordingEnabled: true,
-  configuration: {
-    communicationType: 'unified',
-    widgetConfiguration: {
-      position: 'right',
-      customTheme: { primaryColor: '#0066cc' },
-    },
-  },
-});
+```python
+from wiil import WiilClient
+from wiil.models.service_mgt import CreateDeploymentChannel
+from wiil.models.type_definitions import DeploymentType
 
-console.log('Web channel created:', webChannel.id);
+client = WiilClient(api_key='your-api-key')
+
+# Web Channel
+web_channel = client.deployment_channels.create(
+    CreateDeploymentChannel(
+        channel_identifier='https://example.com',
+        deployment_type=DeploymentType.WEB.value,
+        channel_name='Website Chat Widget',
+        recording_enabled=True,
+        configuration={
+            'communicationType': 'unified',
+            'widgetConfiguration': {
+                'position': 'right',
+                'customTheme': {'primaryColor': '#0066cc'},
+            },
+        },
+    )
+)
+
+print(f'Web channel created: {web_channel.id}')
 ```
 
 ### Get Deployment Channel
 
-```typescript
-// Get by ID
-const channel = await client.deploymentChannels.get('channel_123');
-console.log('Channel name:', channel.channelName);
-console.log('Channel type:', channel.deploymentType);
+```python
+# Get by ID
+channel = client.deployment_channels.get('channel_123')
+print(f'Channel name: {channel.channel_name}')
+print(f'Channel type: {channel.deployment_type}')
 
-// Get by identifier and type
-const webChannel = await client.deploymentChannels.getByIdentifier(
-  'https://example.com',
-  DeploymentType.WEB
-);
-console.log('Found channel:', webChannel.id);
+# Get by identifier and type
+web_channel = client.deployment_channels.get_by_identifier(
+    'https://example.com',
+    DeploymentType.WEB.value
+)
+print(f'Found channel: {web_channel.id}')
 ```
 
 ### List Deployment Channels
 
-```typescript
-// List all channels
-const result = await client.deploymentChannels.list({
-  page: 1,
-  pageSize: 20,
-});
+```python
+from wiil.types import PaginationRequest
+from wiil.models.type_definitions import DeploymentType
 
-console.log('Total channels:', result.meta.totalCount);
-result.data.forEach(channel => {
-  console.log(`- ${channel.channelName} (${channel.deploymentType})`);
-});
+# List all channels
+result = client.deployment_channels.list(
+    params=PaginationRequest(page=1, page_size=20)
+)
 
-// List by type
-const webChannels = await client.deploymentChannels.listByType(
-  DeploymentType.WEB,
-  { page: 1, pageSize: 20 }
-);
+print(f'Total channels: {result.meta.total_count}')
+for channel in result.data:
+    print(f'- {channel.channel_name} ({channel.deployment_type})')
 
-console.log('Web channels:', webChannels.data.length);
+# List by type
+web_channels = client.deployment_channels.list_by_type(
+    DeploymentType.WEB.value,
+    params=PaginationRequest(page=1, page_size=20)
+)
+
+print(f'Web channels: {len(web_channels.data)}')
 ```
 
 ### Update Deployment Channel
 
-```typescript
-const updated = await client.deploymentChannels.update({
-  id: 'channel_123',
-  channelName: 'Updated Channel Name',
-  recordingEnabled: false,
-});
+```python
+from wiil.models.service_mgt import UpdateDeploymentChannel
 
-console.log('Updated channel:', updated.channelName);
+updated = client.deployment_channels.update(
+    UpdateDeploymentChannel(
+        id='channel_123',
+        channel_name='Updated Channel Name',
+        recording_enabled=False,
+    )
+)
+
+print(f'Updated channel: {updated.channel_name}')
 ```
 
 ### Delete Deployment Channel
 
-```typescript
-// Delete channel only
-const deleted = await client.deploymentChannels.delete('channel_123');
+```python
+# Delete channel only
+deleted = client.deployment_channels.delete('channel_123')
 
-// Delete channel and associated phone configuration
-const deletedWithPhone = await client.deploymentChannels.delete('channel_123', {
-  deletePhoneConfig: true,
-});
+# Delete channel and associated phone configuration
+deleted_with_phone = client.deployment_channels.delete(
+    'channel_123',
+    delete_phone_config=True
+)
 
-if (deleted) {
-  console.log('Channel deleted successfully');
-}
+if deleted:
+    print('Channel deleted successfully')
 ```
 
 ## Channel Type Examples
 
 ### Web Chat Widget
 
-```typescript
-const webChannel = await client.deploymentChannels.create({
-  channelIdentifier: 'https://support.example.com',
-  deploymentType: DeploymentType.WEB,
-  channelName: 'Support Portal Chat',
-  recordingEnabled: true,
-  configuration: {
-    communicationType: 'unified',
-    widgetConfiguration: {
-      position: 'right',
-      customTheme: {
-        primaryColor: '#4CAF50',
-        fontFamily: 'Arial, sans-serif',
-      },
-    },
-  },
-});
+```python
+from wiil.models.service_mgt import CreateDeploymentChannel
+from wiil.models.type_definitions import DeploymentType
+
+web_channel = client.deployment_channels.create(
+    CreateDeploymentChannel(
+        channel_identifier='https://support.example.com',
+        deployment_type=DeploymentType.WEB.value,
+        channel_name='Support Portal Chat',
+        recording_enabled=True,
+        configuration={
+            'communicationType': 'unified',
+            'widgetConfiguration': {
+                'position': 'right',
+                'customTheme': {
+                    'primaryColor': '#4CAF50',
+                    'fontFamily': 'Arial, sans-serif',
+                },
+            },
+        },
+    )
+)
 ```
 
 ### Phone Call Channel
 
-```typescript
-// First, ensure you have a phone configuration
-const phoneChannel = await client.deploymentChannels.create({
-  channelIdentifier: '+12025551234',
-  deploymentType: DeploymentType.CALLS,
-  channelName: 'Customer Support Line',
-  recordingEnabled: true,
-  configuration: {
-    phoneConfigurationId: 'phone_config_123',
-  },
-});
+```python
+from wiil.models.service_mgt import CreateDeploymentChannel
+from wiil.models.type_definitions import DeploymentType
+
+# First, ensure you have a phone configuration
+phone_channel = client.deployment_channels.create(
+    CreateDeploymentChannel(
+        channel_identifier='+12025551234',
+        deployment_type=DeploymentType.CALLS.value,
+        channel_name='Customer Support Line',
+        recording_enabled=True,
+        configuration={
+            'phoneConfigurationId': 'phone_config_123',
+        },
+    )
+)
 ```
 
 ### SMS Channel
 
-```typescript
-const smsChannel = await client.deploymentChannels.create({
-  channelIdentifier: '+12025551234',
-  deploymentType: DeploymentType.SMS,
-  channelName: 'SMS Support',
-  recordingEnabled: true,
-  configuration: {
-    phoneConfigurationId: 'phone_config_123',
-  },
-});
+```python
+from wiil.models.service_mgt import CreateDeploymentChannel
+from wiil.models.type_definitions import DeploymentType
+
+sms_channel = client.deployment_channels.create(
+    CreateDeploymentChannel(
+        channel_identifier='+12025551234',
+        deployment_type=DeploymentType.SMS.value,
+        channel_name='SMS Support',
+        recording_enabled=True,
+        configuration={
+            'phoneConfigurationId': 'phone_config_123',
+        },
+    )
+)
 ```
 
 ## Complete Example
 
 Full workflow demonstrating deployment channel lifecycle:
 
-```typescript
-import { WiilClient, DeploymentType } from 'wiil-js';
+```python
+import os
+import time
 
-const client = new WiilClient({
-  apiKey: process.env.WIIL_API_KEY!,
-});
+from wiil import WiilClient
+from wiil.models.service_mgt import (
+    CreateDeploymentChannel,
+    UpdateDeploymentChannel,
+)
+from wiil.models.type_definitions import DeploymentType
+from wiil.types import PaginationRequest
 
-async function manageDeploymentChannels() {
-  // 1. Create a web deployment channel
-  const webChannel = await client.deploymentChannels.create({
-    channelIdentifier: `https://test-${Date.now()}.example.com`,
-    deploymentType: DeploymentType.WEB,
-    channelName: 'Test Web Channel',
-    recordingEnabled: true,
-    configuration: {
-      communicationType: 'unified',
-      widgetConfiguration: {
-        position: 'right',
-        customTheme: { primaryColor: '#007bff' },
-      },
-    },
-  });
+client = WiilClient(api_key=os.environ['WIIL_API_KEY'])
 
-  console.log('Channel created:', webChannel.id);
 
-  // 2. Retrieve channel by ID
-  const retrieved = await client.deploymentChannels.get(webChannel.id);
-  console.log('Retrieved channel:', retrieved.channelName);
+def manage_deployment_channels():
+    timestamp = int(time.time())
 
-  // 3. List all web channels
-  const webChannels = await client.deploymentChannels.listByType(DeploymentType.WEB);
-  console.log('Total web channels:', webChannels.meta.totalCount);
+    # 1. Create a web deployment channel
+    web_channel = client.deployment_channels.create(
+        CreateDeploymentChannel(
+            channel_identifier=f'https://test-{timestamp}.example.com',
+            deployment_type=DeploymentType.WEB.value,
+            channel_name='Test Web Channel',
+            recording_enabled=True,
+            configuration={
+                'communicationType': 'unified',
+                'widgetConfiguration': {
+                    'position': 'right',
+                    'customTheme': {'primaryColor': '#007bff'},
+                },
+            },
+        )
+    )
 
-  // 4. Update channel configuration
-  const updated = await client.deploymentChannels.update({
-    id: webChannel.id,
-    channelName: 'Updated Test Channel',
-    recordingEnabled: false,
-  });
+    print(f'Channel created: {web_channel.id}')
 
-  console.log('Updated channel name:', updated.channelName);
-  console.log('Recording enabled:', updated.recordingEnabled);
+    # 2. Retrieve channel by ID
+    retrieved = client.deployment_channels.get(web_channel.id)
+    print(f'Retrieved channel: {retrieved.channel_name}')
 
-  // 5. Find channel by identifier
-  const found = await client.deploymentChannels.getByIdentifier(
-    webChannel.channelIdentifier,
-    DeploymentType.WEB
-  );
-  console.log('Found by identifier:', found.id);
+    # 3. List all web channels
+    web_channels = client.deployment_channels.list_by_type(
+        DeploymentType.WEB.value
+    )
+    print(f'Total web channels: {web_channels.meta.total_count}')
 
-  // 6. Clean up
-  await client.deploymentChannels.delete(webChannel.id);
-  console.log('Channel deleted');
-}
+    # 4. Update channel configuration
+    updated = client.deployment_channels.update(
+        UpdateDeploymentChannel(
+            id=web_channel.id,
+            channel_name='Updated Test Channel',
+            recording_enabled=False,
+        )
+    )
 
-manageDeploymentChannels().catch(console.error);
+    print(f'Updated channel name: {updated.channel_name}')
+    print(f'Recording enabled: {updated.recording_enabled}')
+
+    # 5. Find channel by identifier
+    found = client.deployment_channels.get_by_identifier(
+        web_channel.channel_identifier,
+        DeploymentType.WEB.value
+    )
+    print(f'Found by identifier: {found.id}')
+
+    # 6. Clean up
+    client.deployment_channels.delete(web_channel.id)
+    print('Channel deleted')
+
+
+if __name__ == '__main__':
+    manage_deployment_channels()
 ```
 
 ## Best Practices
@@ -315,7 +364,7 @@ manageDeploymentChannels().catch(console.error);
 
 4. **One channel per deployment** - Each deployment configuration has exactly one channel. Create separate deployments for multi-channel agents.
 
-5. **Use listByType for filtering** - When you need channels of a specific type, use `listByType()` for better performance.
+5. **Use list_by_type for filtering** - When you need channels of a specific type, use `list_by_type()` for better performance.
 
 ## Troubleshooting
 
@@ -329,14 +378,14 @@ WiilValidationError: Invalid website URL format
 **Solution:**
 Ensure the identifier matches the expected format for the deployment type:
 
-```typescript
-// Web channels: valid URL
-channelIdentifier: 'https://example.com'  // Correct
-channelIdentifier: 'example.com'          // May fail validation
+```python
+# Web channels: valid URL
+channel_identifier = 'https://example.com'  # Correct
+channel_identifier = 'example.com'          # May fail validation
 
-// Phone channels: E.164 format
-channelIdentifier: '+12025551234'         // Correct
-channelIdentifier: '202-555-1234'         // May fail validation
+# Phone channels: E.164 format
+channel_identifier = '+12025551234'         # Correct
+channel_identifier = '202-555-1234'         # May fail validation
 ```
 
 ### Missing Phone Configuration
@@ -349,22 +398,23 @@ WiilAPIError: Phone configuration not found
 **Solution:**
 Create or reference a valid phone configuration before creating phone/SMS channels:
 
-```typescript
-// Ensure phone config exists
-const phoneConfigs = await client.phoneConfigurations.list();
-const phoneConfigId = phoneConfigs.data[0]?.id;
+```python
+# Ensure phone config exists
+phone_configs = client.phone_configurations.list()
+phone_config_id = phone_configs.data[0].id if phone_configs.data else None
 
-if (!phoneConfigId) {
-  throw new Error('No phone configuration available');
-}
+if not phone_config_id:
+    raise ValueError('No phone configuration available')
 
-const channel = await client.deploymentChannels.create({
-  channelIdentifier: '+12025551234',
-  deploymentType: DeploymentType.CALLS,
-  configuration: {
-    phoneConfigurationId: phoneConfigId,  // Must be valid
-  },
-});
+channel = client.deployment_channels.create(
+    CreateDeploymentChannel(
+        channel_identifier='+12025551234',
+        deployment_type=DeploymentType.CALLS.value,
+        configuration={
+            'phoneConfigurationId': phone_config_id,  # Must be valid
+        },
+    )
+)
 ```
 
 ### Channel Already Exists
@@ -377,15 +427,20 @@ WiilAPIError: Channel identifier already in use
 **Solution:**
 Channel identifiers must be unique per deployment type. Check for existing channels first:
 
-```typescript
-try {
-  const existing = await client.deploymentChannels.getByIdentifier(
-    'https://example.com',
-    DeploymentType.WEB
-  );
-  console.log('Channel already exists:', existing.id);
-} catch (error) {
-  // Channel doesn't exist, safe to create
-  const newChannel = await client.deploymentChannels.create({...});
-}
+```python
+try:
+    existing = client.deployment_channels.get_by_identifier(
+        'https://example.com',
+        DeploymentType.WEB.value
+    )
+    print(f'Channel already exists: {existing.id}')
+except Exception:
+    # Channel doesn't exist, safe to create
+    new_channel = client.deployment_channels.create(
+        CreateDeploymentChannel(
+            channel_identifier='https://example.com',
+            deployment_type=DeploymentType.WEB.value,
+            # ...
+        )
+    )
 ```

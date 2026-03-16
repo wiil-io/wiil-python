@@ -2,8 +2,17 @@
 
 from wiil.client.http_client import HttpClient
 from wiil.models.service_mgt.dynamic_setup import (
+    DynamicAgentProcessingState,
     DynamicAgentSetupResult,
 )
+
+
+class PollTimeoutError(Exception):
+    """Raised when polling times out before completion."""
+
+    def __init__(self, message: str, last_state: DynamicAgentProcessingState):
+        super().__init__(message)
+        self.last_state = last_state
 
 
 class DynamicAgentStatusResource:
@@ -26,7 +35,10 @@ class DynamicAgentStatusResource:
         Returns:
             The current status of the agent setup operation
         """
-        return self._http.get(f'{self._base_path}/{setup_id}')
+        return self._http.get(
+            f'{self._base_path}/{setup_id}',
+            response_model=DynamicAgentSetupResult
+        )
 
 
-__all__ = ['DynamicAgentStatusResource']
+__all__ = ['DynamicAgentStatusResource', 'PollTimeoutError']

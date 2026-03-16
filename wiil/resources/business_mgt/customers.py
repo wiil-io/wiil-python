@@ -14,16 +14,21 @@ Example:
     ... ))
 """
 
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional, Union
 from urllib.parse import urlencode, quote
 
+from pydantic import BaseModel, ValidationError
+
 from wiil.client.http_client import HttpClient
+from wiil.errors import WiilValidationError
 from wiil.models.business_mgt import (
     Customer,
     CreateCustomer,
     UpdateCustomer,
 )
 from wiil.types import PaginatedResult, PaginationRequest
+
+BATCH_LIMIT = 50
 
 
 class CustomersResource:
@@ -104,7 +109,8 @@ class CustomersResource:
         return self._http.post(
             self._base_path,
             data.model_dump(by_alias=True, exclude_none=True),
-            schema=CreateCustomer
+            schema=CreateCustomer,
+            response_model=Customer
         )
 
     def get(self, customer_id: str) -> Customer:
@@ -126,7 +132,7 @@ class CustomersResource:
             >>> print('Email:', customer.email)
             >>> print('Phone:', customer.phone_number)
         """
-        return self._http.get(f'{self._base_path}/{customer_id}')
+        return self._http.get(f'{self._base_path}/{customer_id}', response_model=Customer)
 
     def get_by_phone(self, phone_number: str) -> Optional[Customer]:
         """Retrieve a customer by phone number.
@@ -148,7 +154,7 @@ class CustomersResource:
             ... else:
             ...     print('No customer found with that phone number')
         """
-        return self._http.get(f'{self._base_path}/phone/{quote(phone_number, safe="")}')
+        return self._http.get(f'{self._base_path}/phone/{quote(phone_number, safe="")}', response_model=Customer)
 
     def get_by_email(self, email: str) -> Optional[Customer]:
         """Retrieve a customer by email address.
@@ -168,7 +174,7 @@ class CustomersResource:
             >>> if customer:
             ...     print('Found customer:', customer.id)
         """
-        return self._http.get(f'{self._base_path}/email/{quote(email, safe="")}')
+        return self._http.get(f'{self._base_path}/email/{quote(email, safe="")}', response_model=Customer)
 
     def search(
         self,
@@ -205,7 +211,10 @@ class CustomersResource:
             query_params['page'] = params.page
             query_params['pageSize'] = params.page_size
 
-        return self._http.get(f'{self._base_path}/search?{urlencode(query_params)}')
+        return self._http.get(
+            f'{self._base_path}/search?{urlencode(query_params)}',
+            response_model=PaginatedResult[Customer]
+        )
 
     def update(self, customer_id: str, data: UpdateCustomer) -> Customer:
         """Update an existing customer.
@@ -236,7 +245,8 @@ class CustomersResource:
         return self._http.patch(
             f'{self._base_path}/{customer_id}',
             data.model_dump(by_alias=True, exclude_none=True),
-            schema=UpdateCustomer
+            schema=UpdateCustomer,
+            response_model=Customer
         )
 
     def delete(self, customer_id: str) -> bool:
@@ -293,7 +303,62 @@ class CustomersResource:
             query_params['pageSize'] = params.page_size
 
         query_string = f'?{urlencode(query_params)}' if query_params else ''
-        return self._http.get(f'{self._base_path}{query_string}')
+        return self._http.get(
+            f'{self._base_path}{query_string}',
+            response_model=PaginatedResult[Customer]
+        )
+
+    def create_batch(
+        self,
+        data: List[Union[CreateCustomer, Dict[str, Any]]]
+    ) -> PaginatedResult[Customer]:
+        """Create multiple customers in a batch.
+
+        Args:
+            data: List of customers to create (max 50 items)
+
+        Returns:
+            PaginatedResult containing created customers
+
+        Raises:
+            WiilValidationError: When batch size exceeds limit or validation fails
+        """
+        if len(data) > BATCH_LIMIT:
+            raise WiilValidationError(
+                f'Batch size exceeds maximum limit of {BATCH_LIMIT}',
+                details=[{
+                    'path': ['data'],
+                    'message': f'Array length {len(data)} exceeds maximum of {BATCH_LIMIT}'
+                }]
+            )
+
+        payload = []
+        for i, item in enumerate(data):
+            try:
+                if isinstance(item, dict):
+                    validated = CreateCustomer.model_validate(item)
+                    payload.append(validated.model_dump(by_alias=True, exclude_none=True))
+                elif isinstance(item, BaseModel):
+                    payload.append(item.model_dump(by_alias=True, exclude_none=True))
+                else:
+                    raise WiilValidationError(
+                        f'Invalid item type at index {i}',
+                        details=[{
+                            'path': ['data', i],
+                            'message': 'Expected dict or Pydantic model'
+                        }]
+                    )
+            except ValidationError as e:
+                raise WiilValidationError(
+                    f'Validation failed for item at index {i}',
+                    details=e.errors()
+                )
+
+        return self._http.post(
+            f'{self._base_path}/batch',
+            payload,
+            response_model=PaginatedResult[Customer]
+        )
 
 
 __all__ = ['CustomersResource']

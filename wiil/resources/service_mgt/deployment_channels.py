@@ -1,7 +1,7 @@
 """Deployment Channels resource for managing deployment channel entities."""
 
 from typing import Any, Dict, Optional
-from urllib.parse import urlencode
+from urllib.parse import quote, urlencode
 
 from wiil.client.http_client import HttpClient
 from wiil.models.service_mgt import (
@@ -36,12 +36,13 @@ class DeploymentChannelsResource:
         return self._http.post(
             self._base_path,
             data.model_dump(by_alias=True, exclude_none=True),
-            schema=CreateDeploymentChannel
+            schema=CreateDeploymentChannel,
+            response_model=DeploymentChannel
         )
 
     def get(self, channel_id: str) -> DeploymentChannel:
         """Retrieve a deployment channel by ID."""
-        return self._http.get(f'{self._base_path}/{channel_id}')
+        return self._http.get(f'{self._base_path}/{channel_id}', response_model=DeploymentChannel)
 
     def get_by_identifier(self, identifier: str, channel_type: str) -> DeploymentChannel:
         """Retrieve a deployment channel by identifier and type.
@@ -53,7 +54,11 @@ class DeploymentChannelsResource:
         Returns:
             The deployment channel matching the identifier and type
         """
-        return self._http.get(f'{self._base_path}/by-identifier/{identifier}?type={channel_type}')
+        encoded_identifier = quote(identifier, safe='')
+        return self._http.get(
+            f'{self._base_path}/by-identifier/{encoded_identifier}?type={channel_type}',
+            response_model=DeploymentChannel
+        )
 
     def update(self, data: UpdateDeploymentChannel) -> DeploymentChannel:
         """Update an existing deployment channel.
@@ -67,12 +72,23 @@ class DeploymentChannelsResource:
         return self._http.patch(
             self._base_path,
             data.model_dump(by_alias=True, exclude_none=True),
-            schema=UpdateDeploymentChannel
+            schema=UpdateDeploymentChannel,
+            response_model=DeploymentChannel
         )
 
-    def delete(self, channel_id: str) -> bool:
-        """Delete a deployment channel."""
-        return self._http.delete(f'{self._base_path}/{channel_id}')
+    def delete(self, channel_id: str, delete_phone_config: bool = False) -> bool:
+        """Delete a deployment channel.
+
+        Args:
+            channel_id: Deployment channel ID
+            delete_phone_config: Whether to also delete the associated phone
+                configuration (default: False)
+
+        Returns:
+            True if deletion was successful
+        """
+        query_string = '?deletePhoneConfig=true' if delete_phone_config else ''
+        return self._http.delete(f'{self._base_path}/{channel_id}{query_string}')
 
     def list(
         self,
@@ -92,7 +108,10 @@ class DeploymentChannelsResource:
             query_params['pageSize'] = params.page_size
 
         query_string = f'?{urlencode(query_params)}' if query_params else ''
-        return self._http.get(f'{self._base_path}{query_string}')
+        return self._http.get(
+            f'{self._base_path}{query_string}',
+            response_model=PaginatedResult[DeploymentChannel]
+        )
 
     def list_by_type(
         self,
@@ -114,7 +133,10 @@ class DeploymentChannelsResource:
             query_params['pageSize'] = params.page_size
 
         query_string = f'?{urlencode(query_params)}' if query_params else ''
-        return self._http.get(f'{self._base_path}/by-type/{channel_type}{query_string}')
+        return self._http.get(
+            f'{self._base_path}/by-type/{channel_type}{query_string}',
+            response_model=PaginatedResult[DeploymentChannel]
+        )
 
 
 __all__ = ['DeploymentChannelsResource']

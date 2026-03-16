@@ -24,12 +24,13 @@ class ProductOrdersResource:
         return self._http.post(
             self._base_path,
             data.model_dump(by_alias=True, exclude_none=True),
-            schema=CreateProductOrder
+            schema=CreateProductOrder,
+            response_model=ProductOrder
         )
 
     def get(self, order_id: str) -> ProductOrder:
         """Retrieve a product order by ID."""
-        return self._http.get(f'{self._base_path}/{order_id}')
+        return self._http.get(f'{self._base_path}/{order_id}', response_model=ProductOrder)
 
     def get_by_customer(
         self,
@@ -43,29 +44,38 @@ class ProductOrdersResource:
             query_params['pageSize'] = params.page_size
 
         query_string = f'?{urlencode(query_params)}' if query_params else ''
-        return self._http.get(f'{self._base_path}/by-customer/{customer_id}{query_string}')
+        return self._http.get(
+            f'{self._base_path}/by-customer/{customer_id}{query_string}',
+            response_model=PaginatedResult[ProductOrder]
+        )
 
     def update(self, data: UpdateProductOrder) -> ProductOrder:
         """Update a product order."""
         return self._http.patch(
             self._base_path,
             data.model_dump(by_alias=True, exclude_none=True),
-            schema=UpdateProductOrder
+            schema=UpdateProductOrder,
+            response_model=ProductOrder
         )
 
     def update_status(self, order_id: str, status: str) -> ProductOrder:
         """Update product order status."""
         return self._http.patch(
             f'{self._base_path}/{order_id}/status',
-            {'status': status}
+            {'status': status},
+            response_model=ProductOrder
         )
 
     def cancel(self, order_id: str, reason: Optional[str] = None) -> ProductOrder:
         """Cancel a product order."""
         data: Dict[str, Any] = {}
         if reason is not None:
-            data['reason'] = reason
-        return self._http.post(f'{self._base_path}/{order_id}/cancel', data)
+            data['cancelReason'] = reason
+        return self._http.post(
+            f'{self._base_path}/{order_id}/cancel',
+            data,
+            response_model=ProductOrder
+        )
 
     def delete(self, order_id: str) -> bool:
         """Delete a product order."""
@@ -79,7 +89,10 @@ class ProductOrdersResource:
             query_params['pageSize'] = params.page_size
 
         query_string = f'?{urlencode(query_params)}' if query_params else ''
-        return self._http.get(f'{self._base_path}{query_string}')
+        return self._http.get(
+            f'{self._base_path}{query_string}',
+            response_model=PaginatedResult[ProductOrder]
+        )
 
 
 __all__ = ['ProductOrdersResource']

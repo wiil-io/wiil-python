@@ -177,3 +177,83 @@ customer_orders = client.product_orders.get_by_customer(
 
 print(order_details.status, customer_orders.meta.total_count)
 ```
+
+## Batch Operations
+
+Create multiple product categories and products efficiently.
+
+### Create Categories in Batch
+
+```python
+from wiil.models.business_mgt import CreateProductCategory
+
+categories = client.products.create_category_batch([
+    CreateProductCategory(name="Electronics", display_order=1),
+    CreateProductCategory(name="Clothing", display_order=2),
+    CreateProductCategory(name="Accessories", display_order=3),
+])
+
+print(f"Created {len(categories.data)} categories")
+for category in categories.data:
+    print(f"  - {category.name}")
+```
+
+**Limits:** Maximum 50 categories per batch
+
+### Create Products in Batch
+
+```python
+from wiil.models.business_mgt import CreateBusinessProduct
+
+products = client.products.create_batch([
+    CreateBusinessProduct(
+        name="Wireless Earbuds",
+        description="Bluetooth 5.0 earbuds",
+        price=79.99,
+        sku="ELEC-001",
+        category_id="cat_electronics",
+        is_active=True,
+    ),
+    CreateBusinessProduct(
+        name="Cotton T-Shirt",
+        description="100% cotton, various sizes",
+        price=24.99,
+        sku="CLTH-001",
+        category_id="cat_clothing",
+        is_active=True,
+    ),
+    CreateBusinessProduct(
+        name="Leather Wallet",
+        description="Genuine leather bifold",
+        price=49.99,
+        sku="ACCS-001",
+        category_id="cat_accessories",
+        is_active=True,
+    ),
+])
+
+print(f"Created {len(products.data)} products")
+for product in products.data:
+    print(f"  - {product.name}: ${product.price}")
+```
+
+**Limits:** Maximum 100 products per batch
+
+### Handling Batch Errors
+
+Batch operations validate each item and report errors with index information:
+
+```python
+from wiil.errors import WiilValidationError
+from wiil.models.business_mgt import CreateBusinessProduct
+
+try:
+    products = client.products.create_batch([
+        CreateBusinessProduct(name="Valid Product", price=10.00, sku="SKU-001"),
+        CreateBusinessProduct(name="", price=10.00, sku="SKU-002"),  # Invalid: empty name
+    ])
+except WiilValidationError as e:
+    print(f"Validation error: {e.message}")
+    for detail in e.details:
+        print(f"  - {detail}")
+```

@@ -40,7 +40,7 @@ class TestDynamicPhoneAgentResource:
         mock_api.add(
             responses.POST,
             f"{BASE_URL}/dynamic-phone-agent",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -78,7 +78,7 @@ class TestDynamicPhoneAgentResource:
         mock_api.add(
             responses.POST,
             f"{BASE_URL}/dynamic-phone-agent",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -126,7 +126,7 @@ class TestDynamicPhoneAgentResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/dynamic-phone-agent/setup_123",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -144,7 +144,7 @@ class TestDynamicPhoneAgentResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/dynamic-phone-agent/invalid_id",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=error_response("NOT_FOUND", "Dynamic phone agent not found"),
             status=404,
         )
@@ -176,7 +176,7 @@ class TestDynamicPhoneAgentResource:
         mock_api.add(
             responses.PATCH,
             f"{BASE_URL}/dynamic-phone-agent",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -197,7 +197,7 @@ class TestDynamicPhoneAgentResource:
         mock_api.add(
             responses.DELETE,
             f"{BASE_URL}/dynamic-phone-agent/setup_123",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(True),
             status=200,
         )
@@ -213,7 +213,7 @@ class TestDynamicPhoneAgentResource:
         mock_api.add(
             responses.DELETE,
             f"{BASE_URL}/dynamic-phone-agent/invalid_id",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=error_response("NOT_FOUND", "Dynamic phone agent not found"),
             status=404,
         )
@@ -271,7 +271,7 @@ class TestDynamicPhoneAgentResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/dynamic-phone-agent",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -301,7 +301,7 @@ class TestDynamicPhoneAgentResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/dynamic-phone-agent?page=2&pageSize=50",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )

@@ -37,7 +37,7 @@ class PaginationMeta(BaseModel):
     )
     page_size: int = Field(
         ...,
-        gt=0,
+        ge=0,
         le=1000,
         description="Number of items per page - limited to 1000 for performance",
         alias="pageSize"

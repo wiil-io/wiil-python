@@ -75,7 +75,7 @@ class SupportModelsResource:
             >>> print('Type:', model.type)
             >>> print('Discontinued:', model.discontinued)
         """
-        return self._http.get(f'{self._base_path}/{model_id}')
+        return self._http.get(f'{self._base_path}/{model_id}', response_model=WiilSupportModel)
 
     def list(self) -> List[WiilSupportModel]:
         """List all support models in the registry.
@@ -93,7 +93,7 @@ class SupportModelsResource:
             >>> for model in models:
             ...     print(f"- {model.name} ({model.proprietor})")
         """
-        return self._http.get(self._base_path)
+        return self._http.get(self._base_path, response_model=List[WiilSupportModel])
 
     def get_default_multi_mode(self) -> Optional[WiilSupportModel]:
         """Retrieve the default multi-mode model.
@@ -110,7 +110,7 @@ class SupportModelsResource:
             >>> if model:
             ...     print('Default multi-mode model:', model.name)
         """
-        return self._http.get(f'{self._base_path}/defaults/multi-mode')
+        return self._http.get(f'{self._base_path}/defaults/multi-mode', response_model=WiilSupportModel)
 
     def get_default_sts(self) -> Optional[WiilSupportModel]:
         """Retrieve the default Speech-to-Speech model.
@@ -127,7 +127,7 @@ class SupportModelsResource:
             >>> if model:
             ...     print('Default STS model:', model.name)
         """
-        return self._http.get(f'{self._base_path}/defaults/sts')
+        return self._http.get(f'{self._base_path}/defaults/sts', response_model=WiilSupportModel)
 
     def get_default_tts(self) -> Optional[WiilSupportModel]:
         """Retrieve the default Text-to-Speech model.
@@ -146,7 +146,7 @@ class SupportModelsResource:
             ...     if model.supported_voices:
             ...         print(f"Supported voices: {len(model.supported_voices)}")
         """
-        return self._http.get(f'{self._base_path}/defaults/tts')
+        return self._http.get(f'{self._base_path}/defaults/tts', response_model=WiilSupportModel)
 
     def get_default_stt(self) -> Optional[WiilSupportModel]:
         """Retrieve the default Speech-to-Text model.
@@ -165,7 +165,7 @@ class SupportModelsResource:
             ...     if model.support_languages:
             ...         print(f"Supported languages: {len(model.support_languages)}")
         """
-        return self._http.get(f'{self._base_path}/defaults/stt')
+        return self._http.get(f'{self._base_path}/defaults/stt', response_model=WiilSupportModel)
 
     def get_default_transcribe(self) -> Optional[WiilSupportModel]:
         """Retrieve the default Transcription model.
@@ -182,7 +182,7 @@ class SupportModelsResource:
             >>> if model:
             ...     print('Default transcription model:', model.name)
         """
-        return self._http.get(f'{self._base_path}/defaults/transcribe')
+        return self._http.get(f'{self._base_path}/defaults/transcribe', response_model=WiilSupportModel)
 
     def get_default_batch(self) -> Optional[WiilSupportModel]:
         """Retrieve the default Batch processing model.
@@ -199,7 +199,7 @@ class SupportModelsResource:
             >>> if model:
             ...     print('Default batch model:', model.name)
         """
-        return self._http.get(f'{self._base_path}/defaults/batch')
+        return self._http.get(f'{self._base_path}/defaults/batch', response_model=WiilSupportModel)
 
     def get_default_translation_stt(self) -> Optional[WiilSupportModel]:
         """Retrieve the default Translation Speech-to-Text model.
@@ -216,7 +216,7 @@ class SupportModelsResource:
             >>> if model:
             ...     print('Default translation STT model:', model.name)
         """
-        return self._http.get(f'{self._base_path}/defaults/translation-stt')
+        return self._http.get(f'{self._base_path}/defaults/translation-stt', response_model=WiilSupportModel)
 
     def get_default_translation_tts(self) -> Optional[WiilSupportModel]:
         """Retrieve the default Translation Text-to-Speech model.
@@ -233,7 +233,7 @@ class SupportModelsResource:
             >>> if model:
             ...     print('Default translation TTS model:', model.name)
         """
-        return self._http.get(f'{self._base_path}/defaults/translation-tts')
+        return self._http.get(f'{self._base_path}/defaults/translation-tts', response_model=WiilSupportModel)
 
     def get_by_type_and_proprietor(
         self,
@@ -259,7 +259,8 @@ class SupportModelsResource:
             ...     print('Found model:', model.name)
         """
         return self._http.get(
-            f'{self._base_path}/lookup/type-proprietor/{type}/{proprietor}'
+            f'{self._base_path}/lookup/type-proprietor/{type}/{proprietor}',
+            response_model=WiilSupportModel
         )
 
     def get_by_proprietor_and_provider_model_id(
@@ -290,7 +291,39 @@ class SupportModelsResource:
             ...     print('Wiil Model ID:', model.model_id)
         """
         return self._http.get(
-            f'{self._base_path}/lookup/proprietor-provider/{proprietor}/{provider_model_id}'
+            f'{self._base_path}/lookup/proprietor-provider/{proprietor}/{provider_model_id}',
+            response_model=WiilSupportModel
+        )
+
+    def is_supported(
+        self,
+        proprietor: str,
+        provider_model_id: str
+    ) -> bool:
+        """Check if a model is supported by proprietor and provider model ID.
+
+        Args:
+            proprietor: Model proprietor (e.g., 'OpenAI', 'Anthropic', 'Deepgram')
+            provider_model_id: Provider-specific model identifier (e.g., 'gpt-4-turbo')
+
+        Returns:
+            True if the model is supported, False otherwise
+
+        Raises:
+            WiilAPIError: When the API returns an error
+            WiilNetworkError: When network communication fails
+
+        Example:
+            >>> # Check if a specific model is supported
+            >>> is_supported = client.support_models.is_supported('OpenAI', 'gpt-4-turbo')
+            >>> if is_supported:
+            ...     print('Model is supported')
+            >>> else:
+            ...     print('Model is not supported')
+        """
+        return self._http.get(
+            f'{self._base_path}/supports/{proprietor}/{provider_model_id}',
+            response_model=bool
         )
 
 

@@ -12,7 +12,7 @@ Example:
 """
 
 import json
-from typing import Any, Dict, Optional, Type, TypeVar
+from typing import Any, Dict, List, Optional, Type, TypeVar, Union, get_origin, get_args
 
 import requests
 from pydantic import BaseModel, ValidationError
@@ -66,27 +66,35 @@ class HttpClient:
         # Create a session for connection pooling
         self.session = requests.Session()
         self.session.headers.update({
-            'Content-Type': 'application/json',
-            'X-WIIL-API-Key': self.api_key,
+            'X-Wiil-Api-Key': self.api_key,
         })
 
-    def get(self, path: str, **kwargs: Any) -> Any:
+    def get(
+        self,
+        path: str,
+        response_model: Optional[Type[T]] = None,
+        **kwargs: Any
+    ) -> T:
         """Make a GET request to the API.
 
         Args:
             path: API endpoint path (e.g., '/organizations')
+            response_model: Optional Pydantic model to parse response into
             **kwargs: Additional keyword arguments to pass to requests.get()
 
         Returns:
-            The response data extracted from the APIResponse wrapper
+            The response data parsed into response_model if provided,
+            otherwise AttrDict
 
         Raises:
             WiilAPIError: When the API returns an error response (4xx or 5xx)
             WiilNetworkError: When network communication fails
+            WiilValidationError: When response validation fails
 
         Example:
-            >>> data = http.get('/organizations')
-            >>> print(data['id'])
+            >>> from wiil.models import Organization
+            >>> org = http.get('/organizations/123', response_model=Organization)
+            >>> print(org.id)
         """
         url = f"{self.base_url}{path}"
 
@@ -101,11 +109,14 @@ class HttpClient:
             # Parse the response
             response_data = response.json()
 
-            # Return the data field from the APIResponse wrapper
-            if isinstance(response_data, dict) and 'data' in response_data:
-                return self._to_attr_obj(response_data['data'])
+            # Check for API-level failure (success: false)
+            self._check_api_success(response_data, response.status_code)
 
-            return self._to_attr_obj(response_data)
+            # Extract data from APIResponse wrapper
+            if isinstance(response_data, dict) and 'data' in response_data:
+                return self._parse_response(response_data['data'], response_model)
+
+            return self._parse_response(response_data, response_model)
 
         except Timeout:
             raise WiilNetworkError(
@@ -135,32 +146,34 @@ class HttpClient:
         path: str,
         data: Any,
         schema: Optional[Type[BaseModel]] = None,
+        response_model: Optional[Type[T]] = None,
         **kwargs: Any
-    ) -> Any:
+    ) -> T:
         """Make a POST request to the API with optional validation.
 
         Args:
             path: API endpoint path
             data: Request payload (will be JSON-encoded)
             schema: Optional Pydantic model for validating the request payload
+            response_model: Optional Pydantic model to parse response into
             **kwargs: Additional keyword arguments to pass to requests.post()
 
         Returns:
-            The response data extracted from the APIResponse wrapper
+            The response data parsed into response_model if provided,
+            otherwise AttrDict
 
         Raises:
-            WiilValidationError: When request validation fails
+            WiilValidationError: When request or response validation fails
             WiilAPIError: When the API returns an error response
             WiilNetworkError: When network communication fails
 
         Example:
-            >>> from pydantic import BaseModel
-            >>> class CreateOrgRequest(BaseModel):
-            ...     name: str
-            >>> data = http.post(
+            >>> from wiil.models import Organization, CreateOrganization
+            >>> org = http.post(
             ...     '/organizations',
             ...     {'name': 'Acme Corp'},
-            ...     schema=CreateOrgRequest
+            ...     schema=CreateOrganization,
+            ...     response_model=Organization
             ... )
         """
         # Validate request if schema provided
@@ -168,9 +181,9 @@ class HttpClient:
             try:
                 if isinstance(data, dict):
                     validated_data = schema(**data)
-                    data = validated_data.model_dump(exclude_none=True)
+                    data = validated_data.model_dump(by_alias=True, exclude_none=True)
                 elif isinstance(data, BaseModel):
-                    data = data.model_dump(exclude_none=True)
+                    data = data.model_dump(by_alias=True, exclude_none=True)
             except ValidationError as e:
                 raise WiilValidationError(
                     'Request validation failed',
@@ -191,11 +204,14 @@ class HttpClient:
             # Parse the response
             response_data = response.json()
 
-            # Return the data field from the APIResponse wrapper
-            if isinstance(response_data, dict) and 'data' in response_data:
-                return self._to_attr_obj(response_data['data'])
+            # Check for API-level failure (success: false)
+            self._check_api_success(response_data, response.status_code)
 
-            return self._to_attr_obj(response_data)
+            # Extract data from APIResponse wrapper and parse
+            if isinstance(response_data, dict) and 'data' in response_data:
+                return self._parse_response(response_data['data'], response_model)
+
+            return self._parse_response(response_data, response_model)
 
         except Timeout:
             raise WiilNetworkError(
@@ -225,28 +241,33 @@ class HttpClient:
         path: str,
         data: Any,
         schema: Optional[Type[BaseModel]] = None,
+        response_model: Optional[Type[T]] = None,
         **kwargs: Any
-    ) -> Any:
+    ) -> T:
         """Make a PUT request to the API with optional validation.
 
         Args:
             path: API endpoint path
             data: Request payload (will be JSON-encoded)
             schema: Optional Pydantic model for validating the request payload
+            response_model: Optional Pydantic model to parse response into
             **kwargs: Additional keyword arguments to pass to requests.put()
 
         Returns:
-            The response data extracted from the APIResponse wrapper
+            The response data parsed into response_model if provided,
+            otherwise AttrDict
 
         Raises:
-            WiilValidationError: When request validation fails
+            WiilValidationError: When request or response validation fails
             WiilAPIError: When the API returns an error response
             WiilNetworkError: When network communication fails
 
         Example:
-            >>> data = http.put(
+            >>> from wiil.models import Organization
+            >>> org = http.put(
             ...     '/organizations/org_123',
-            ...     {'name': 'Acme Corporation'}
+            ...     {'name': 'Acme Corporation'},
+            ...     response_model=Organization
             ... )
         """
         # Validate request if schema provided
@@ -254,9 +275,9 @@ class HttpClient:
             try:
                 if isinstance(data, dict):
                     validated_data = schema(**data)
-                    data = validated_data.model_dump(exclude_none=True)
+                    data = validated_data.model_dump(by_alias=True, exclude_none=True)
                 elif isinstance(data, BaseModel):
-                    data = data.model_dump(exclude_none=True)
+                    data = data.model_dump(by_alias=True, exclude_none=True)
             except ValidationError as e:
                 raise WiilValidationError(
                     'Request validation failed',
@@ -277,11 +298,14 @@ class HttpClient:
             # Parse the response
             response_data = response.json()
 
-            # Return the data field from the APIResponse wrapper
-            if isinstance(response_data, dict) and 'data' in response_data:
-                return self._to_attr_obj(response_data['data'])
+            # Check for API-level failure (success: false)
+            self._check_api_success(response_data, response.status_code)
 
-            return self._to_attr_obj(response_data)
+            # Extract data from APIResponse wrapper and parse
+            if isinstance(response_data, dict) and 'data' in response_data:
+                return self._parse_response(response_data['data'], response_model)
+
+            return self._parse_response(response_data, response_model)
 
         except Timeout:
             raise WiilNetworkError(
@@ -311,28 +335,33 @@ class HttpClient:
         path: str,
         data: Any,
         schema: Optional[Type[BaseModel]] = None,
+        response_model: Optional[Type[T]] = None,
         **kwargs: Any
-    ) -> Any:
+    ) -> T:
         """Make a PATCH request to the API with optional validation.
 
         Args:
             path: API endpoint path
             data: Request payload (will be JSON-encoded)
             schema: Optional Pydantic model for validating the request payload
+            response_model: Optional Pydantic model to parse response into
             **kwargs: Additional keyword arguments to pass to requests.patch()
 
         Returns:
-            The response data extracted from the APIResponse wrapper
+            The response data parsed into response_model if provided,
+            otherwise AttrDict
 
         Raises:
-            WiilValidationError: When request validation fails
+            WiilValidationError: When request or response validation fails
             WiilAPIError: When the API returns an error response
             WiilNetworkError: When network communication fails
 
         Example:
-            >>> data = http.patch(
+            >>> from wiil.models import Organization
+            >>> org = http.patch(
             ...     '/organizations/org_123',
-            ...     {'name': 'Acme Corp Updated'}
+            ...     {'name': 'Acme Corp Updated'},
+            ...     response_model=Organization
             ... )
         """
         # Validate request if schema provided
@@ -340,9 +369,9 @@ class HttpClient:
             try:
                 if isinstance(data, dict):
                     validated_data = schema(**data)
-                    data = validated_data.model_dump(exclude_none=True)
+                    data = validated_data.model_dump(by_alias=True, exclude_none=True)
                 elif isinstance(data, BaseModel):
-                    data = data.model_dump(exclude_none=True)
+                    data = data.model_dump(by_alias=True, exclude_none=True)
             except ValidationError as e:
                 raise WiilValidationError(
                     'Request validation failed',
@@ -363,11 +392,14 @@ class HttpClient:
             # Parse the response
             response_data = response.json()
 
-            # Return the data field from the APIResponse wrapper
-            if isinstance(response_data, dict) and 'data' in response_data:
-                return self._to_attr_obj(response_data['data'])
+            # Check for API-level failure (success: false)
+            self._check_api_success(response_data, response.status_code)
 
-            return self._to_attr_obj(response_data)
+            # Extract data from APIResponse wrapper and parse
+            if isinstance(response_data, dict) and 'data' in response_data:
+                return self._parse_response(response_data['data'], response_model)
+
+            return self._parse_response(response_data, response_model)
 
         except Timeout:
             raise WiilNetworkError(
@@ -392,19 +424,27 @@ class HttpClient:
                 details={'error': str(e)}
             )
 
-    def delete(self, path: str, **kwargs: Any) -> Any:
+    def delete(
+        self,
+        path: str,
+        response_model: Optional[Type[T]] = None,
+        **kwargs: Any
+    ) -> Optional[T]:
         """Make a DELETE request to the API.
 
         Args:
             path: API endpoint path
+            response_model: Optional Pydantic model to parse response into
             **kwargs: Additional keyword arguments to pass to requests.delete()
 
         Returns:
-            The response data extracted from the APIResponse wrapper (may be None)
+            The response data parsed into response_model if provided,
+            otherwise AttrDict or None
 
         Raises:
             WiilAPIError: When the API returns an error response
             WiilNetworkError: When network communication fails
+            WiilValidationError: When response validation fails
 
         Example:
             >>> http.delete('/organizations/org_123')
@@ -423,11 +463,14 @@ class HttpClient:
             if response.text:
                 response_data = response.json()
 
-                # Return the data field from the APIResponse wrapper
-                if isinstance(response_data, dict) and 'data' in response_data:
-                    return self._to_attr_obj(response_data['data'])
+                # Check for API-level failure (success: false)
+                self._check_api_success(response_data, response.status_code)
 
-                return self._to_attr_obj(response_data)
+                # Extract data from APIResponse wrapper and parse
+                if isinstance(response_data, dict) and 'data' in response_data:
+                    return self._parse_response(response_data['data'], response_model)
+
+                return self._parse_response(response_data, response_model)
 
             return None
 
@@ -476,14 +519,13 @@ class HttpClient:
         try:
             error_data = response.json()
 
-            # Check if it's a standard WIIL API error response
+            # Check if it's a standard WIIL API error response (flat structure)
             if isinstance(error_data, dict) and not error_data.get('success', True):
-                error_info = error_data.get('error', {})
                 return WiilAPIError(
-                    message=error_info.get('message', f'Request failed with status {status_code}'),
-                    status_code=status_code,
-                    code=error_info.get('code', 'UNKNOWN_ERROR'),
-                    details=error_info.get('details')
+                    message=error_data.get('message', f'Request failed with status {status_code}'),
+                    status_code=error_data.get('status', status_code),
+                    code=error_data.get('code', 'UNKNOWN_ERROR'),
+                    details=error_data.get('meta')
                 )
 
         except (json.JSONDecodeError, ValueError):
@@ -498,6 +540,28 @@ class HttpClient:
             details={'response_text': response.text}
         )
 
+    def _check_api_success(self, response_data: Any, status_code: int = 200) -> None:
+        """Check if API response indicates failure even with 2xx status.
+
+        The WIIL API may return HTTP 200 with success=false for logical errors.
+        This method checks for that condition and raises WiilAPIError.
+
+        Args:
+            response_data: Parsed JSON response data
+            status_code: HTTP status code for error reporting
+
+        Raises:
+            WiilAPIError: When response has success=false
+        """
+        if isinstance(response_data, dict) and response_data.get('success') is False:
+            # Extract error fields from flat structure (matches TypeScript SDK)
+            raise WiilAPIError(
+                message=response_data.get('message', 'Request failed'),
+                status_code=response_data.get('status', status_code),
+                code=response_data.get('code', 'API_ERROR'),
+                details=response_data.get('meta')
+            )
+
     def _to_attr_obj(self, value: Any) -> Any:
         """Recursively convert dict payloads into attribute-accessible mappings."""
         if isinstance(value, dict):
@@ -505,6 +569,55 @@ class HttpClient:
         if isinstance(value, list):
             return [self._to_attr_obj(item) for item in value]
         return value
+
+    def _parse_response(
+        self,
+        data: Any,
+        response_model: Optional[Type[T]] = None
+    ) -> Union[T, Any]:
+        """Parse response data into a Pydantic model if specified.
+
+        Args:
+            data: Raw response data (dict or list)
+            response_model: Optional Pydantic model type to parse into
+
+        Returns:
+            Parsed model instance(s) or raw AttrDict if no model specified
+
+        Raises:
+            WiilValidationError: When response validation fails
+        """
+        if response_model is None:
+            return self._to_attr_obj(data)
+
+        # Handle None data - return None for Optional types
+        if data is None:
+            return None
+
+        # Handle primitive types (bool, int, str, etc.) that don't have model_validate
+        if response_model in (bool, int, str, float):
+            return data
+
+        try:
+            # Handle List[Model] types
+            origin = get_origin(response_model)
+            if origin is list:
+                args = get_args(response_model)
+                if args and isinstance(data, list):
+                    item_model = args[0]
+                    return [item_model.model_validate(item) for item in data]
+
+            # Handle single model
+            if isinstance(data, list):
+                return [response_model.model_validate(item) for item in data]
+
+            return response_model.model_validate(data)
+
+        except ValidationError as e:
+            raise WiilValidationError(
+                'Response validation failed',
+                details=e.errors()
+            )
 
     def __del__(self):
         """Close the session when the client is destroyed."""
@@ -515,23 +628,11 @@ class HttpClient:
 class AttrDict(dict):
     """Dictionary wrapper that allows attribute-style access."""
 
-    @staticmethod
-    def _snake_to_camel(value: str) -> str:
-        """Convert snake_case names to camelCase for API payload lookups."""
-        if '_' not in value:
-            return value
-        parts = value.split('_')
-        return parts[0] + ''.join(part.capitalize() for part in parts[1:])
-
     def __getattr__(self, key: str) -> Any:
-        if key in self:
+        try:
             return self[key]
-
-        camel_key = self._snake_to_camel(key)
-        if camel_key in self:
-            return self[camel_key]
-
-        raise AttributeError(key)
+        except KeyError as exc:
+            raise AttributeError(key) from exc
 
 
 __all__ = ['HttpClient']

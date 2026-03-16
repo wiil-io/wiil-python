@@ -48,7 +48,7 @@ class TestKnowledgeSourcesResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/knowledge-sources/source_123",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -65,7 +65,7 @@ class TestKnowledgeSourcesResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/knowledge-sources/invalid_id",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=error_response("NOT_FOUND", "Knowledge source not found"),
             status=404,
         )
@@ -150,7 +150,7 @@ class TestKnowledgeSourcesResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/knowledge-sources",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -180,7 +180,7 @@ class TestKnowledgeSourcesResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/knowledge-sources?page=2&pageSize=50",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )

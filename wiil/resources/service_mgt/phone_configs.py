@@ -1,7 +1,7 @@
 """Phone Configurations resource for managing phone configuration entities."""
 
 from typing import Any, Dict, Optional
-from urllib.parse import urlencode
+from urllib.parse import quote, urlencode
 
 from wiil.client.http_client import HttpClient
 from wiil.models.service_mgt import (
@@ -25,15 +25,21 @@ class PhoneConfigurationsResource:
 
     def get(self, config_id: str) -> PhoneConfiguration:
         """Retrieve a phone configuration by ID."""
-        return self._http.get(f'{self._base_path}/{config_id}')
+        return self._http.get(f'{self._base_path}/{config_id}', response_model=PhoneConfiguration)
 
     def get_by_phone_number(self, phone_number: str) -> PhoneConfiguration:
         """Retrieve a phone configuration by phone number."""
-        return self._http.get(f'{self._base_path}/by-phone-number/{phone_number}')
+        return self._http.get(
+            f'{self._base_path}/by-phone-number/{quote(phone_number, safe="")}',
+            response_model=PhoneConfiguration
+        )
 
     def get_by_request_id(self, request_id: str) -> PhoneConfiguration:
         """Retrieve a phone configuration by request ID."""
-        return self._http.get(f'{self._base_path}/by-request/{request_id}')
+        return self._http.get(
+            f'{self._base_path}/by-request/{request_id}',
+            response_model=PhoneConfiguration
+        )
 
     def update(self, data: UpdatePhoneConfiguration) -> PhoneConfiguration:
         """Update an existing phone configuration.
@@ -47,7 +53,8 @@ class PhoneConfigurationsResource:
         return self._http.patch(
             self._base_path,
             data.model_dump(by_alias=True, exclude_none=True),
-            schema=UpdatePhoneConfiguration
+            schema=UpdatePhoneConfiguration,
+            response_model=PhoneConfiguration
         )
 
     def delete(self, config_id: str) -> bool:
@@ -72,7 +79,10 @@ class PhoneConfigurationsResource:
             query_params['pageSize'] = params.page_size
 
         query_string = f'?{urlencode(query_params)}' if query_params else ''
-        return self._http.get(f'{self._base_path}{query_string}')
+        return self._http.get(
+            f'{self._base_path}{query_string}',
+            response_model=PaginatedResult[PhoneConfiguration]
+        )
 
 
 __all__ = ['PhoneConfigurationsResource']

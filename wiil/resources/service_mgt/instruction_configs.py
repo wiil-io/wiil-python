@@ -36,12 +36,13 @@ class InstructionConfigurationsResource:
         return self._http.post(
             self._base_path,
             data.model_dump(by_alias=True, exclude_none=True),
-            schema=CreateInstructionConfiguration
+            schema=CreateInstructionConfiguration,
+            response_model=InstructionConfiguration
         )
 
     def get(self, config_id: str) -> InstructionConfiguration:
         """Retrieve an instruction configuration by ID."""
-        return self._http.get(f'{self._base_path}/{config_id}')
+        return self._http.get(f'{self._base_path}/{config_id}', response_model=InstructionConfiguration)
 
     def update(self, data: UpdateInstructionConfiguration) -> InstructionConfiguration:
         """Update an existing instruction configuration.
@@ -55,7 +56,8 @@ class InstructionConfigurationsResource:
         return self._http.patch(
             self._base_path,
             data.model_dump(by_alias=True, exclude_none=True),
-            schema=UpdateInstructionConfiguration
+            schema=UpdateInstructionConfiguration,
+            response_model=InstructionConfiguration
         )
 
     def delete(self, config_id: str) -> bool:
@@ -80,7 +82,10 @@ class InstructionConfigurationsResource:
             query_params['pageSize'] = params.page_size
 
         query_string = f'?{urlencode(query_params)}' if query_params else ''
-        return self._http.get(f'{self._base_path}{query_string}')
+        return self._http.get(
+            f'{self._base_path}{query_string}',
+            response_model=PaginatedResult[InstructionConfiguration]
+        )
 
     def get_supported_templates(self) -> List[InstructionConfiguration]:
         """Retrieve the list of supported instruction templates.
@@ -88,7 +93,10 @@ class InstructionConfigurationsResource:
         Returns:
             List of supported instruction template configurations
         """
-        return self._http.get(f'{self._base_path}/supported-templates')
+        return self._http.get(
+            f'{self._base_path}/supported-templates',
+            response_model=List[InstructionConfiguration]
+        )
 
 
 __all__ = ['InstructionConfigurationsResource']

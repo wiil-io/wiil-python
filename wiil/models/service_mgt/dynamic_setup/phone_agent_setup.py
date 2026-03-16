@@ -72,6 +72,12 @@ class DynamicPhoneAgentSetupResult(DynamicAgentSetupResult):
         phone_number: Phone number associated with the configuration
     """
 
+    model_config = ConfigDict(
+        validate_by_name=True,
+        validate_by_alias=True,
+        use_enum_values=True,
+    )
+
     phone_number: Optional[str] = Field(
         None,
         description="Phone number associated with the phone configuration used for this assistant",

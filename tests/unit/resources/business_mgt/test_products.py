@@ -37,7 +37,7 @@ class TestProductsResource:
         mock_api.add(
             responses.POST,
             f"{BASE_URL}/product-management/categories",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -65,7 +65,7 @@ class TestProductsResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/product-management/categories/cat_123",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -113,7 +113,7 @@ class TestProductsResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/product-management/categories?page=1&pageSize=10",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -140,7 +140,7 @@ class TestProductsResource:
         mock_api.add(
             responses.PATCH,
             f"{BASE_URL}/product-management/categories",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -159,7 +159,7 @@ class TestProductsResource:
         mock_api.add(
             responses.DELETE,
             f"{BASE_URL}/product-management/categories/cat_123",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(True),
             status=200,
         )
@@ -196,7 +196,7 @@ class TestProductsResource:
         mock_api.add(
             responses.POST,
             f"{BASE_URL}/product-management/products",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -239,7 +239,7 @@ class TestProductsResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/product-management/products/prod_123",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -275,7 +275,7 @@ class TestProductsResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/product-management/products/by-sku/WM-001",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -311,7 +311,7 @@ class TestProductsResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/product-management/products/by-barcode/1234567890123",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -381,7 +381,7 @@ class TestProductsResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/product-management/products?page=1&pageSize=10",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -431,7 +431,7 @@ class TestProductsResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/product-management/products/by-category/cat_123?page=1&pageSize=10",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -484,7 +484,7 @@ class TestProductsResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/product-management/products/search?query=mouse&page=1&pageSize=10",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -523,7 +523,7 @@ class TestProductsResource:
         mock_api.add(
             responses.PATCH,
             f"{BASE_URL}/product-management/products",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -542,7 +542,7 @@ class TestProductsResource:
         mock_api.add(
             responses.DELETE,
             f"{BASE_URL}/product-management/products/prod_123",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(True),
             status=200,
         )
@@ -560,7 +560,7 @@ class TestProductsResource:
         mock_api.add(
             responses.POST,
             f"{BASE_URL}/product-management/products",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=error_response("VALIDATION_ERROR", "Price is required"),
             status=400,
         )
@@ -580,7 +580,7 @@ class TestProductsResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/product-management/products/nonexistent",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=error_response("NOT_FOUND", "Product not found"),
             status=404,
         )

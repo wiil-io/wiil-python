@@ -22,7 +22,7 @@ class KnowledgeSourcesResource:
 
     def get(self, source_id: str) -> KnowledgeSource:
         """Retrieve a knowledge source by ID."""
-        return self._http.get(f'{self._base_path}/{source_id}')
+        return self._http.get(f'{self._base_path}/{source_id}', response_model=KnowledgeSource)
 
     def list(
         self,
@@ -42,7 +42,10 @@ class KnowledgeSourcesResource:
             query_params['pageSize'] = params.page_size
 
         query_string = f'?{urlencode(query_params)}' if query_params else ''
-        return self._http.get(f'{self._base_path}{query_string}')
+        return self._http.get(
+            f'{self._base_path}{query_string}',
+            response_model=PaginatedResult[KnowledgeSource]
+        )
 
 
 __all__ = ['KnowledgeSourcesResource']

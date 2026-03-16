@@ -59,7 +59,7 @@ class TestPropertyInquiryResource:
         mock_api.add(
             responses.POST,
             f"{BASE_URL}/property-inquiries",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -120,7 +120,7 @@ class TestPropertyInquiryResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/property-inquiries/inq_123",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -186,7 +186,7 @@ class TestPropertyInquiryResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/property-inquiries/by-property/prop_123?page=1&pageSize=10",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -255,7 +255,7 @@ class TestPropertyInquiryResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/property-inquiries/by-customer/cust_123?page=1&pageSize=10",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -308,7 +308,7 @@ class TestPropertyInquiryResource:
         mock_api.add(
             responses.PATCH,
             f"{BASE_URL}/property-inquiries",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -371,7 +371,7 @@ class TestPropertyInquiryResource:
         mock_api.add(
             responses.PATCH,
             f"{BASE_URL}/property-inquiries/inq_123/status",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -394,7 +394,7 @@ class TestPropertyInquiryResource:
         mock_api.add(
             responses.DELETE,
             f"{BASE_URL}/property-inquiries/inq_123",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(True),
             status=200,
         )
@@ -457,7 +457,7 @@ class TestPropertyInquiryResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/property-inquiries?page=1&pageSize=10",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -478,7 +478,7 @@ class TestPropertyInquiryResource:
         mock_api.add(
             responses.POST,
             f"{BASE_URL}/property-inquiries",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=error_response("VALIDATION_ERROR", "Property ID required"),
             status=400,
         )
@@ -499,7 +499,7 @@ class TestPropertyInquiryResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/property-inquiries/nonexistent",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=error_response("NOT_FOUND", "Inquiry not found"),
             status=404,
         )

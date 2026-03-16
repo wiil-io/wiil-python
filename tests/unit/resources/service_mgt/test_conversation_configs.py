@@ -35,7 +35,7 @@ class TestConversationConfigurationsResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/conversation-configs/conv_123",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -54,7 +54,7 @@ class TestConversationConfigurationsResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/conversation-configs/invalid_id",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=error_response("NOT_FOUND", "Conversation configuration not found"),
             status=404,
         )
@@ -113,7 +113,7 @@ class TestConversationConfigurationsResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/conversation-configs",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -147,7 +147,7 @@ class TestConversationConfigurationsResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/conversation-configs?page=2&pageSize=50",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )

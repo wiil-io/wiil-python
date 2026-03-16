@@ -10,8 +10,6 @@ Example:
     >>> print(org.company_name)
 """
 
-from typing import Any
-
 from wiil.client.http_client import HttpClient
 from wiil.models.account import Organization
 
@@ -55,8 +53,7 @@ class OrganizationsResource:
             >>> print('Platform Email:', org.platform_email)
             >>> print('Service Status:', org.service_status)
         """
-        response_data: Any = self._http.get('/organizations')
-        return Organization.model_validate(response_data)
+        return self._http.get('/organizations', response_model=Organization)
 
 
 __all__ = ['OrganizationsResource']

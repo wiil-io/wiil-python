@@ -42,7 +42,7 @@ class TestTelephonyProviderResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/phone-configurations/telephony-provider/signalwire/numbers?countryCode=US",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_numbers),
             status=200,
         )
@@ -77,7 +77,7 @@ class TestTelephonyProviderResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/phone-configurations/telephony-provider/signalwire/numbers?countryCode=US&areaCode=206&contains=555&postalCode=98101",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_numbers),
             status=200,
         )
@@ -98,7 +98,7 @@ class TestTelephonyProviderResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/phone-configurations/telephony-provider/signalwire/numbers?countryCode=XX",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=error_response("NOT_FOUND", "No phone numbers available"),
             status=404,
         )
@@ -146,7 +146,7 @@ class TestTelephonyProviderResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/phone-configurations/telephony-provider/signalwire/pricing?countryCode=US",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_pricing),
             status=200,
         )
@@ -164,7 +164,7 @@ class TestTelephonyProviderResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/phone-configurations/telephony-provider/signalwire/pricing?countryCode=XX",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=error_response("NOT_FOUND", "Pricing not available for region"),
             status=404,
         )
@@ -190,7 +190,7 @@ class TestTelephonyProviderResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/phone-configurations/telephony-provider/purchase-request/req_123",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_purchase),
             status=200,
         )
@@ -224,7 +224,7 @@ class TestTelephonyProviderResource:
         mock_api.add(
             responses.POST,
             f"{BASE_URL}/phone-configurations/telephony-provider/purchase",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(completed_purchase),
             status=200,
         )
@@ -279,7 +279,7 @@ class TestTelephonyProviderResource:
         mock_api.add(
             responses.POST,
             f"{BASE_URL}/phone-configurations/telephony-provider/purchase",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(pending_purchase),
             status=200,
         )
@@ -287,14 +287,14 @@ class TestTelephonyProviderResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/phone-configurations/telephony-provider/purchase-request/req_345",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(pending_purchase),
             status=200,
         )
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/phone-configurations/telephony-provider/purchase-request/req_345",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(completed_purchase),
             status=200,
         )
@@ -334,7 +334,7 @@ class TestTelephonyProviderResource:
         mock_api.add(
             responses.POST,
             f"{BASE_URL}/phone-configurations/telephony-provider/purchase",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(pending_purchase),
             status=200,
         )

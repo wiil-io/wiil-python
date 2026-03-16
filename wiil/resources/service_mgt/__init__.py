@@ -19,9 +19,18 @@ from wiil.resources.service_mgt.translation_sessions import TranslationSessionsR
 from wiil.resources.service_mgt.knowledge_sources import KnowledgeSourcesResource
 from wiil.resources.service_mgt.support_models import SupportModelsResource
 from wiil.resources.service_mgt.telephony_provider import TelephonyProviderResource
-from wiil.resources.service_mgt.dynamic_agent_status import DynamicAgentStatusResource
-from wiil.resources.service_mgt.dynamic_web_agent import DynamicWebAgentResource
-from wiil.resources.service_mgt.dynamic_phone_agent import DynamicPhoneAgentResource
+from wiil.resources.service_mgt.dynamic_agent_status import (
+    DynamicAgentStatusResource,
+    PollTimeoutError,
+)
+from wiil.resources.service_mgt.dynamic_web_agent import (
+    DynamicWebAgentResource,
+    WebAgentCreateOptions,
+)
+from wiil.resources.service_mgt.dynamic_phone_agent import (
+    DynamicPhoneAgentResource,
+    PhoneAgentCreateOptions,
+)
 
 __all__ = [
     'AgentConfigurationsResource',
@@ -36,6 +45,9 @@ __all__ = [
     'SupportModelsResource',
     'TelephonyProviderResource',
     'DynamicAgentStatusResource',
+    'PollTimeoutError',
     'DynamicWebAgentResource',
+    'WebAgentCreateOptions',
     'DynamicPhoneAgentResource',
+    'PhoneAgentCreateOptions',
 ]

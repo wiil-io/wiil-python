@@ -41,7 +41,7 @@ class TestTranslationService:
         mock_api.add(
             responses.POST,
             f"{BASE_URL}/translation/connect",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(response_payload),
             status=200,
         )
@@ -78,7 +78,7 @@ class TestTranslationService:
         mock_api.add(
             responses.POST,
             f"{BASE_URL}/translation/connect",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response({"invalid": "payload"}),
             status=200,
         )

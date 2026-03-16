@@ -38,15 +38,14 @@ Before you begin, ensure you have:
    - Copy and securely store your API key
 
 3. **Development Environment**
-   - Node.js 16.x or higher
-   - npm or yarn package manager
+   - Python 3.9 or higher
+   - pip package manager
    - Text editor or IDE
 
 4. **SDK Installation**
+
    ```bash
-   npm install wiil-js
-   # or
-   yarn add wiil-js
+   pip install wiil
    ```
 
 ---
@@ -58,8 +57,9 @@ Before you begin, ensure you have:
 ```bash
 mkdir my-wiil-agent
 cd my-wiil-agent
-npm init -y
-npm install wiil-js
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+pip install wiil
 ```
 
 ### 2. Configure Environment Variables
@@ -78,21 +78,23 @@ echo ".env" >> .gitignore
 
 ### 3. Create Your Setup Script
 
-Create a new file `setup.ts` (or `setup.js` for JavaScript):
+Create a new file `setup.py`:
 
-```typescript
-import { WiilClient } from 'wiil-js';
+```python
+import os
+from wiil import WiilClient
 
-// Initialize client
-const client = new WiilClient({
-  apiKey: process.env.WIIL_API_KEY!
-});
+# Initialize client
+client = WiilClient(
+    api_key=os.environ['WIIL_API_KEY']
+)
 
-async function main() {
-  // Your setup code will go here
-}
+def main():
+    # Your setup code will go here
+    pass
 
-main().catch(console.error);
+if __name__ == '__main__':
+    main()
 ```
 
 ---
@@ -103,26 +105,27 @@ main().catch(console.error);
 
 ### Code
 
-```typescript
-import { WiilClient } from 'wiil-js';
+```python
+import os
+from wiil import WiilClient
 
-const client = new WiilClient({
-  apiKey: process.env.WIIL_API_KEY!
-});
+client = WiilClient(
+    api_key=os.environ['WIIL_API_KEY']
+)
 
-// Verify your organization
-const organization = await client.organizations.get();
+# Verify your organization
+organization = client.organizations.get()
 
-console.log('Organization Details:');
-console.log(`  Company Name: ${organization.companyName}`);
-console.log(`  Organization ID: ${organization.id}`);
-console.log(`  Service Status: ${organization.serviceStatus}`);
-console.log(`  Business Vertical: ${organization.businessVerticalId}`);
+print('Organization Details:')
+print(f'  Company Name: {organization.company_name}')
+print(f'  Organization ID: {organization.id}')
+print(f'  Service Status: {organization.service_status}')
+print(f'  Business Vertical: {organization.business_vertical_id}')
 ```
 
 ### Expected Output
 
-```
+```text
 Organization Details:
   Company Name: ACME Corporation
   Organization ID: 1a2b3c4d5e
@@ -148,27 +151,29 @@ Projects help you organize deployments by business unit (Sales, Support, Operati
 
 ### Code
 
-```typescript
-// Option A: Use the existing default project (created by the system)
-let project;
-try {
-  project = await client.projects.getDefault();
-  console.log(`Using default project: ${project.name}`);
-} catch (error) {
-  // Option B: Create a new project (if no default exists)
-  project = await client.projects.create({
-    name: 'Customer Support',
-    description: 'Customer support AI agent deployments'
-  });
-  console.log(`Created new project: ${project.name}`);
-}
+```python
+from wiil.models.service_mgt import CreateProject
 
-console.log(`Project ID: ${project.id}`);
+# Option A: Use the existing default project (created by the system)
+try:
+    project = client.projects.get_default()
+    print(f'Using default project: {project.name}')
+except Exception:
+    # Option B: Create a new project (if no default exists)
+    project = client.projects.create(
+        CreateProject(
+            name='Customer Support',
+            description='Customer support AI agent deployments'
+        )
+    )
+    print(f'Created new project: {project.name}')
+
+print(f'Project ID: {project.id}')
 ```
 
 ### Expected Output
 
-```
+```text
 Created new project: Customer Support
 Project ID: 9x8y7z6w5v
 ```
@@ -188,33 +193,37 @@ This is the **heart of your agent's behavior**. It includes:
 - **Instructions**: Detailed behavioral guidelines and conversation flow
 - **Guardrails**: Safety constraints, compliance rules, and ethical boundaries
 
-**Note**: The instruction configuration must be created first because the agent configuration requires an `instructionConfigurationId`.
+**Note**: The instruction configuration must be created first because the agent configuration requires an `instruction_configuration_id`.
 
 ### Code
 
-```typescript
-import { BusinessSupportServices } from 'wiil-js';
+```python
+from wiil.models.service_mgt import (
+    BusinessSupportServices,
+    CreateInstructionConfiguration
+)
 
-const instructionConfig = await client.instructionConfigs.create({
-  // ========================================================================
-  // INSTRUCTION NAME - System-readable identifier
-  // ========================================================================
-  instructionName: 'customer-support-agent',
+instruction_config = client.instruction_configs.create(
+    CreateInstructionConfiguration(
+        # ====================================================================
+        # INSTRUCTION NAME - System-readable identifier
+        # ====================================================================
+        instruction_name='customer-support-agent',
 
-  // ========================================================================
-  // ROLE - The agent's persona
-  // ========================================================================
-  role: 'Customer Support Specialist',
+        # ====================================================================
+        # ROLE - The agent's persona
+        # ====================================================================
+        role='Customer Support Specialist',
 
-  // ========================================================================
-  // INTRODUCTION MESSAGE - Initial greeting
-  // ========================================================================
-  introductionMessage: `Hello! I'm an AI assistant from ACME Corporation. How can I help you today?`,
+        # ====================================================================
+        # INTRODUCTION MESSAGE - Initial greeting
+        # ====================================================================
+        introduction_message="Hello! I'm an AI assistant from ACME Corporation. How can I help you today?",
 
-  // ========================================================================
-  // INSTRUCTIONS - Detailed behavioral guidelines
-  // ========================================================================
-  instructions: `You are a professional customer support agent for ACME Corporation, a leading provider of business solutions.
+        # ====================================================================
+        # INSTRUCTIONS - Detailed behavioral guidelines
+        # ====================================================================
+        instructions="""You are a professional customer support agent for ACME Corporation, a leading provider of business solutions.
 
 Your role and responsibilities:
 - Greet customers warmly and professionally
@@ -245,12 +254,12 @@ Your knowledge:
 - Booking and reservation systems
 - Order tracking and status
 
-Remember: You represent ACME Corporation. Always maintain professionalism while being genuinely helpful.`,
+Remember: You represent ACME Corporation. Always maintain professionalism while being genuinely helpful.""",
 
-  // ========================================================================
-  // GUARDRAILS - Safety and compliance constraints
-  // ========================================================================
-  guardrails: `Data Privacy:
+        # ====================================================================
+        # GUARDRAILS - Safety and compliance constraints
+        # ====================================================================
+        guardrails="""Data Privacy:
 - NEVER share or request sensitive personal information (SSN, passwords, full credit card numbers)
 - Follow GDPR and data privacy regulations
 - Do not access or reference customer data unless necessary for the current request
@@ -278,21 +287,22 @@ Escalation Triggers:
 - Issue requires access to systems the agent cannot use
 - Customer is experiencing an emergency or urgent situation
 - Conversation exceeds 10 minutes without resolution
-- Customer is dissatisfied with the agent's responses`,
+- Customer is dissatisfied with the agent's responses""",
 
-  // ========================================================================
-  // SUPPORTED SERVICES - Platform business services (tools) enabled
-  // ========================================================================
-  supportedServices: [BusinessSupportServices.APPOINTMENT_MANAGEMENT]
-});
+        # ====================================================================
+        # SUPPORTED SERVICES - Platform business services (tools) enabled
+        # ====================================================================
+        supported_services=[BusinessSupportServices.APPOINTMENT_MANAGEMENT]
+    )
+)
 
-console.log(`Instructions Created: ${instructionConfig.instructionName}`);
-console.log(`Instructions ID: ${instructionConfig.id}`);
+print(f'Instructions Created: {instruction_config.instruction_name}')
+print(f'Instructions ID: {instruction_config.id}')
 ```
 
 ### Expected Output
 
-```
+```text
 Instructions Created: customer-support-agent
 Instructions ID: f6g7h8i9j0
 ```
@@ -324,36 +334,34 @@ The Support Model Registry includes:
 
 ### Code
 
-```typescript
-// List all available models
-const allModels = await client.supportModels.list();
-console.log(`Available models: ${allModels.length}`);
+```python
+# List all available models
+all_models = client.support_models.list()
+print(f'Available models: {len(all_models.data)}')
 
-// Get default multi-mode model (recommended for conversational agents)
-const defaultModel = await client.supportModels.getDefaultMultiMode();
-if (defaultModel) {
-  console.log('Default Multi-Mode Model:');
-  console.log(`  Name: ${defaultModel.name}`);
-  console.log(`  Wiil Model ID: ${defaultModel.modelId}`);
-  console.log(`  Proprietor: ${defaultModel.proprietor}`);
-  console.log(`  Provider Model ID: ${defaultModel.provider_model_id}`);
-  console.log(`  Type: ${defaultModel.type}`);
-  console.log(`  Discontinued: ${defaultModel.discontinued}`);
-}
+# Get default multi-mode model (recommended for conversational agents)
+default_model = client.support_models.get_default_multi_mode()
+if default_model:
+    print('Default Multi-Mode Model:')
+    print(f'  Name: {default_model.name}')
+    print(f'  Wiil Model ID: {default_model.model_id}')
+    print(f'  Proprietor: {default_model.proprietor}')
+    print(f'  Provider Model ID: {default_model.provider_model_id}')
+    print(f'  Type: {default_model.type}')
+    print(f'  Discontinued: {default_model.discontinued}')
 
-// Lookup a specific model by provider details
-const geminiModel = await client.supportModels.getByProprietorAndProviderModelId(
-  'Google',
-  'gemini-2.0-flash-exp'
-);
-if (geminiModel) {
-  console.log(`Gemini Wiil Model ID: ${geminiModel.modelId}`);
-}
+# Lookup a specific model by provider details
+gemini_model = client.support_models.get_by_proprietor_and_provider_model_id(
+    'Google',
+    'gemini-2.0-flash-exp'
+)
+if gemini_model:
+    print(f'Gemini Wiil Model ID: {gemini_model.model_id}')
 ```
 
 ### Expected Output
 
-```
+```text
 Available models: 47
 Default Multi-Mode Model:
   Name: Gemini 2.0 Flash (Experimental)
@@ -361,7 +369,7 @@ Default Multi-Mode Model:
   Proprietor: Google
   Provider Model ID: gemini-2.0-flash-exp
   Type: MULTI_MODE
-  Discontinued: false
+  Discontinued: False
 Gemini Wiil Model ID: abc123xyz
 ```
 
@@ -369,14 +377,14 @@ Gemini Wiil Model ID: abc123xyz
 
 | Method | Purpose | Returns |
 |--------|---------|---------|
-| `getDefaultMultiMode()` | General conversational AI | Best multi-mode model (text, voice, vision) |
-| `getDefaultTTS()` | Text-to-Speech | Best TTS model for voice synthesis |
-| `getDefaultSTT()` | Speech-to-Text | Best STT model for transcription |
-| `getDefaultSTS()` | Speech-to-Speech | Best model for direct voice-to-voice |
-| `getDefaultTranscribe()` | Transcription | Best model for audio transcription |
-| `getDefaultBatch()` | Batch processing | Best model for bulk operations |
-| `getDefaultTranslationSTT()` | Translation STT | Best STT for translation workflows |
-| `getDefaultTranslationTTS()` | Translation TTS | Best TTS for translation workflows |
+| `get_default_multi_mode()` | General conversational AI | Best multi-mode model (text, voice, vision) |
+| `get_default_tts()` | Text-to-Speech | Best TTS model for voice synthesis |
+| `get_default_stt()` | Speech-to-Text | Best STT model for transcription |
+| `get_default_sts()` | Speech-to-Speech | Best model for direct voice-to-voice |
+| `get_default_transcribe()` | Transcription | Best model for audio transcription |
+| `get_default_batch()` | Batch processing | Best model for bulk operations |
+| `get_default_translation_stt()` | Translation STT | Best STT for translation workflows |
+| `get_default_translation_tts()` | Translation TTS | Best TTS for translation workflows |
 
 ---
 
@@ -394,28 +402,31 @@ The Agent Configuration links together:
 
 ### Code
 
-```typescript
-// Verify we have the required dependencies from previous steps
-if (!defaultModel) {
-  throw new Error('No default multi-mode model available');
-}
+```python
+from wiil.models.service_mgt import CreateAgentConfiguration
 
-// Create agent configuration
-const agentConfig = await client.agentConfigs.create({
-  name: 'SupportAgent',
-  modelId: defaultModel.modelId,  // Wiil Model ID from Step 4
-  instructionConfigurationId: instructionConfig.id  // From Step 3
-});
+# Verify we have the required dependencies from previous steps
+if not default_model:
+    raise Exception('No default multi-mode model available')
 
-console.log(`Agent Created: ${agentConfig.name}`);
-console.log(`Agent ID: ${agentConfig.id}`);
-console.log(`Using Model: ${defaultModel.name} (${defaultModel.modelId})`);
-console.log(`Using Instructions: ${instructionConfig.instructionName}`);
+# Create agent configuration
+agent_config = client.agent_configs.create(
+    CreateAgentConfiguration(
+        name='SupportAgent',
+        model_id=default_model.model_id,  # Wiil Model ID from Step 4
+        instruction_configuration_id=instruction_config.id  # From Step 3
+    )
+)
+
+print(f'Agent Created: {agent_config.name}')
+print(f'Agent ID: {agent_config.id}')
+print(f'Using Model: {default_model.name} ({default_model.model_id})')
+print(f'Using Instructions: {instruction_config.instruction_name}')
 ```
 
 ### Expected Output
 
-```
+```text
 Agent Created: SupportAgent
 Agent ID: a1b2c3d4e5
 Using Model: Gemini 2.0 Flash (Experimental) (abc123xyz)
@@ -438,36 +449,36 @@ Before purchasing a phone number for CALLS or SMS channels, use the Telephony Pr
 
 ### Code
 
-```typescript
-// Step 1: Get pricing information
-const pricing = await client.telephonyProvider.getPricing();
+```python
+from wiil.models.service_mgt import PurchasePhoneNumber
 
-console.log('Pricing Information:');
-pricing.forEach(price => {
-  console.log(`  ${price.number_type}: $${price.price}/month`);
-});
+# Step 1: Get pricing information
+pricing = client.telephony_provider.get_pricing()
 
-// Step 2: Search for available phone numbers
-const numbers = await client.telephonyProvider.getPhoneNumbers();
+print('Pricing Information:')
+for price in pricing:
+    print(f'  {price.number_type}: ${price.price}/month')
 
-console.log(`\nFound ${numbers.length} available phone numbers`);
+# Step 2: Search for available phone numbers
+numbers = client.telephony_provider.get_phone_numbers()
 
-// Display first 5 numbers
-numbers.slice(0, 5).forEach(number => {
-  console.log(`  ${number.phoneNumber} - ${number.friendlyName}`);
-});
+print(f'\nFound {len(numbers)} available phone numbers')
 
-// Step 3: Search with area code filter
-const seattleNumbers = await client.telephonyProvider.getPhoneNumbers({
-  areaCode: '206'  // Seattle area code
-});
+# Display first 5 numbers
+for number in numbers[:5]:
+    print(f'  {number.phone_number} - {number.friendly_name}')
 
-console.log(`\nFound ${seattleNumbers.length} Seattle area numbers`);
+# Step 3: Search with area code filter
+seattle_numbers = client.telephony_provider.get_phone_numbers(
+    area_code='206'  # Seattle area code
+)
+
+print(f'\nFound {len(seattle_numbers)} Seattle area numbers')
 ```
 
 ### Expected Output
 
-```
+```text
 Pricing Information:
   local: $1.00/month
   toll-free: $2.00/month
@@ -485,27 +496,29 @@ Found 25 Seattle area numbers
 
 | Option | Type | Description |
 |--------|------|-------------|
-| areaCode | string | Filter by area code (e.g., '206', '415') |
-| contains | string | Filter by number pattern (e.g., '555') |
-| postalCode | string | Filter by postal code (e.g., '98101') |
+| area_code | str | Filter by area code (e.g., '206', '415') |
+| contains | str | Filter by number pattern (e.g., '555') |
+| postal_code | str | Filter by postal code (e.g., '98101') |
 
 ### Purchase Phone Number
 
 Once you've found a suitable number, purchase it:
 
-```typescript
-const purchase = await client.telephonyProvider.purchase({
-  phoneNumber: numbers[0].phoneNumber  // Use number from search results
-});
+```python
+purchase = client.telephony_provider.purchase(
+    PurchasePhoneNumber(
+        phone_number=numbers[0].phone_number  # Use number from search results
+    )
+)
 
-console.log(`Purchase ID: ${purchase.id}`);
-console.log(`Status: ${purchase.status}`);
-console.log(`Phone Number: ${purchase.phoneNumber}`);
+print(f'Purchase ID: {purchase.id}')
+print(f'Status: {purchase.status}')
+print(f'Phone Number: {purchase.phone_number}')
 
-// The purchase() method automatically polls until completion
-// Check status if needed:
-const status = await client.telephonyProvider.getPurchaseStatus(purchase.id);
-console.log(`Final Status: ${status.status}`);
+# The purchase() method automatically polls until completion
+# Check status if needed:
+status = client.telephony_provider.get_purchase_status(purchase.id)
+print(f'Final Status: {status.status}')
 ```
 
 See the [Telephony Provider Guide](./service-mgt/telephony-provider-guide.md) for complete documentation.
@@ -527,34 +540,36 @@ Channels define how customers reach your agent:
 - **EMAIL**: Email conversations
 - **MOBILE**: Mobile app integration (Coming Soon)
 
-**Note**: The deployment channel must be created first because the deployment configuration requires a `deploymentChannelId`.
+**Note**: The deployment channel must be created first because the deployment configuration requires a `deployment_channel_id`.
 
 ### Code - Web Chat Channel
 
-```typescript
-import { DeploymentType } from 'wiil-js';
+```python
+from wiil.models.service_mgt import DeploymentType, CreateDeploymentChannel
 
-const webChatChannel = await client.deploymentChannels.create({
-  channelIdentifier: 'https://example.com',  // URL for web channels
-  deploymentType: DeploymentType.WEB,
-  channelName: 'Website Live Chat',
-  recordingEnabled: true,
-  configuration: {
-    communicationType: 'unified',  // 'text', 'voice', or 'unified'
-    widgetConfiguration: {
-      position: 'right'  // 'left' or 'right'
-    }
-  }
-});
+web_chat_channel = client.deployment_channels.create(
+    CreateDeploymentChannel(
+        channel_identifier='https://example.com',  # URL for web channels
+        deployment_type=DeploymentType.WEB.value,
+        channel_name='Website Live Chat',
+        recording_enabled=True,
+        configuration={
+            'communicationType': 'unified',  # 'text', 'voice', or 'unified'
+            'widgetConfiguration': {
+                'position': 'right'  # 'left' or 'right'
+            }
+        }
+    )
+)
 
-console.log(`Channel Created: ${webChatChannel.channelName}`);
-console.log(`Channel ID: ${webChatChannel.id}`);
-console.log(`Channel Type: ${webChatChannel.deploymentType}`);
+print(f'Channel Created: {web_chat_channel.channel_name}')
+print(f'Channel ID: {web_chat_channel.id}')
+print(f'Channel Type: {web_chat_channel.deployment_type}')
 ```
 
 ### Expected Output
 
-```
+```text
 Channel Created: Website Live Chat
 Channel ID: p6q7r8s9t0
 Channel Type: WEB
@@ -577,36 +592,42 @@ The Deployment Configuration:
 
 ### Code
 
-```typescript
-import { DeploymentStatus, DeploymentProvisioningType } from 'wiil-js';
+```python
+from wiil.models.service_mgt import (
+    DeploymentStatus,
+    DeploymentProvisioningType,
+    CreateDeploymentConfiguration
+)
 
-const deploymentConfig = await client.deploymentConfigs.create({
-  // Required fields
-  projectId: project.id,                        // From Step 2
-  deploymentChannelId: webChatChannel.id,      // From Step 6
-  agentConfigurationId: agentConfig.id,        // From Step 5
-  instructionConfigurationId: instructionConfig.id,  // From Step 3
+deployment_config = client.deployment_configs.create(
+    CreateDeploymentConfiguration(
+        # Required fields
+        project_id=project.id,                           # From Step 2
+        deployment_channel_id=web_chat_channel.id,       # From Step 6
+        agent_configuration_id=agent_config.id,          # From Step 5
+        instruction_configuration_id=instruction_config.id,  # From Step 3
 
-  // Optional fields
-  deploymentName: 'Customer Support Deployment',
-  isActive: true,
-  deploymentStatus: DeploymentStatus.PENDING,  // Will be PENDING initially (PENDING, ACTIVE, PAUSED, ARCHIVED)
-  provisioningType: DeploymentProvisioningType.DIRECT  // DIRECT or CHAINED (for voice processing)
-});
+        # Optional fields
+        deployment_name='Customer Support Deployment',
+        is_active=True,
+        deployment_status=DeploymentStatus.PENDING.value,  # PENDING, ACTIVE, PAUSED, ARCHIVED
+        provisioning_type=DeploymentProvisioningType.DIRECT.value  # DIRECT or CHAINED
+    )
+)
 
-console.log(`Deployment Created: ${deploymentConfig.deploymentName}`);
-console.log(`Deployment ID: ${deploymentConfig.id}`);
-console.log(`Status: ${deploymentConfig.deploymentStatus}`);
-console.log(`Active: ${deploymentConfig.isActive}`);
+print(f'Deployment Created: {deployment_config.deployment_name}')
+print(f'Deployment ID: {deployment_config.id}')
+print(f'Status: {deployment_config.deployment_status}')
+print(f'Active: {deployment_config.is_active}')
 ```
 
 ### Expected Output
 
-```
+```text
 Deployment Created: Customer Support Deployment
 Deployment ID: k1l2m3n4o5
 Status: pending
-Active: true
+Active: True
 ```
 
 ---
@@ -617,7 +638,7 @@ Active: true
 
 ### For Web Chat
 
-After creating the deployment configuration, integrate the WIIL widget into your website using the `deploymentConfigId`:
+After creating the deployment configuration, integrate the WIIL widget into your website using the `deployment_config_id`:
 
 #### HTML Integration
 
@@ -705,33 +726,34 @@ No integration needed - customers can text your configured SMS number.
 
 ### Code
 
-```typescript
-// Retrieve and verify deployment
-const verifiedDeployment = await client.deploymentConfigs.get(deploymentConfig.id);
-const verifiedChannel = await client.deploymentChannels.get(webChatChannel.id);
+```python
+# Retrieve and verify deployment
+verified_deployment = client.deployment_configs.get(deployment_config.id)
+verified_channel = client.deployment_channels.get(web_chat_channel.id)
 
-console.log('='.repeat(60));
-console.log('DEPLOYMENT VERIFICATION');
-console.log('='.repeat(60));
+print('=' * 60)
+print('DEPLOYMENT VERIFICATION')
+print('=' * 60)
 
-console.log('\nDeployment Status:');
-console.log(`  Active: ${verifiedDeployment.isActive ? '✓ YES' : '✗ NO'}`);
-console.log(`  Agent: ${verifiedDeployment.agentConfigurationId}`);
-console.log(`  Instructions: ${verifiedDeployment.instructionConfigurationId}`);
+print('\nDeployment Status:')
+active_status = '✓ YES' if verified_deployment.is_active else '✗ NO'
+print(f'  Active: {active_status}')
+print(f'  Agent: {verified_deployment.agent_configuration_id}')
+print(f'  Instructions: {verified_deployment.instruction_configuration_id}')
 
-console.log('\nChannel Status:');
-console.log(`  Name: ${verifiedChannel.channelName}`);
-console.log(`  Type: ${verifiedChannel.deploymentType}`);
-console.log(`  Channel ID: ${verifiedChannel.id}`);
+print('\nChannel Status:')
+print(f'  Name: {verified_channel.channel_name}')
+print(f'  Type: {verified_channel.deployment_type}')
+print(f'  Channel ID: {verified_channel.id}')
 
-console.log('\n' + '='.repeat(60));
-console.log('✓ DEPLOYMENT COMPLETE - Agent is LIVE!');
-console.log('='.repeat(60));
+print('\n' + '=' * 60)
+print('✓ DEPLOYMENT COMPLETE - Agent is LIVE!')
+print('=' * 60)
 ```
 
 ### Expected Output
 
-```
+```text
 ============================================================
 DEPLOYMENT VERIFICATION
 ============================================================
@@ -774,6 +796,7 @@ Congratulations! Your AI agent is now deployed and ready to handle customer conv
 **WIIL Console → Analytics Dashboard**
 
 Track key metrics:
+
 - Conversation volume and trends
 - Average conversation duration
 - Customer satisfaction scores
@@ -784,12 +807,16 @@ Track key metrics:
 
 Based on real conversations, update your instruction configuration:
 
-```typescript
-const updatedInstructions = await client.instructionConfigs.update({
-  id: instructionConfig.id,
-  instructions: '... improved instructions based on learnings ...',
-  guardrails: '... updated safety constraints ...'
-});
+```python
+from wiil.models.service_mgt import UpdateInstructionConfiguration
+
+updated_instructions = client.instruction_configs.update(
+    instruction_config.id,
+    UpdateInstructionConfiguration(
+        instructions='... improved instructions based on learnings ...',
+        guardrails='... updated safety constraints ...'
+    )
+)
 ```
 
 ### 3. Enable Multi-Channel
@@ -807,30 +834,32 @@ Deploy the same agent across multiple channels. See the [Channels Guide](./chann
 
 ---
 
-
 ## Support & Resources
 
 ### Documentation
+
 - **Platform Docs**: [https://docs.wiil.io](https://docs.wiil.io)
 - **API Reference**: [https://docs.wiil.io/developer/api-reference](https://docs.wiil.io/developer/api-reference)
-- **SDK Reference**: [https://github.com/wiil-io/wiil-js](https://github.com/wiil-io/wiil-js)
+- **SDK Reference**: [https://github.com/wiil-io/wiil-python](https://github.com/wiil-io/wiil-python)
 
 ### Support
+
 - **Email**: [dev-support@wiil.io](mailto:dev-support@wiil.io)
 - **Console**: [https://console.wiil.io](https://console.wiil.io)
-- **GitHub Issues**: [https://github.com/wiil-io/wiil-js/issues](https://github.com/wiil-io/wiil-js/issues)
+- **GitHub Issues**: [https://github.com/wiil-io/wiil-python/issues](https://github.com/wiil-io/wiil-python/issues)
 
 ### Community
+
 - **Discord**: Join our developer community
 - **Blog**: Technical articles and best practices
 - **Changelog**: Stay updated with new features
 
 ---
 
-**Congratulations!** You've successfully deployed your first AI agent on the WIIL Platform. 🎉
+**Congratulations!** You've successfully deployed your first AI agent on the WIIL Platform.
 
 Your agent is now handling customer conversations 24/7, helping your business scale customer support while maintaining quality interactions.
 
 ---
 
-*Built with ❤️ by the WIIL team*
+*Built by the WIIL team*

@@ -18,11 +18,14 @@ class ConversationConfigurationsResource:
 
     def __init__(self, http: HttpClient):
         self._http = http
-        self._base_path = '/conversation-configs'
+        self._base_path = '/conversation-configurations'
 
     def get(self, config_id: str) -> ServiceConversationConfig:
         """Retrieve a conversation configuration by ID."""
-        return self._http.get(f'{self._base_path}/{config_id}')
+        return self._http.get(
+            f'{self._base_path}/{config_id}',
+            response_model=ServiceConversationConfig
+        )
 
     def list(
         self,
@@ -42,7 +45,10 @@ class ConversationConfigurationsResource:
             query_params['pageSize'] = params.page_size
 
         query_string = f'?{urlencode(query_params)}' if query_params else ''
-        return self._http.get(f'{self._base_path}{query_string}')
+        return self._http.get(
+            f'{self._base_path}{query_string}',
+            response_model=PaginatedResult[ServiceConversationConfig]
+        )
 
 
 __all__ = ['ConversationConfigurationsResource']

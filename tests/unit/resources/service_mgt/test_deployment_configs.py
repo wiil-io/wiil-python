@@ -40,7 +40,7 @@ class TestDeploymentConfigurationsResource:
         mock_api.add(
             responses.POST,
             f"{BASE_URL}/deployment-configurations",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -78,7 +78,7 @@ class TestDeploymentConfigurationsResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/deployment-configurations/deploy_123",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -111,7 +111,7 @@ class TestDeploymentConfigurationsResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/deployment-configurations/by-channel/channel_789",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -143,7 +143,7 @@ class TestDeploymentConfigurationsResource:
         mock_api.add(
             responses.PATCH,
             f"{BASE_URL}/deployment-configurations",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -163,7 +163,7 @@ class TestDeploymentConfigurationsResource:
         mock_api.add(
             responses.DELETE,
             f"{BASE_URL}/deployment-configurations/deploy_123",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(True),
             status=200,
         )
@@ -222,7 +222,7 @@ class TestDeploymentConfigurationsResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/deployment-configurations",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -253,7 +253,7 @@ class TestDeploymentConfigurationsResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/deployment-configurations/by-project/proj_123",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -281,7 +281,7 @@ class TestDeploymentConfigurationsResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/deployment-configurations/by-agent/agent_123",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -309,7 +309,7 @@ class TestDeploymentConfigurationsResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/deployment-configurations/by-instruction/inst_123",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )

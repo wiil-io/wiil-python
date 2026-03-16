@@ -33,7 +33,7 @@ class TestOttService:
                 f"{BASE_URL}/chat-service-config/config_123"
                 "?email=user%40example.com&phone=%2B12065551234"
             ),
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_payload),
             status=200,
         )
@@ -68,7 +68,7 @@ class TestOttService:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/commission-service-agent/config_abc",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_payload),
             status=200,
         )
@@ -100,7 +100,7 @@ class TestOttService:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/commission-service-agent/config_invalid",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response({"bad": "payload"}),
             status=200,
         )

@@ -7,6 +7,7 @@ from wiil.client.http_client import HttpClient
 from wiil.models.service_mgt import (
     DeploymentConfiguration,
     CreateDeploymentConfiguration,
+    CreateChainDeploymentConfiguration,
     UpdateDeploymentConfiguration,
 )
 from wiil.types import PaginatedResult, PaginationRequest
@@ -36,16 +37,36 @@ class DeploymentConfigurationsResource:
         return self._http.post(
             self._base_path,
             data.model_dump(by_alias=True, exclude_none=True),
-            schema=CreateDeploymentConfiguration
+            schema=CreateDeploymentConfiguration,
+            response_model=DeploymentConfiguration
+        )
+
+    def create_chain(
+        self,
+        data: CreateChainDeploymentConfiguration
+    ) -> DeploymentConfiguration:
+        """Create a chained deployment configuration.
+
+        Args:
+            data: Chain deployment configuration data
+
+        Returns:
+            The created deployment configuration
+        """
+        return self._http.post(
+            self._base_path,
+            data.model_dump(by_alias=True, exclude_none=True),
+            schema=CreateChainDeploymentConfiguration,
+            response_model=DeploymentConfiguration
         )
 
     def get(self, config_id: str) -> DeploymentConfiguration:
         """Retrieve a deployment configuration by ID."""
-        return self._http.get(f'{self._base_path}/{config_id}')
+        return self._http.get(f'{self._base_path}/{config_id}', response_model=DeploymentConfiguration)
 
     def get_by_channel(self, channel_id: str) -> DeploymentConfiguration:
         """Retrieve a deployment configuration by channel ID."""
-        return self._http.get(f'{self._base_path}/by-channel/{channel_id}')
+        return self._http.get(f'{self._base_path}/by-channel/{channel_id}', response_model=DeploymentConfiguration)
 
     def update(self, data: UpdateDeploymentConfiguration) -> DeploymentConfiguration:
         """Update an existing deployment configuration.
@@ -59,7 +80,8 @@ class DeploymentConfigurationsResource:
         return self._http.patch(
             self._base_path,
             data.model_dump(by_alias=True, exclude_none=True),
-            schema=UpdateDeploymentConfiguration
+            schema=UpdateDeploymentConfiguration,
+            response_model=DeploymentConfiguration
         )
 
     def delete(self, config_id: str) -> bool:
@@ -84,7 +106,10 @@ class DeploymentConfigurationsResource:
             query_params['pageSize'] = params.page_size
 
         query_string = f'?{urlencode(query_params)}' if query_params else ''
-        return self._http.get(f'{self._base_path}{query_string}')
+        return self._http.get(
+            f'{self._base_path}{query_string}',
+            response_model=PaginatedResult[DeploymentConfiguration]
+        )
 
     def list_by_project(
         self,
@@ -106,7 +131,10 @@ class DeploymentConfigurationsResource:
             query_params['pageSize'] = params.page_size
 
         query_string = f'?{urlencode(query_params)}' if query_params else ''
-        return self._http.get(f'{self._base_path}/by-project/{project_id}{query_string}')
+        return self._http.get(
+            f'{self._base_path}/by-project/{project_id}{query_string}',
+            response_model=PaginatedResult[DeploymentConfiguration]
+        )
 
     def list_by_agent(
         self,
@@ -128,7 +156,10 @@ class DeploymentConfigurationsResource:
             query_params['pageSize'] = params.page_size
 
         query_string = f'?{urlencode(query_params)}' if query_params else ''
-        return self._http.get(f'{self._base_path}/by-agent/{agent_id}{query_string}')
+        return self._http.get(
+            f'{self._base_path}/by-agent/{agent_id}{query_string}',
+            response_model=PaginatedResult[DeploymentConfiguration]
+        )
 
     def list_by_instruction(
         self,
@@ -150,7 +181,10 @@ class DeploymentConfigurationsResource:
             query_params['pageSize'] = params.page_size
 
         query_string = f'?{urlencode(query_params)}' if query_params else ''
-        return self._http.get(f'{self._base_path}/by-instruction/{instruction_id}{query_string}')
+        return self._http.get(
+            f'{self._base_path}/by-instruction/{instruction_id}{query_string}',
+            response_model=PaginatedResult[DeploymentConfiguration]
+        )
 
 
 __all__ = ['DeploymentConfigurationsResource']

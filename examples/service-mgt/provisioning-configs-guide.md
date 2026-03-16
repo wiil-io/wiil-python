@@ -1,37 +1,46 @@
 # Provisioning Configurations Guide
 
-This guide covers creating and managing provisioning configurations using the WIIL Platform JS SDK. Provisioning configurations define voice processing chains (STT -> Agent -> TTS) and translation configurations for AI deployments.
+This guide covers creating and managing provisioning configurations using the WIIL Platform Python SDK. Provisioning configurations define voice processing chains (STT -> Processing -> TTS) and translation configurations for AI deployments.
 
 ## Quick Start
 
-```typescript
-import { WiilClient } from 'wiil-js';
+```python
+from wiil import WiilClient
+from wiil.models.service_mgt import (
+    CreateProvisioningConfig,
+    SupportedProprietor,
+)
+from wiil.models.service_mgt.dynamic_setup import (
+    DynamicSTTModelConfiguration,
+    DynamicModelConfiguration,
+    DynamicTTSModelConfiguration,
+)
 
-const client = new WiilClient({
-  apiKey: 'your-api-key',
-});
+client = WiilClient(api_key='your-api-key')
 
-// Get STT and TTS models
-const sttModel = await client.supportModels.getDefaultSTT();
-const ttsModel = await client.supportModels.getDefaultTTS();
+chain = client.provisioning_configs.create(
+    CreateProvisioningConfig(
+        chain_name='customer-support-voice-chain',
+        description='Voice processing chain for customer support',
+        stt_config=DynamicSTTModelConfiguration(
+            provider_type=SupportedProprietor.DEEPGRAM.value,
+            provider_model_id='nova-2',
+            language_id='en-US'
+        ),
+        processing_config=DynamicModelConfiguration(
+            provider_type=SupportedProprietor.OPENAI.value,
+            provider_model_id='gpt-4o-mini'
+        ),
+        tts_config=DynamicTTSModelConfiguration(
+            provider_type=SupportedProprietor.ELEVENLABS.value,
+            provider_model_id='eleven_turbo_v2',
+            language_id='en-US',
+            voice_id='voice_rachel'
+        )
+    )
+)
 
-// Create a provisioning chain
-const chain = await client.provisioningConfigs.create({
-  chainName: 'customer-support-voice-chain',
-  description: 'Voice processing chain for customer support',
-  sttConfig: {
-    modelId: sttModel!.modelId,
-    defaultLanguage: 'en-US',
-  },
-  agentConfigurationId: 'agent_123',
-  ttsConfig: {
-    modelId: ttsModel!.modelId,
-    voiceId: ttsModel!.supportedVoices![0].voiceId,
-    defaultLanguage: 'en-US',
-  },
-});
-
-console.log('Chain created:', chain.id);
+print(f'Chain created: {chain.id}')
 ```
 
 ## Architecture Overview
@@ -39,7 +48,7 @@ console.log('Chain created:', chain.id);
 Provisioning configurations define **voice processing chains**:
 
 - **STT Config**: Speech-to-Text configuration for converting voice input to text
-- **Agent Configuration**: The AI agent that processes the text
+- **Processing Config**: The AI model that processes the text
 - **TTS Config**: Text-to-Speech configuration for converting responses to voice
 
 **Use Cases:**
@@ -51,238 +60,467 @@ Provisioning configurations define **voice processing chains**:
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| chainName | string | Yes | Unique name for the chain |
-| description | string | No | Description of the chain's purpose |
-| sttConfig | STTConfig | Yes | Speech-to-Text configuration |
-| agentConfigurationId | string | Yes | Agent configuration ID |
-| ttsConfig | TTSConfig | Yes | Text-to-Speech configuration |
+| chain_name | str | Yes | Unique name for the chain |
+| description | str | No | Description of the chain's purpose |
+| stt_config | DynamicSTTModelConfiguration | Yes | Speech-to-Text configuration |
+| processing_config | DynamicModelConfiguration | Yes | Processing model configuration |
+| tts_config | DynamicTTSModelConfiguration | Yes | Text-to-Speech configuration |
 
 ### STT Config Schema
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| modelId | string | Yes | STT model ID from support models |
-| defaultLanguage | string | Yes | Default input language (e.g., 'en-US') |
+| provider_type | str | Yes | Provider type (e.g., 'deepgram', 'google') |
+| provider_model_id | str | Yes | Provider's model ID |
+| language_id | str | Yes | Input language (e.g., 'en-US') |
+
+### Processing Config Schema
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| provider_type | str | Yes | Provider type (e.g., 'openai', 'anthropic') |
+| provider_model_id | str | Yes | Provider's model ID |
 
 ### TTS Config Schema
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| modelId | string | Yes | TTS model ID from support models |
-| voiceId | string | Yes | Voice ID from the TTS model's supported voices |
-| defaultLanguage | string | Yes | Default output language (e.g., 'en-US') |
+| provider_type | str | Yes | Provider type (e.g., 'elevenlabs', 'google') |
+| provider_model_id | str | Yes | Provider's model ID |
+| language_id | str | Yes | Output language (e.g., 'en-US') |
+| voice_id | str | Yes | Voice ID from the TTS model's supported voices |
 
 ## CRUD Operations
 
 ### Create Provisioning Configuration
 
-```typescript
-// Get available models
-const models = await client.supportModels.list();
-const sttModel = models.find(m => m.type === 'stt' && !m.discontinued);
-const ttsModel = models.find(m => m.type === 'tts' && !m.discontinued && m.supportedVoices?.length > 0);
+```python
+from wiil.models.service_mgt import (
+    CreateProvisioningConfig,
+    SupportedProprietor,
+)
+from wiil.models.service_mgt.dynamic_setup import (
+    DynamicSTTModelConfiguration,
+    DynamicModelConfiguration,
+    DynamicTTSModelConfiguration,
+)
 
-if (!sttModel || !ttsModel) {
-  throw new Error('Required models not available');
-}
+chain = client.provisioning_configs.create(
+    CreateProvisioningConfig(
+        chain_name='voice-support-chain',
+        description='Voice processing for customer support',
+        stt_config=DynamicSTTModelConfiguration(
+            provider_type=SupportedProprietor.DEEPGRAM.value,
+            provider_model_id='nova-2',
+            language_id='en-US'
+        ),
+        processing_config=DynamicModelConfiguration(
+            provider_type=SupportedProprietor.OPENAI.value,
+            provider_model_id='gpt-4o-mini'
+        ),
+        tts_config=DynamicTTSModelConfiguration(
+            provider_type=SupportedProprietor.ELEVENLABS.value,
+            provider_model_id='eleven_turbo_v2',
+            language_id='en-US',
+            voice_id='voice_rachel'
+        )
+    )
+)
 
-// Create the provisioning chain
-const chain = await client.provisioningConfigs.create({
-  chainName: 'voice-support-chain',
-  description: 'Voice processing for customer support',
-  sttConfig: {
-    modelId: sttModel.modelId,
-    defaultLanguage: 'en-US',
-  },
-  agentConfigurationId: 'agent_123',
-  ttsConfig: {
-    modelId: ttsModel.modelId,
-    voiceId: ttsModel.supportedVoices![0].voiceId,
-    defaultLanguage: 'en-US',
-  },
-});
-
-console.log('Chain created:', chain.id);
-console.log('Chain name:', chain.chainName);
+print(f'Chain created: {chain.id}')
+print(f'Chain name: {chain.chain_name}')
 ```
 
 ### Create Translation Configuration
 
-```typescript
-const translationChain = await client.provisioningConfigs.createTranslation({
-  chainName: 'english-spanish-translation',
-  description: 'Real-time English to Spanish translation',
-  sourceLanguage: 'en-US',
-  targetLanguage: 'es-ES',
-  sttModelId: sttModel.modelId,
-  ttsModelId: ttsModel.modelId,
-  voiceId: ttsModel.supportedVoices![0].voiceId,
-});
+```python
+from wiil.models.service_mgt import (
+    CreateTranslationChainConfig,
+    SupportedProprietor,
+)
+from wiil.models.service_mgt.dynamic_setup import (
+    DynamicSTTModelConfiguration,
+    DynamicModelConfiguration,
+    DynamicTTSModelConfiguration,
+)
 
-console.log('Translation chain created:', translationChain.id);
+translation_chain = client.provisioning_configs.create_translation(
+    CreateTranslationChainConfig(
+        chain_name='english-spanish-translation',
+        description='Real-time English to Spanish translation',
+        stt_config=DynamicSTTModelConfiguration(
+            provider_type=SupportedProprietor.DEEPGRAM.value,
+            provider_model_id='nova-2',
+            language_id='en'
+        ),
+        processing_config=DynamicModelConfiguration(
+            provider_type=SupportedProprietor.OPENAI.value,
+            provider_model_id='gpt-4o-mini'
+        ),
+        tts_config=DynamicTTSModelConfiguration(
+            provider_type=SupportedProprietor.ELEVENLABS.value,
+            provider_model_id='eleven_multilingual_v2',
+            language_id='es',
+            voice_id='spanish-voice-id'
+        ),
+        is_translation=True
+    )
+)
+
+print(f'Translation chain created: {translation_chain.id}')
 ```
 
 ### Get Provisioning Configuration
 
-```typescript
-// Get by ID
-const chain = await client.provisioningConfigs.get('chain_123');
-console.log('Chain name:', chain.chainName);
+```python
+# Get by ID
+chain = client.provisioning_configs.get('chain_123')
+print(f'Chain name: {chain.chain_name}')
 
-// Get by chain name
-const byName = await client.provisioningConfigs.getByChainName('voice-support-chain');
-console.log('Found chain:', byName.id);
+# Get by chain name
+by_name = client.provisioning_configs.get_by_chain_name('voice-support-chain')
+print(f'Found chain: {by_name.id}')
 ```
 
 ### List Provisioning Configurations
 
-```typescript
-// List all configurations
-const all = await client.provisioningConfigs.list({
-  page: 1,
-  pageSize: 20,
-});
+```python
+from wiil.types import PaginationRequest
 
-console.log('Total configs:', all.meta.totalCount);
+# List all configurations
+all_configs = client.provisioning_configs.list(
+    params=PaginationRequest(page=1, page_size=20)
+)
 
-// List only provisioning chains (STT -> Agent -> TTS)
-const provisioningChains = await client.provisioningConfigs.listProvisioningChains();
-console.log('Provisioning chains:', provisioningChains.data.length);
+print(f'Total configs: {all_configs.meta.total_count}')
 
-// List only translation chains
-const translationChains = await client.provisioningConfigs.listTranslationChains();
-console.log('Translation chains:', translationChains.data.length);
+# List only provisioning chains (STT -> Processing -> TTS)
+provisioning_chains = client.provisioning_configs.list_provisioning_chains()
+print(f'Provisioning chains: {len(provisioning_chains.data)}')
+
+# List only translation chains
+translation_chains = client.provisioning_configs.list_translation_chains()
+print(f'Translation chains: {len(translation_chains.data)}')
 ```
 
 ### Update Provisioning Configuration
 
-```typescript
-const updated = await client.provisioningConfigs.update({
-  id: 'chain_123',
-  description: 'Updated voice processing chain',
-  chainName: 'updated-voice-chain',
-});
+```python
+from wiil.models.service_mgt import UpdateProvisioningConfig
 
-console.log('Updated chain:', updated.chainName);
+updated = client.provisioning_configs.update(
+    UpdateProvisioningConfig(
+        id='chain_123',
+        description='Updated voice processing chain',
+        chain_name='updated-voice-chain',
+    )
+)
+
+print(f'Updated chain: {updated.chain_name}')
 ```
 
 ### Delete Provisioning Configuration
 
-```typescript
-const deleted = await client.provisioningConfigs.delete('chain_123');
+```python
+deleted = client.provisioning_configs.delete('chain_123')
 
-if (deleted) {
-  console.log('Chain deleted successfully');
-}
+if deleted:
+    print('Chain deleted successfully')
 ```
 
-## Complete Example
+## Full Example with Voice
 
-Full workflow demonstrating provisioning configuration lifecycle:
+```python
+import os
+from wiil import WiilClient
+from wiil.models.service_mgt import (
+    CreateProvisioningConfig,
+    SupportedProprietor,
+)
+from wiil.models.service_mgt.dynamic_setup import (
+    DynamicSTTModelConfiguration,
+    DynamicModelConfiguration,
+    DynamicTTSModelConfiguration,
+)
 
-```typescript
-import { WiilClient, LLMType, AssistantType, BusinessSupportServices } from 'wiil-js';
+client = WiilClient(api_key=os.environ['WIIL_API_KEY'])
 
-const client = new WiilClient({
-  apiKey: process.env.WIIL_API_KEY!,
-});
+chain = client.provisioning_configs.create(
+    CreateProvisioningConfig(
+        # Required
+        chain_name='customer-support-voice-chain',
 
-async function createVoiceProcessingChain() {
-  // 1. Get available models
-  console.log('Fetching available models...');
-  const models = await client.supportModels.list();
+        # Optional - Description
+        description='Voice processing chain for customer support calls',
 
-  const sttModel = models.find(m => m.type === 'stt' && !m.discontinued);
-  const ttsModel = models.find(m => m.type === 'tts' && !m.discontinued && m.supportedVoices?.length > 0);
-  const agentModel = await client.supportModels.getDefaultMultiMode();
+        # Required - STT Configuration
+        stt_config=DynamicSTTModelConfiguration(
+            provider_type=SupportedProprietor.DEEPGRAM.value,
+            provider_model_id='nova-2',
+            language_id='en-US'
+        ),
 
-  if (!sttModel || !ttsModel || !agentModel) {
-    throw new Error('Required models not available');
-  }
+        # Required - Processing Configuration
+        processing_config=DynamicModelConfiguration(
+            provider_type=SupportedProprietor.OPENAI.value,
+            provider_model_id='gpt-4o-mini'
+        ),
 
-  console.log('Using STT model:', sttModel.name);
-  console.log('Using TTS model:', ttsModel.name);
-  console.log('Using Agent model:', agentModel.name);
+        # Required - TTS Configuration
+        tts_config=DynamicTTSModelConfiguration(
+            provider_type=SupportedProprietor.ELEVENLABS.value,
+            provider_model_id='eleven_turbo_v2',
+            language_id='en-US',
+            voice_id='voice_rachel'
+        )
+    )
+)
 
-  // 2. Create instruction configuration
-  const instruction = await client.instructionConfigs.create({
-    instructionName: 'Voice Agent Instructions',
-    role: 'Voice Support Agent',
-    introductionMessage: 'Hello, how can I help you today?',
-    instructions: 'You are a helpful voice support agent. Be concise in your responses.',
-    guardrails: 'Keep responses brief for voice interactions.',
-    supportedServices: [BusinessSupportServices.APPOINTMENT_MANAGEMENT],
-  });
-  console.log('Instruction created:', instruction.id);
+print(f'Chain created: {chain.id}')
+print(f'Chain name: {chain.chain_name}')
+```
 
-  // 3. Create agent configuration
-  const agent = await client.agentConfigs.create({
-    name: 'VoiceAgent',
-    modelId: agentModel.modelId,
-    instructionConfigurationId: instruction.id,
-    assistantType: AssistantType.PHONE,
-  });
-  console.log('Agent created:', agent.id);
+---
 
-  // 4. Create provisioning chain
-  const chain = await client.provisioningConfigs.create({
-    chainName: `voice-chain-${Date.now()}`,
-    description: 'Voice processing chain for phone support',
-    sttConfig: {
-      modelId: sttModel.modelId,
-      defaultLanguage: 'en-US',
-    },
-    agentConfigurationId: agent.id,
-    ttsConfig: {
-      modelId: ttsModel.modelId,
-      voiceId: ttsModel.supportedVoices![0].voiceId,
-      defaultLanguage: 'en-US',
-    },
-  });
-  console.log('Provisioning chain created:', chain.id);
+## Voice Configuration
 
-  // 5. Retrieve and verify
-  const retrieved = await client.provisioningConfigs.get(chain.id);
-  console.log('Retrieved chain:', retrieved.chainName);
+### Overview
 
-  // 6. List all provisioning chains
-  const allChains = await client.provisioningConfigs.listProvisioningChains();
-  console.log('Total provisioning chains:', allChains.meta.totalCount);
+Provisioning chains require Speech-to-Text (STT), Processing, and Text-to-Speech (TTS) configurations to define the complete voice processing pipeline.
 
-  // 7. Update the chain
-  const updated = await client.provisioningConfigs.update({
-    id: chain.id,
-    description: 'Updated voice processing chain',
-  });
-  console.log('Updated chain description');
+### STT Configuration
 
-  // 8. Clean up
-  await client.provisioningConfigs.delete(chain.id);
-  console.log('Chain deleted');
+```python
+from wiil.models.service_mgt import SupportedProprietor
+from wiil.models.service_mgt.dynamic_setup import DynamicSTTModelConfiguration
 
-  await client.agentConfigs.delete(agent.id);
-  console.log('Agent deleted');
+stt_config = DynamicSTTModelConfiguration(
+    provider_type=SupportedProprietor.DEEPGRAM.value,  # Required
+    provider_model_id='nova-2',                         # Required
+    language_id='en-US'                                 # Optional, default: 'en'
+)
+```
 
-  await client.instructionConfigs.delete(instruction.id);
-  console.log('Instruction deleted');
+### Processing Configuration
 
-  console.log('Cleanup complete!');
-}
+```python
+from wiil.models.service_mgt import SupportedProprietor
+from wiil.models.service_mgt.dynamic_setup import DynamicModelConfiguration
 
-createVoiceProcessingChain().catch(console.error);
+processing_config = DynamicModelConfiguration(
+    provider_type=SupportedProprietor.OPENAI.value,  # Required
+    provider_model_id='gpt-4o-mini'                  # Required
+)
+```
+
+### TTS Configuration
+
+```python
+from wiil.models.service_mgt import SupportedProprietor
+from wiil.models.service_mgt.dynamic_setup import DynamicTTSModelConfiguration
+
+tts_config = DynamicTTSModelConfiguration(
+    provider_type=SupportedProprietor.ELEVENLABS.value,  # Required
+    provider_model_id='eleven_turbo_v2',                 # Required
+    language_id='en-US',                                 # Optional, default: 'en'
+    voice_id='voice_rachel'                              # Optional
+)
+```
+
+### Supported Providers
+
+```python
+from wiil.models.service_mgt import SupportedProprietor
+
+# Available providers
+SupportedProprietor.OPENAI      # "OpenAI"
+SupportedProprietor.GOOGLE      # "Google"
+SupportedProprietor.ANTHROPIC   # "Anthropic"
+SupportedProprietor.GROQ        # "Groq"
+SupportedProprietor.DEEPGRAM    # "Deepgram" - Recommended for STT
+SupportedProprietor.ELEVENLABS  # "ElevenLabs" - Recommended for TTS
+SupportedProprietor.CARTESIA    # "Cartesia"
+```
+
+### Recommended Configurations
+
+**For STT (Speech-to-Text):**
+
+```python
+stt_config = DynamicSTTModelConfiguration(
+    provider_type=SupportedProprietor.DEEPGRAM.value,
+    provider_model_id='nova-2',
+    language_id='en-US'
+)
+```
+
+**For Processing (LLM):**
+
+```python
+processing_config = DynamicModelConfiguration(
+    provider_type=SupportedProprietor.OPENAI.value,
+    provider_model_id='gpt-4o-mini'
+)
+```
+
+**For TTS (Text-to-Speech):**
+
+```python
+tts_config = DynamicTTSModelConfiguration(
+    provider_type=SupportedProprietor.ELEVENLABS.value,
+    provider_model_id='eleven_turbo_v2',
+    language_id='en-US',
+    voice_id='voice_rachel'
+)
+```
+
+---
+
+## Complete Lifecycle Example
+
+Full workflow demonstrating provisioning configuration lifecycle with dynamic model discovery:
+
+```python
+import os
+
+from wiil import WiilClient
+from wiil.models.service_mgt import (
+    CreateProvisioningConfig,
+    CreateInstructionConfiguration,
+    CreateAgentConfiguration,
+    UpdateProvisioningConfig,
+)
+from wiil.models.service_mgt.dynamic_setup import (
+    DynamicSTTModelConfiguration,
+    DynamicModelConfiguration,
+    DynamicTTSModelConfiguration,
+)
+from wiil.models.type_definitions import BusinessSupportServices
+
+client = WiilClient(api_key=os.environ['WIIL_API_KEY'])
+
+
+def create_voice_processing_chain():
+    # 1. Get available models
+    print('Fetching available models...')
+    models = client.support_models.list()
+
+    stt_model = next(
+        (m for m in models if m.type == 'stt' and not m.discontinued),
+        None
+    )
+    processing_model = next(
+        (m for m in models if m.type in ('text', 'multi_mode') and not m.discontinued),
+        None
+    )
+    tts_model = next(
+        (m for m in models
+         if m.type == 'tts' and not m.discontinued and m.supported_voices),
+        None
+    )
+
+    if not all([stt_model, processing_model, tts_model]):
+        raise ValueError('Required models not available')
+
+    print(f'Using STT model: {stt_model.name}')
+    print(f'Using Processing model: {processing_model.name}')
+    print(f'Using TTS model: {tts_model.name}')
+
+    # 2. Create instruction configuration
+    instruction = client.instruction_configs.create(
+        CreateInstructionConfiguration(
+            instruction_name='Voice Agent Instructions',
+            role='Voice Support Agent',
+            introduction_message='Hello, how can I help you today?',
+            instructions='You are a helpful voice support agent. Be concise.',
+            guardrails='Keep responses brief for voice interactions.',
+            supported_services=[BusinessSupportServices.APPOINTMENT_MANAGEMENT],
+        )
+    )
+    print(f'Instruction created: {instruction.id}')
+
+    # 3. Create agent configuration
+    agent = client.agent_configs.create(
+        CreateAgentConfiguration(
+            name='VoiceAgent',
+            model_id='model_gpt4_turbo',
+            instruction_configuration_id=instruction.id,
+        )
+    )
+    print(f'Agent created: {agent.id}')
+
+    # 4. Create provisioning chain
+    import time
+    timestamp = int(time.time())
+
+    chain = client.provisioning_configs.create(
+        CreateProvisioningConfig(
+            chain_name=f'voice-chain-{timestamp}',
+            description='Voice processing chain for phone support',
+            stt_config=DynamicSTTModelConfiguration(
+                provider_type=stt_model.proprietor,
+                provider_model_id=stt_model.provider_model_id,
+                language_id='en-US',
+            ),
+            processing_config=DynamicModelConfiguration(
+                provider_type=processing_model.proprietor,
+                provider_model_id=processing_model.provider_model_id,
+            ),
+            tts_config=DynamicTTSModelConfiguration(
+                provider_type=tts_model.proprietor,
+                provider_model_id=tts_model.provider_model_id,
+                language_id='en-US',
+                voice_id=tts_model.supported_voices[0].voice_id,
+            ),
+        )
+    )
+    print(f'Provisioning chain created: {chain.id}')
+
+    # 5. Retrieve and verify
+    retrieved = client.provisioning_configs.get(chain.id)
+    print(f'Retrieved chain: {retrieved.chain_name}')
+
+    # 6. List all provisioning chains
+    all_chains = client.provisioning_configs.list_provisioning_chains()
+    print(f'Total provisioning chains: {all_chains.meta.total_count}')
+
+    # 7. Update the chain
+    updated = client.provisioning_configs.update(
+        UpdateProvisioningConfig(
+            id=chain.id,
+            description='Updated voice processing chain',
+        )
+    )
+    print('Updated chain description')
+
+    # 8. Clean up
+    client.provisioning_configs.delete(chain.id)
+    print('Chain deleted')
+
+    client.agent_configs.delete(agent.id)
+    print('Agent deleted')
+
+    client.instruction_configs.delete(instruction.id)
+    print('Instruction deleted')
+
+    print('Cleanup complete!')
+
+
+if __name__ == '__main__':
+    create_voice_processing_chain()
 ```
 
 ## Best Practices
 
-1. **Verify model availability** - Always check that STT and TTS models are available and not discontinued before creating chains.
+1. **Verify model availability** - Always check that STT, Processing, and TTS models are available and not discontinued before creating chains.
 
-2. **Use compatible voice IDs** - The voiceId must come from the TTS model's `supportedVoices` array.
+2. **Use compatible voice IDs** - The `voice_id` must come from the TTS model's `supported_voices` array.
 
-3. **Match languages** - Ensure the STT, agent, and TTS configurations use compatible languages.
+3. **Match languages** - Ensure the STT and TTS configurations use compatible languages.
 
 4. **Use descriptive chain names** - Chain names should clearly indicate the purpose (e.g., 'customer-support-voice-en-us').
 
-5. **Clean up in order** - Delete provisioning chains before deleting the agent configurations they reference.
+5. **Clean up in order** - Delete provisioning chains before deleting related configurations.
 
 ## Troubleshooting
 
@@ -296,12 +534,13 @@ WiilAPIError: STT model not found
 **Solution:**
 Verify the model exists and is not discontinued:
 
-```typescript
-const models = await client.supportModels.list();
-const activeSTT = models.filter(m => m.type === 'stt' && !m.discontinued);
+```python
+models = client.support_models.list()
+active_stt = [m for m in models if m.type == 'stt' and not m.discontinued]
 
-console.log('Available STT models:');
-activeSTT.forEach(m => console.log(`  ${m.modelId}: ${m.name}`));
+print('Available STT models:')
+for m in active_stt:
+    print(f'  {m.proprietor}/{m.provider_model_id}: {m.name}')
 ```
 
 ### Invalid Voice ID
@@ -314,15 +553,32 @@ WiilValidationError: Voice ID not found for TTS model
 **Solution:**
 Use a voice ID from the TTS model's supported voices:
 
-```typescript
-const ttsModel = models.find(m => m.type === 'tts' && m.supportedVoices?.length > 0);
+```python
+tts_model = next(
+    (m for m in models if m.type == 'tts' and m.supported_voices),
+    None
+)
 
-if (ttsModel?.supportedVoices) {
-  console.log('Available voices:');
-  ttsModel.supportedVoices.forEach(v => {
-    console.log(`  ${v.voiceId}: ${v.name}`);
-  });
-}
+if tts_model and tts_model.supported_voices:
+    print('Available voices:')
+    for v in tts_model.supported_voices:
+        print(f'  {v.voice_id}: {v.name}')
+```
+
+### Unsupported Model
+
+**Error:**
+```
+WiilValidationError: Unsupported STT model: provider/model-id
+```
+
+**Solution:**
+The SDK validates models against the support registry. Verify the model is supported:
+
+```python
+# Check if a specific model is supported
+is_supported = client.support_models.supports('deepgram', 'nova-2')
+print(f'Model supported: {is_supported}')
 ```
 
 ### Chain Name Already Exists
@@ -335,15 +591,16 @@ WiilAPIError: Chain name already exists
 **Solution:**
 Use unique chain names or check existing chains first:
 
-```typescript
-try {
-  const existing = await client.provisioningConfigs.getByChainName('my-chain');
-  console.log('Chain already exists:', existing.id);
-} catch (error) {
-  // Chain doesn't exist, safe to create
-  const chain = await client.provisioningConfigs.create({
-    chainName: 'my-chain',
-    // ...
-  });
-}
+```python
+try:
+    existing = client.provisioning_configs.get_by_chain_name('my-chain')
+    print(f'Chain already exists: {existing.id}')
+except Exception:
+    # Chain doesn't exist, safe to create
+    chain = client.provisioning_configs.create(
+        CreateProvisioningConfig(
+            chain_name='my-chain',
+            # ...
+        )
+    )
 ```

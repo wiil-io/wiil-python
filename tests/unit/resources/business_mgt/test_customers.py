@@ -43,7 +43,7 @@ class TestCustomersResource:
         mock_api.add(
             responses.POST,
             f"{BASE_URL}/customers",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -87,7 +87,7 @@ class TestCustomersResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/customers/cust_123",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -128,7 +128,7 @@ class TestCustomersResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/customers/phone/%2B1234567890",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -169,7 +169,7 @@ class TestCustomersResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/customers/email/john.doe%40example.com",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -222,7 +222,7 @@ class TestCustomersResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/customers/search?query=john&page=1&pageSize=10",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -260,7 +260,7 @@ class TestCustomersResource:
         mock_api.add(
             responses.PATCH,
             f"{BASE_URL}/customers/cust_123",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -279,7 +279,7 @@ class TestCustomersResource:
         mock_api.add(
             responses.DELETE,
             f"{BASE_URL}/customers/cust_123",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(True),
             status=200,
         )
@@ -352,7 +352,7 @@ class TestCustomersResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/customers",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -404,7 +404,7 @@ class TestCustomersResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/customers?page=2&pageSize=10",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -420,7 +420,7 @@ class TestCustomersResource:
         mock_api.add(
             responses.POST,
             f"{BASE_URL}/customers",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=error_response("VALIDATION_ERROR", "Email is required"),
             status=400,
         )
@@ -438,7 +438,7 @@ class TestCustomersResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/customers/nonexistent",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=error_response("NOT_FOUND", "Customer not found"),
             status=404,
         )

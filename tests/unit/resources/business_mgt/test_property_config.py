@@ -41,7 +41,7 @@ class TestPropertyConfigResource:
         mock_api.add(
             responses.POST,
             f"{BASE_URL}/property-management/categories",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -73,7 +73,7 @@ class TestPropertyConfigResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/property-management/categories/cat_123",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -114,7 +114,7 @@ class TestPropertyConfigResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/property-management/categories?page=1&pageSize=10",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -143,7 +143,7 @@ class TestPropertyConfigResource:
         mock_api.add(
             responses.PATCH,
             f"{BASE_URL}/property-management/categories",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -164,7 +164,7 @@ class TestPropertyConfigResource:
         mock_api.add(
             responses.DELETE,
             f"{BASE_URL}/property-management/categories/cat_123",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(True),
             status=200,
         )
@@ -200,7 +200,7 @@ class TestPropertyConfigResource:
         mock_api.add(
             responses.POST,
             f"{BASE_URL}/property-management/addresses",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -243,7 +243,7 @@ class TestPropertyConfigResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/property-management/addresses/addr_123",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -292,7 +292,7 @@ class TestPropertyConfigResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/property-management/addresses?page=1&pageSize=10",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -329,7 +329,7 @@ class TestPropertyConfigResource:
         mock_api.add(
             responses.PATCH,
             f"{BASE_URL}/property-management/addresses",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -351,7 +351,7 @@ class TestPropertyConfigResource:
         mock_api.add(
             responses.DELETE,
             f"{BASE_URL}/property-management/addresses/addr_123",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(True),
             status=200,
         )
@@ -385,7 +385,7 @@ class TestPropertyConfigResource:
         mock_api.add(
             responses.POST,
             f"{BASE_URL}/property-management/addresses/addr_123/verify",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -439,7 +439,7 @@ class TestPropertyConfigResource:
         mock_api.add(
             responses.POST,
             f"{BASE_URL}/property-management/properties",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -504,7 +504,7 @@ class TestPropertyConfigResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/property-management/properties/prop_123",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -570,7 +570,7 @@ class TestPropertyConfigResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/property-management/properties?page=1&pageSize=10",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -638,7 +638,7 @@ class TestPropertyConfigResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/property-management/properties/by-category/cat_123?page=1&pageSize=10",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -693,7 +693,7 @@ class TestPropertyConfigResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/property-management/properties/by-address/addr_123",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -759,7 +759,7 @@ class TestPropertyConfigResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/property-management/properties/search?query=downtown&page=1&pageSize=10",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -814,7 +814,7 @@ class TestPropertyConfigResource:
         mock_api.add(
             responses.PATCH,
             f"{BASE_URL}/property-management/properties",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -838,7 +838,7 @@ class TestPropertyConfigResource:
         mock_api.add(
             responses.DELETE,
             f"{BASE_URL}/property-management/properties/prop_123",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(True),
             status=200,
         )
@@ -856,7 +856,7 @@ class TestPropertyConfigResource:
         mock_api.add(
             responses.POST,
             f"{BASE_URL}/property-management/categories",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=error_response("VALIDATION_ERROR", "Name required"),
             status=400,
         )
@@ -876,7 +876,7 @@ class TestPropertyConfigResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/property-management/categories/nonexistent",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=error_response("NOT_FOUND", "Category not found"),
             status=404,
         )
@@ -893,7 +893,7 @@ class TestPropertyConfigResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/property-management/properties/nonexistent",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=error_response("NOT_FOUND", "Property not found"),
             status=404,
         )

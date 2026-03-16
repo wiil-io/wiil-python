@@ -22,7 +22,10 @@ class TranslationSessionsResource:
 
     def get(self, session_id: str) -> TranslationServiceLog:
         """Retrieve a translation session by ID."""
-        return self._http.get(f'{self._base_path}/{session_id}')
+        return self._http.get(
+            f'{self._base_path}/{session_id}',
+            response_model=TranslationServiceLog
+        )
 
     def list(
         self,
@@ -42,7 +45,10 @@ class TranslationSessionsResource:
             query_params['pageSize'] = params.page_size
 
         query_string = f'?{urlencode(query_params)}' if query_params else ''
-        return self._http.get(f'{self._base_path}{query_string}')
+        return self._http.get(
+            f'{self._base_path}{query_string}',
+            response_model=PaginatedResult[TranslationServiceLog]
+        )
 
 
 __all__ = ['TranslationSessionsResource']

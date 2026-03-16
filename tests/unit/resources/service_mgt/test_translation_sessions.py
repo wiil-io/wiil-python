@@ -42,7 +42,7 @@ class TestTranslationSessionsResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/translation-sessions/session_123",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -60,7 +60,7 @@ class TestTranslationSessionsResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/translation-sessions/invalid_id",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=error_response("NOT_FOUND", "Translation session not found"),
             status=404,
         )
@@ -131,7 +131,7 @@ class TestTranslationSessionsResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/translation-sessions",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -161,7 +161,7 @@ class TestTranslationSessionsResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/translation-sessions?page=2&pageSize=50",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )

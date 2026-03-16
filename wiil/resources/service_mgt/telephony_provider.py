@@ -2,25 +2,24 @@
 
 This module provides methods for searching available phone numbers,
 getting pricing information, purchasing phone numbers, and checking
-purchase status from various telephony providers (SignalWire, Twilio,
-etc.). All methods require proper authentication via API key.
+purchase status. All methods require proper authentication via API key.
 
 Example:
     ```python
     from wiil import WiilClient
-    from wiil.types.service_types import ProviderType
 
     client = WiilClient(api_key='your-api-key')
 
-    # Search for phone numbers in a specific region
-    numbers = client.telephony_provider.get_phone_numbers(
-        ProviderType.SIGNALWIRE,
-        'US',
+    # Search for phone numbers
+    numbers = client.telephony_provider.get_phone_numbers()
+
+    # Search with area code filter
+    seattle_numbers = client.telephony_provider.get_phone_numbers(
         area_code='206'
     )
 
-    # Get pricing for a region
-    pricing = client.telephony_provider.get_pricing(ProviderType.SIGNALWIRE, 'US')
+    # Get pricing
+    pricing = client.telephony_provider.get_pricing()
     ```
 """
 
@@ -35,7 +34,6 @@ from wiil.models.service_mgt.phone_number import (
     PhoneNumberPricing,
     PhoneNumberPurchase,
 )
-from wiil.types.service_types import ProviderType
 
 
 class TelephonyProviderResource:
@@ -61,17 +59,13 @@ class TelephonyProviderResource:
 
     def get_phone_numbers(
         self,
-        provider: ProviderType,
-        country_code: str,
         area_code: Optional[str] = None,
         contains: Optional[str] = None,
         postal_code: Optional[str] = None
     ) -> List[BasePhoneNumberInfo]:
-        """Retrieve available phone numbers for a specific provider and region.
+        """Retrieve available phone numbers.
 
         Args:
-            provider: Telephony provider (e.g., ProviderType.SIGNALWIRE, ProviderType.TWILIO)
-            country_code: Country code (e.g., 'US', 'CA')
             area_code: Optional area code filter (e.g., '206', '415')
             contains: Optional number pattern to search for
             postal_code: Optional postal code filter
@@ -85,32 +79,19 @@ class TelephonyProviderResource:
 
         Example:
             ```python
-            # Search for phone numbers in US
-            numbers = client.telephony_provider.get_phone_numbers(
-                ProviderType.SIGNALWIRE,
-                'US'
-            )
+            # Search for phone numbers
+            numbers = client.telephony_provider.get_phone_numbers()
 
             # Search with area code filter
             seattle_numbers = client.telephony_provider.get_phone_numbers(
-                ProviderType.SIGNALWIRE,
-                'US',
                 area_code='206'
-            )
-
-            # Search for specific number pattern
-            custom_numbers = client.telephony_provider.get_phone_numbers(
-                ProviderType.SIGNALWIRE,
-                'US',
-                contains='555',
-                postal_code='98101'
             )
 
             for number in numbers:
                 print(f"{number.phone_number} - {number.region}")
             ```
         """
-        params: Dict[str, Any] = {"countryCode": country_code}
+        params: Dict[str, Any] = {}
 
         if area_code:
             params["areaCode"] = area_code
@@ -119,22 +100,17 @@ class TelephonyProviderResource:
         if postal_code:
             params["postalCode"] = postal_code
 
-        query_string = f'?{urlencode(params)}'
-        return self._http.get(f"{self._resource_path}/{provider}/numbers{query_string}")
+        query_string = f'?{urlencode(params)}' if params else ''
+        return self._http.get(
+            f"{self._resource_path}/numbers{query_string}",
+            response_model=List[BasePhoneNumberInfo]
+        )
 
-    def get_pricing(
-        self,
-        provider: ProviderType,
-        country_code: str
-    ) -> List[PhoneNumberPricing]:
-        """Retrieve pricing information for phone numbers by provider and region.
-
-        Args:
-            provider: Telephony provider (e.g., ProviderType.SIGNALWIRE, ProviderType.TWILIO)
-            country_code: Country code (e.g., 'US', 'CA')
+    def get_pricing(self) -> List[PhoneNumberPricing]:
+        """Retrieve pricing information for phone numbers.
 
         Returns:
-            List of pricing information for phone numbers in the specified region
+            List of pricing information for phone numbers
 
         Raises:
             WiilAPIError: When the API returns an error
@@ -142,19 +118,16 @@ class TelephonyProviderResource:
 
         Example:
             ```python
-            pricing = client.telephony_provider.get_pricing(
-                ProviderType.SIGNALWIRE,
-                'US'
-            )
+            pricing = client.telephony_provider.get_pricing()
             for price in pricing:
                 print(f"Number Type: {price.number_type}")
                 print(f"Price: ${price.price}")
             ```
         """
-        params: Dict[str, Any] = {"countryCode": country_code}
-
-        query_string = f'?{urlencode(params)}'
-        return self._http.get(f"{self._resource_path}/{provider}/pricing{query_string}")
+        return self._http.get(
+            f"{self._resource_path}/pricing",
+            response_model=List[PhoneNumberPricing]
+        )
 
     def purchase(
         self,
@@ -181,6 +154,7 @@ class TelephonyProviderResource:
             f"{self._resource_path}/purchase",
             payload,
             schema=BusinessPhoneNumberPurchaseRequest,
+            response_model=PhoneNumberPurchase
         )
 
         initial_status = self._normalize_status(initial_result)
@@ -207,7 +181,10 @@ class TelephonyProviderResource:
 
     def get_purchase_status(self, request_id: str) -> PhoneNumberPurchase:
         """Get current status for a phone purchase request."""
-        return self._http.get(f"{self._resource_path}/purchase-request/{request_id}")
+        return self._http.get(
+            f"{self._resource_path}/purchase-request/{request_id}",
+            response_model=PhoneNumberPurchase
+        )
 
     @staticmethod
     def _extract_field(payload: Any, field_name: str) -> Optional[Any]:

@@ -1,23 +1,23 @@
 # Translation Sessions Guide
 
-This guide covers accessing translation session logs using the WIIL Platform JS SDK. Translation sessions represent records of translation operations performed by the AI system.
+This guide covers accessing translation session logs using the WIIL Platform Python SDK. Translation sessions represent records of translation operations performed by the AI system.
 
 ## Quick Start
 
-```typescript
-import { WiilClient } from 'wiil-js';
+```python
+import os
+from wiil import WiilClient
 
-const client = new WiilClient({
-  apiKey: 'your-api-key',
-});
+client = WiilClient(
+    api_key=os.environ['WIIL_API_KEY']
+)
 
-// List translation sessions
-const result = await client.translationSessions.list();
+# List translation sessions
+result = client.translation_sessions.list()
 
-console.log('Total sessions:', result.meta.totalCount);
-result.data.forEach(session => {
-  console.log(`- ${session.id}: ${session.sourceLanguage} -> ${session.targetLanguage}`);
-});
+print('Total sessions:', result.meta.total_count)
+for session in result.data:
+    print(f'- {session.id}: {session.source_language} -> {session.target_language}')
 ```
 
 ## Architecture Overview
@@ -32,128 +32,135 @@ Translation sessions are a **read-only resource** that provides:
 
 ### List Translation Sessions
 
-```typescript
-// List with default pagination
-const result = await client.translationSessions.list();
+```python
+# List with default pagination
+result = client.translation_sessions.list()
 
-console.log('Total sessions:', result.meta.totalCount);
-console.log('Page:', result.meta.page, 'of', result.meta.totalPages);
+print('Total sessions:', result.meta.total_count)
+print('Page:', result.meta.page, 'of', result.meta.total_pages)
 
-result.data.forEach(session => {
-  console.log(`Session ${session.id}:`);
-  console.log(`  Source: ${session.sourceLanguage}`);
-  console.log(`  Target: ${session.targetLanguage}`);
-});
+for session in result.data:
+    print(f'Session {session.id}:')
+    print(f'  Source: {session.source_language}')
+    print(f'  Target: {session.target_language}')
 ```
 
 ### List with Custom Pagination
 
-```typescript
-const result = await client.translationSessions.list({
-  page: 2,
-  pageSize: 50,
-  sortBy: 'createdAt',
-  sortDirection: 'desc',
-});
+```python
+from wiil.models.common import PaginationRequest
 
-console.log(`Page ${result.meta.page} of ${result.meta.totalPages}`);
-console.log(`Showing ${result.data.length} of ${result.meta.totalCount} sessions`);
+result = client.translation_sessions.list(
+    PaginationRequest(
+        page=2,
+        page_size=50,
+        sort_by='createdAt',
+        sort_direction='desc'
+    )
+)
+
+print(f'Page {result.meta.page} of {result.meta.total_pages}')
+print(f'Showing {len(result.data)} of {result.meta.total_count} sessions')
 ```
 
 ### Get Translation Session by ID
 
-```typescript
-const session = await client.translationSessions.get('session_123');
+```python
+from datetime import datetime
 
-console.log('Session ID:', session.id);
-console.log('Source Language:', session.sourceLanguage);
-console.log('Target Language:', session.targetLanguage);
-console.log('Created At:', new Date(session.createdAt).toISOString());
+session = client.translation_sessions.get('session_123')
+
+print('Session ID:', session.id)
+print('Source Language:', session.source_language)
+print('Target Language:', session.target_language)
+print('Created At:', session.created_at)
 ```
 
 ## Complete Example
 
-```typescript
-import { WiilClient } from 'wiil-js';
+```python
+import os
+from wiil import WiilClient
+from wiil.models.common import PaginationRequest
 
-const client = new WiilClient({
-  apiKey: process.env.WIIL_API_KEY!,
-});
+client = WiilClient(
+    api_key=os.environ['WIIL_API_KEY']
+)
 
-async function exploreTranslationSessions() {
-  // 1. List all translation sessions
-  const allSessions = await client.translationSessions.list({
-    page: 1,
-    pageSize: 100,
-  });
+def explore_translation_sessions():
+    # 1. List all translation sessions
+    all_sessions = client.translation_sessions.list(
+        PaginationRequest(
+            page=1,
+            page_size=100
+        )
+    )
 
-  console.log('Total translation sessions:', allSessions.meta.totalCount);
+    print('Total translation sessions:', all_sessions.meta.total_count)
 
-  if (allSessions.data.length === 0) {
-    console.log('No translation sessions available');
-    return;
-  }
+    if len(all_sessions.data) == 0:
+        print('No translation sessions available')
+        return
 
-  // 2. Analyze language pairs
-  const languagePairs = new Map<string, number>();
+    # 2. Analyze language pairs
+    language_pairs = {}
 
-  allSessions.data.forEach(session => {
-    const pair = `${session.sourceLanguage} -> ${session.targetLanguage}`;
-    languagePairs.set(pair, (languagePairs.get(pair) || 0) + 1);
-  });
+    for session in all_sessions.data:
+        pair = f'{session.source_language} -> {session.target_language}'
+        language_pairs[pair] = language_pairs.get(pair, 0) + 1
 
-  console.log('\nLanguage pair distribution:');
-  languagePairs.forEach((count, pair) => {
-    console.log(`  ${pair}: ${count} sessions`);
-  });
+    print('\nLanguage pair distribution:')
+    for pair, count in language_pairs.items():
+        print(f'  {pair}: {count} sessions')
 
-  // 3. Get details of a specific session
-  const sessionId = allSessions.data[0].id;
-  const sessionDetails = await client.translationSessions.get(sessionId);
+    # 3. Get details of a specific session
+    session_id = all_sessions.data[0].id
+    session_details = client.translation_sessions.get(session_id)
 
-  console.log('\nSession details:');
-  console.log('  ID:', sessionDetails.id);
-  console.log('  Source:', sessionDetails.sourceLanguage);
-  console.log('  Target:', sessionDetails.targetLanguage);
-}
+    print('\nSession details:')
+    print('  ID:', session_details.id)
+    print('  Source:', session_details.source_language)
+    print('  Target:', session_details.target_language)
 
-exploreTranslationSessions().catch(console.error);
+if __name__ == '__main__':
+    explore_translation_sessions()
 ```
 
 ## Best Practices
 
 1. **Use pagination for large datasets** - Translation sessions can accumulate quickly. Always use pagination to avoid loading too much data.
 
-2. **Sort by createdAt for recent sessions** - Use `sortBy: 'createdAt'` with `sortDirection: 'desc'` to get the most recent sessions first.
+2. **Sort by created_at for recent sessions** - Use `sort_by='createdAt'` with `sort_direction='desc'` to get the most recent sessions first.
 
-3. **Check for empty results** - Always check if `data.length > 0` before accessing session details.
+3. **Check for empty results** - Always check if `len(data) > 0` before accessing session details.
 
 ## Troubleshooting
 
 ### Session Not Found
 
 **Error:**
-```
+
+```text
 WiilAPIError: Translation session not found
 ```
 
 **Solution:**
 Verify the session ID exists by listing available sessions first:
 
-```typescript
-const sessions = await client.translationSessions.list();
+```python
+sessions = client.translation_sessions.list()
 
-if (sessions.data.length > 0) {
-  const session = await client.translationSessions.get(sessions.data[0].id);
-  console.log('Session found:', session.id);
-} else {
-  console.log('No translation sessions available');
-}
+if len(sessions.data) > 0:
+    session = client.translation_sessions.get(sessions.data[0].id)
+    print('Session found:', session.id)
+else:
+    print('No translation sessions available')
 ```
 
 ### No Sessions Available
 
 If no translation sessions exist, they will be created automatically as translation operations occur through the platform. Translation sessions are generated by:
+
 - Real-time translation services
 - Translation provisioning chains
 - Multi-language agent interactions

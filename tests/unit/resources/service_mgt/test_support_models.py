@@ -41,7 +41,7 @@ class TestSupportModelsResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/support-models/model_123",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -59,7 +59,7 @@ class TestSupportModelsResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/support-models/invalid_id",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=error_response("NOT_FOUND", "Support model not found"),
             status=404,
         )
@@ -118,7 +118,7 @@ class TestSupportModelsResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/support-models",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_models),
             status=200,
         )
@@ -148,7 +148,7 @@ class TestSupportModelsResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/support-models/defaults/multi-mode",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -177,7 +177,7 @@ class TestSupportModelsResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/support-models/defaults/sts",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -222,7 +222,7 @@ class TestSupportModelsResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/support-models/defaults/tts",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -259,7 +259,7 @@ class TestSupportModelsResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/support-models/defaults/stt",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -288,7 +288,7 @@ class TestSupportModelsResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/support-models/defaults/transcribe",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -316,7 +316,7 @@ class TestSupportModelsResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/support-models/defaults/batch",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -344,7 +344,7 @@ class TestSupportModelsResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/support-models/defaults/translation-stt",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -372,7 +372,7 @@ class TestSupportModelsResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/support-models/defaults/translation-tts",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -400,7 +400,7 @@ class TestSupportModelsResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/support-models/lookup/type-proprietor/TEXT_PROCESSING/Anthropic",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -431,7 +431,7 @@ class TestSupportModelsResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/support-models/lookup/proprietor-provider/Google/gemini-2.0-flash-exp",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )

@@ -154,12 +154,9 @@ class CreateServiceAppointment(PydanticBaseModel):
         create_data = CreateServiceAppointment(
             business_service_id="service_123",
             customer_id="cust_456",
-            customer_name="Jane Smith",
-            customer_email="jane@example.com",
             start_time=1234567890,
             duration=45,
-            total_price=75.00,
-            status=AppointmentStatus.PENDING
+            total_price=75.00
         )
         ```
     """
@@ -172,19 +169,15 @@ class CreateServiceAppointment(PydanticBaseModel):
 
     business_service_id: str = Field(..., alias="businessServiceId")
     customer_id: str = Field(..., alias="customerId")
-    customer_name: Optional[str] = Field(None, alias="customerName")
-    customer_email: Optional[EmailStr] = Field(None, alias="customerEmail")
     start_time: int = Field(..., alias="startTime")
     end_time: Optional[int] = Field(None, alias="endTime")
-    duration: Optional[int] = Field(30, gt=0)
-    total_price: Optional[float] = Field(0.0, ge=0, alias="totalPrice")
+    duration: Optional[int] = Field(None, gt=0)
+    total_price: Optional[float] = Field(None, ge=0, alias="totalPrice")
     deposit_paid: float = Field(0.0, ge=0, alias="depositPaid")
-    status: AppointmentStatus = AppointmentStatus.PENDING
     assigned_user_account_id: Optional[str] = Field(None, alias="assignedUserAccountId")
     calendar_id: Optional[str] = Field(None, alias="calendarId")
     calendar_event_id: Optional[str] = Field(None, alias="calendarEventId")
     calendar_provider: Optional[CalendarProvider] = Field(None, alias="calendarProvider")
-    service_conversation_config_id: Optional[str] = Field(None, alias="serviceConversationConfigId")
 
 
 class UpdateServiceAppointment(PydanticBaseModel):
@@ -196,7 +189,6 @@ class UpdateServiceAppointment(PydanticBaseModel):
         ```python
         update_data = UpdateServiceAppointment(
             id="appt_123",
-            status=AppointmentStatus.COMPLETED,
             end_time=1234567950
         )
         ```
@@ -211,17 +203,13 @@ class UpdateServiceAppointment(PydanticBaseModel):
     id: str
     business_service_id: Optional[str] = Field(None, alias="businessServiceId")
     customer_id: Optional[str] = Field(None, alias="customerId")
-    customer_name: Optional[str] = Field(None, alias="customerName")
-    customer_email: Optional[EmailStr] = Field(None, alias="customerEmail")
     start_time: Optional[int] = Field(None, alias="startTime")
     end_time: Optional[int] = Field(None, alias="endTime")
     duration: Optional[int] = Field(None, gt=0)
     total_price: Optional[float] = Field(None, ge=0, alias="totalPrice")
     deposit_paid: Optional[float] = Field(None, ge=0, alias="depositPaid")
-    status: Optional[AppointmentStatus] = None
     assigned_user_account_id: Optional[str] = Field(None, alias="assignedUserAccountId")
     calendar_id: Optional[str] = Field(None, alias="calendarId")
     calendar_event_id: Optional[str] = Field(None, alias="calendarEventId")
     calendar_provider: Optional[CalendarProvider] = Field(None, alias="calendarProvider")
     cancel_reason: Optional[str] = Field(None, alias="cancelReason")
-    service_conversation_config_id: Optional[str] = Field(None, alias="serviceConversationConfigId")

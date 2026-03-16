@@ -1,23 +1,20 @@
 # Knowledge Sources Guide
 
-This guide covers accessing knowledge sources using the WIIL Platform JS SDK. Knowledge sources represent repositories of information that AI agents can access for context and factual grounding.
+This guide covers accessing knowledge sources using the WIIL Platform Python SDK. Knowledge sources represent repositories of information that AI agents can access for context and factual grounding.
 
 ## Quick Start
 
-```typescript
-import { WiilClient } from 'wiil-js';
+```python
+from wiil import WiilClient
 
-const client = new WiilClient({
-  apiKey: 'your-api-key',
-});
+client = WiilClient(api_key='your-api-key')
 
-// List knowledge sources
-const result = await client.knowledgeSources.list();
+# List knowledge sources
+result = client.knowledge_sources.list()
 
-console.log('Total sources:', result.meta.totalCount);
-result.data.forEach(source => {
-  console.log(`- ${source.name} (${source.type})`);
-});
+print(f'Total sources: {result.meta.total_count}')
+for source in result.data:
+    print(f'- {source.name} ({source.type})')
 ```
 
 ## Architecture Overview
@@ -26,183 +23,221 @@ Knowledge sources are a **read-only resource** that provides:
 
 - **Information Repositories**: Documents, FAQs, product catalogs, and other data
 - **Agent Context**: Factual grounding for AI agent responses
-- **Referenced by Instructions**: Instruction configurations link to knowledge sources via `knowledgeSourceIds`
+- **Referenced by Instructions**: Instruction configurations link to knowledge sources via `knowledge_source_ids`
 
 **Relationship with Instruction Configurations:**
-```typescript
-const instruction = await client.instructionConfigs.create({
-  // ... other fields
-  knowledgeSourceIds: ['ks_123', 'ks_456'],  // Link to knowledge sources
-});
+```python
+instruction = client.instruction_configs.create(
+    CreateInstructionConfiguration(
+        # ... other fields
+        knowledge_source_ids=['ks_123', 'ks_456'],  # Link to knowledge sources
+    )
+)
 ```
 
 ## Operations
 
 ### List Knowledge Sources
 
-```typescript
-// List with default pagination
-const result = await client.knowledgeSources.list();
+```python
+from wiil import WiilClient
 
-console.log('Total knowledge sources:', result.meta.totalCount);
-console.log('Page:', result.meta.page, 'of', result.meta.totalPages);
+client = WiilClient(api_key='your-api-key')
 
-result.data.forEach(source => {
-  console.log(`${source.name}:`);
-  console.log(`  ID: ${source.id}`);
-  console.log(`  Type: ${source.type}`);
-});
+# List with default pagination
+result = client.knowledge_sources.list()
+
+print(f'Total knowledge sources: {result.meta.total_count}')
+print(f'Page: {result.meta.page} of {result.meta.total_pages}')
+
+for source in result.data:
+    print(f'{source.name}:')
+    print(f'  ID: {source.id}')
+    print(f'  Type: {source.type}')
 ```
 
 ### List with Custom Pagination
 
-```typescript
-const result = await client.knowledgeSources.list({
-  page: 2,
-  pageSize: 50,
-});
+```python
+from wiil.types import PaginationRequest
 
-console.log(`Page ${result.meta.page} of ${result.meta.totalPages}`);
-console.log(`Showing ${result.data.length} of ${result.meta.totalCount} sources`);
+result = client.knowledge_sources.list(
+    params=PaginationRequest(page=2, page_size=50)
+)
+
+print(f'Page {result.meta.page} of {result.meta.total_pages}')
+print(f'Showing {len(result.data)} of {result.meta.total_count} sources')
 ```
 
 ### Get Knowledge Source by ID
 
-```typescript
-const source = await client.knowledgeSources.get('ks_123');
+```python
+source = client.knowledge_sources.get('ks_123')
 
-console.log('Knowledge Source:');
-console.log('  ID:', source.id);
-console.log('  Name:', source.name);
-console.log('  Type:', source.type);
-console.log('  Created:', new Date(source.createdAt).toISOString());
+print('Knowledge Source:')
+print(f'  ID: {source.id}')
+print(f'  Name: {source.name}')
+print(f'  Type: {source.type}')
+print(f'  Created: {source.created_at}')
 ```
 
 ## Using Knowledge Sources with Instructions
 
 Knowledge sources provide context for AI agents through instruction configurations:
 
-```typescript
-// 1. List available knowledge sources
-const sources = await client.knowledgeSources.list();
+```python
+from wiil import WiilClient
+from wiil.models.service_mgt import (
+    CreateInstructionConfiguration,
+    CreateAgentConfiguration,
+)
+from wiil.models.type_definitions import BusinessSupportServices
 
-console.log('Available knowledge sources:');
-sources.data.forEach(source => {
-  console.log(`  ${source.id}: ${source.name}`);
-});
+client = WiilClient(api_key='your-api-key')
 
-// 2. Select relevant sources for your agent
-const relevantSourceIds = sources.data
-  .filter(s => s.type === 'faq' || s.type === 'documentation')
-  .map(s => s.id);
+# 1. List available knowledge sources
+sources = client.knowledge_sources.list()
 
-// 3. Create instruction with knowledge sources
-const model = await client.supportModels.getDefaultMultiMode();
+print('Available knowledge sources:')
+for source in sources.data:
+    print(f'  {source.id}: {source.name}')
 
-const instruction = await client.instructionConfigs.create({
-  instructionName: 'Knowledge-Enhanced Agent',
-  role: 'Support Agent',
-  introductionMessage: 'Hello! I have access to our knowledge base.',
-  instructions: 'Use the linked knowledge sources to answer questions accurately.',
-  guardrails: 'Only provide information from verified knowledge sources.',
-  supportedServices: [BusinessSupportServices.APPOINTMENT_MANAGEMENT],
-  knowledgeSourceIds: relevantSourceIds,
-});
+# 2. Select relevant sources for your agent
+relevant_source_ids = [
+    s.id for s in sources.data
+    if s.type in ('faq', 'documentation')
+]
 
-// 4. Create agent with the instruction
-const agent = await client.agentConfigs.create({
-  name: 'KnowledgeBot',
-  modelId: model!.modelId,
-  instructionConfigurationId: instruction.id,
-});
+# 3. Get a model
+models = client.support_models.list()
+model = next(
+    (m for m in models if m.type == 'multi_mode' and not m.discontinued),
+    None
+)
 
-console.log('Agent created with knowledge sources:', agent.id);
+# 4. Create instruction with knowledge sources
+instruction = client.instruction_configs.create(
+    CreateInstructionConfiguration(
+        instruction_name='Knowledge-Enhanced Agent',
+        role='Support Agent',
+        introduction_message='Hello! I have access to our knowledge base.',
+        instructions='Use the linked knowledge sources to answer questions.',
+        guardrails='Only provide information from verified knowledge sources.',
+        supported_services=[BusinessSupportServices.APPOINTMENT_MANAGEMENT],
+        knowledge_source_ids=relevant_source_ids,
+    )
+)
+
+# 5. Create agent with the instruction
+agent = client.agent_configs.create(
+    CreateAgentConfiguration(
+        name='KnowledgeBot',
+        model_id=model.model_id,
+        instruction_configuration_id=instruction.id,
+    )
+)
+
+print(f'Agent created with knowledge sources: {agent.id}')
 ```
 
 ## Complete Example
 
-```typescript
-import { WiilClient, BusinessSupportServices } from 'wiil-js';
+```python
+import os
 
-const client = new WiilClient({
-  apiKey: process.env.WIIL_API_KEY!,
-});
+from wiil import WiilClient
+from wiil.models.service_mgt import (
+    CreateInstructionConfiguration,
+    CreateAgentConfiguration,
+)
+from wiil.models.type_definitions import BusinessSupportServices
+from wiil.types import PaginationRequest
 
-async function exploreKnowledgeSources() {
-  // 1. List all knowledge sources
-  const allSources = await client.knowledgeSources.list({
-    page: 1,
-    pageSize: 100,
-  });
+client = WiilClient(api_key=os.environ['WIIL_API_KEY'])
 
-  console.log('Total knowledge sources:', allSources.meta.totalCount);
 
-  if (allSources.data.length === 0) {
-    console.log('No knowledge sources available');
-    return;
-  }
+def explore_knowledge_sources():
+    # 1. List all knowledge sources
+    all_sources = client.knowledge_sources.list(
+        params=PaginationRequest(page=1, page_size=100)
+    )
 
-  // 2. Categorize by type
-  const byType = new Map<string, number>();
+    print(f'Total knowledge sources: {all_sources.meta.total_count}')
 
-  allSources.data.forEach(source => {
-    const type = source.type || 'unknown';
-    byType.set(type, (byType.get(type) || 0) + 1);
-  });
+    if not all_sources.data:
+        print('No knowledge sources available')
+        return
 
-  console.log('\nKnowledge sources by type:');
-  byType.forEach((count, type) => {
-    console.log(`  ${type}: ${count}`);
-  });
+    # 2. Categorize by type
+    by_type = {}
 
-  // 3. Get details of a specific source
-  const sourceId = allSources.data[0].id;
-  const sourceDetails = await client.knowledgeSources.get(sourceId);
+    for source in all_sources.data:
+        source_type = source.type or 'unknown'
+        by_type[source_type] = by_type.get(source_type, 0) + 1
 
-  console.log('\nSource details:');
-  console.log('  ID:', sourceDetails.id);
-  console.log('  Name:', sourceDetails.name);
-  console.log('  Type:', sourceDetails.type);
+    print('\nKnowledge sources by type:')
+    for source_type, count in by_type.items():
+        print(f'  {source_type}: {count}')
 
-  // 4. Example: Create an agent with knowledge sources
-  console.log('\nExample: Creating agent with knowledge sources...');
+    # 3. Get details of a specific source
+    source_id = all_sources.data[0].id
+    source_details = client.knowledge_sources.get(source_id)
 
-  const model = await client.supportModels.getDefaultMultiMode();
-  if (!model) {
-    console.log('No model available');
-    return;
-  }
+    print('\nSource details:')
+    print(f'  ID: {source_details.id}')
+    print(f'  Name: {source_details.name}')
+    print(f'  Type: {source_details.type}')
 
-  // Select first 3 knowledge sources
-  const selectedSourceIds = allSources.data.slice(0, 3).map(s => s.id);
+    # 4. Example: Create an agent with knowledge sources
+    print('\nExample: Creating agent with knowledge sources...')
 
-  const instruction = await client.instructionConfigs.create({
-    instructionName: `KS_Test_Instructions_${Date.now()}`,
-    role: 'Knowledge Base Agent',
-    introductionMessage: 'Hello! I can answer questions using our knowledge base.',
-    instructions: 'Answer questions using the linked knowledge sources.',
-    guardrails: 'Cite sources when providing information.',
-    supportedServices: [BusinessSupportServices.APPOINTMENT_MANAGEMENT],
-    knowledgeSourceIds: selectedSourceIds,
-  });
+    models = client.support_models.list()
+    model = next(
+        (m for m in models if m.type == 'multi_mode' and not m.discontinued),
+        None
+    )
+    if not model:
+        print('No model available')
+        return
 
-  console.log('Instruction created with', selectedSourceIds.length, 'knowledge sources');
+    # Select first 3 knowledge sources
+    selected_source_ids = [s.id for s in all_sources.data[:3]]
 
-  const agent = await client.agentConfigs.create({
-    name: 'KnowledgeAgent',
-    modelId: model.modelId,
-    instructionConfigurationId: instruction.id,
-  });
+    import time
+    timestamp = int(time.time())
 
-  console.log('Agent created:', agent.id);
+    instruction = client.instruction_configs.create(
+        CreateInstructionConfiguration(
+            instruction_name=f'KS_Test_Instructions_{timestamp}',
+            role='Knowledge Base Agent',
+            introduction_message='Hello! I can answer questions using our knowledge base.',
+            instructions='Answer questions using the linked knowledge sources.',
+            guardrails='Cite sources when providing information.',
+            supported_services=[BusinessSupportServices.APPOINTMENT_MANAGEMENT],
+            knowledge_source_ids=selected_source_ids,
+        )
+    )
 
-  // Cleanup
-  await client.agentConfigs.delete(agent.id);
-  await client.instructionConfigs.delete(instruction.id);
-  console.log('Cleanup complete');
-}
+    print(f'Instruction created with {len(selected_source_ids)} knowledge sources')
 
-exploreKnowledgeSources().catch(console.error);
+    agent = client.agent_configs.create(
+        CreateAgentConfiguration(
+            name='KnowledgeAgent',
+            model_id=model.model_id,
+            instruction_configuration_id=instruction.id,
+        )
+    )
+
+    print(f'Agent created: {agent.id}')
+
+    # Cleanup
+    client.agent_configs.delete(agent.id)
+    client.instruction_configs.delete(instruction.id)
+    print('Cleanup complete')
+
+
+if __name__ == '__main__':
+    explore_knowledge_sources()
 ```
 
 ## Best Practices
@@ -230,20 +265,19 @@ WiilAPIError: Knowledge source not found
 **Solution:**
 Verify the source ID exists by listing available sources:
 
-```typescript
-const sources = await client.knowledgeSources.list();
+```python
+sources = client.knowledge_sources.list()
 
-const sourceIds = sources.data.map(s => s.id);
-console.log('Available source IDs:', sourceIds);
+source_ids = [s.id for s in sources.data]
+print(f'Available source IDs: {source_ids}')
 
-// Check if your ID exists
-const targetId = 'ks_123';
-if (sourceIds.includes(targetId)) {
-  const source = await client.knowledgeSources.get(targetId);
-  console.log('Source found:', source.name);
-} else {
-  console.log('Source not found in available sources');
-}
+# Check if your ID exists
+target_id = 'ks_123'
+if target_id in source_ids:
+    source = client.knowledge_sources.get(target_id)
+    print(f'Source found: {source.name}')
+else:
+    print('Source not found in available sources')
 ```
 
 ### No Knowledge Sources Available
@@ -260,23 +294,22 @@ If no knowledge sources exist, they need to be created through the WIIL Console 
 
 **Error:**
 ```
-WiilValidationError: Invalid knowledgeSourceIds
+WiilValidationError: Invalid knowledge_source_ids
 ```
 
 **Solution:**
 Ensure all referenced knowledge source IDs are valid:
 
-```typescript
-const sources = await client.knowledgeSources.list();
-const validIds = new Set(sources.data.map(s => s.id));
+```python
+sources = client.knowledge_sources.list()
+valid_ids = {s.id for s in sources.data}
 
-const requestedIds = ['ks_123', 'ks_456', 'ks_789'];
-const invalidIds = requestedIds.filter(id => !validIds.has(id));
+requested_ids = ['ks_123', 'ks_456', 'ks_789']
+invalid_ids = [id for id in requested_ids if id not in valid_ids]
 
-if (invalidIds.length > 0) {
-  console.log('Invalid knowledge source IDs:', invalidIds);
-}
+if invalid_ids:
+    print(f'Invalid knowledge source IDs: {invalid_ids}')
 
-const validRequestedIds = requestedIds.filter(id => validIds.has(id));
-// Use validRequestedIds in your instruction configuration
+valid_requested_ids = [id for id in requested_ids if id in valid_ids]
+# Use valid_requested_ids in your instruction configuration
 ```

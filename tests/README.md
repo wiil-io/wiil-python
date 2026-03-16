@@ -257,7 +257,7 @@ class Test[ResourceName]Resource:
 def test_create(self, client, mock_api, api_response):
     mock_api.post(
         f"{BASE_URL}/resources",
-        headers={"X-WIIL-API-Key": API_KEY}
+        headers={"X-Wiil-Api-Key": API_KEY}
     ).mock(return_value=Response(200, json=api_response({...})))
 
     result = client.resources.create(name="Test")
@@ -269,7 +269,7 @@ def test_create(self, client, mock_api, api_response):
 def test_get(self, client, mock_api, api_response):
     mock_api.get(
         f"{BASE_URL}/resources/123",
-        headers={"X-WIIL-API-Key": API_KEY}
+        headers={"X-Wiil-Api-Key": API_KEY}
     ).mock(return_value=Response(200, json=api_response({...})))
 
     result = client.resources.get("123")
@@ -281,7 +281,7 @@ def test_get(self, client, mock_api, api_response):
 def test_update(self, client, mock_api, api_response):
     mock_api.patch(
         f"{BASE_URL}/resources",
-        headers={"X-WIIL-API-Key": API_KEY}
+        headers={"X-Wiil-Api-Key": API_KEY}
     ).mock(return_value=Response(200, json=api_response({...})))
 
     result = client.resources.update(id="123", name="Updated")
@@ -293,7 +293,7 @@ def test_update(self, client, mock_api, api_response):
 def test_delete(self, client, mock_api, api_response):
     mock_api.delete(
         f"{BASE_URL}/resources/123",
-        headers={"X-WIIL-API-Key": API_KEY}
+        headers={"X-Wiil-Api-Key": API_KEY}
     ).mock(return_value=Response(200, json=api_response(True)))
 
     result = client.resources.delete("123")
@@ -305,7 +305,7 @@ def test_delete(self, client, mock_api, api_response):
 def test_not_found_error(self, client, mock_api, error_response):
     mock_api.get(
         f"{BASE_URL}/resources/invalid",
-        headers={"X-WIIL-API-Key": API_KEY}
+        headers={"X-Wiil-Api-Key": API_KEY}
     ).mock(return_value=Response(
         404,
         json=error_response("NOT_FOUND", "Resource not found")
@@ -337,7 +337,7 @@ def test_list_with_pagination(self, client, mock_api, api_response):
 
     mock_api.get(
         f"{BASE_URL}/resources?page=2&pageSize=50",
-        headers={"X-WIIL-API-Key": API_KEY}
+        headers={"X-Wiil-Api-Key": API_KEY}
     ).mock(return_value=Response(200, json=api_response(mock_response)))
 
     result = client.resources.list(page=2, page_size=50)

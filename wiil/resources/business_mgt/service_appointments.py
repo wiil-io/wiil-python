@@ -28,12 +28,13 @@ class ServiceAppointmentsResource:
         return self._http.post(
             self._base_path,
             data.model_dump(by_alias=True, exclude_none=True),
-            schema=CreateServiceAppointment
+            schema=CreateServiceAppointment,
+            response_model=ServiceAppointment
         )
 
     def get(self, appointment_id: str) -> ServiceAppointment:
         """Retrieve a service appointment by ID."""
-        return self._http.get(f'{self._base_path}/{appointment_id}')
+        return self._http.get(f'{self._base_path}/{appointment_id}', response_model=ServiceAppointment)
 
     def get_by_customer(
         self,
@@ -47,7 +48,10 @@ class ServiceAppointmentsResource:
             query_params['pageSize'] = params.page_size
 
         query_string = f'?{urlencode(query_params)}' if query_params else ''
-        return self._http.get(f'{self._base_path}/by-customer/{customer_id}{query_string}')
+        return self._http.get(
+            f'{self._base_path}/by-customer/{customer_id}{query_string}',
+            response_model=PaginatedResult[ServiceAppointment]
+        )
 
     def get_by_service(
         self,
@@ -61,21 +65,29 @@ class ServiceAppointmentsResource:
             query_params['pageSize'] = params.page_size
 
         query_string = f'?{urlencode(query_params)}' if query_params else ''
-        return self._http.get(f'{self._base_path}/by-service/{service_id}{query_string}')
+        return self._http.get(
+            f'{self._base_path}/by-service/{service_id}{query_string}',
+            response_model=PaginatedResult[ServiceAppointment]
+        )
 
     def update_status(self, appointment_id: str, status: str) -> ServiceAppointment:
         """Update appointment status."""
         return self._http.patch(
             f'{self._base_path}/{appointment_id}/status',
-            {'status': status}
+            {'status': status},
+            response_model=ServiceAppointment
         )
 
     def cancel(self, appointment_id: str, reason: Optional[str] = None) -> ServiceAppointment:
         """Cancel a service appointment."""
         data: Dict[str, Any] = {}
         if reason is not None:
-            data['reason'] = reason
-        return self._http.post(f'{self._base_path}/{appointment_id}/cancel', data)
+            data['cancelReason'] = reason
+        return self._http.post(
+            f'{self._base_path}/{appointment_id}/cancel',
+            data,
+            response_model=ServiceAppointment
+        )
 
     def reschedule(
         self,
@@ -91,7 +103,11 @@ class ServiceAppointmentsResource:
         }
         if service_id is not None:
             data['serviceId'] = service_id
-        return self._http.post(f'{self._base_path}/{appointment_id}/reschedule', data)
+        return self._http.post(
+            f'{self._base_path}/{appointment_id}/reschedule',
+            data,
+            response_model=ServiceAppointment
+        )
 
     def delete(self, appointment_id: str) -> bool:
         """Delete a service appointment."""
@@ -105,7 +121,10 @@ class ServiceAppointmentsResource:
             query_params['pageSize'] = params.page_size
 
         query_string = f'?{urlencode(query_params)}' if query_params else ''
-        return self._http.get(f'{self._base_path}{query_string}')
+        return self._http.get(
+            f'{self._base_path}{query_string}',
+            response_model=PaginatedResult[ServiceAppointment]
+        )
 
 
 __all__ = ['ServiceAppointmentsResource']

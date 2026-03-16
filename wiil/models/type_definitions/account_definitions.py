@@ -17,13 +17,13 @@ class ServiceStatus(str, Enum):
         ```
     """
 
-    ACTIVE = "ACTIVE"
+    ACTIVE = "active"
     """Service is operational and available."""
 
-    INACTIVE = "INACTIVE"
+    INACTIVE = "inactive"
     """Service is not currently in use but can be reactivated."""
 
-    SUSPENDED = "SUSPENDED"
+    SUSPENDED = "suspended"
     """Service is temporarily suspended and requires intervention to resume."""
 
 

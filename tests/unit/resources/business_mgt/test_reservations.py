@@ -42,7 +42,7 @@ class TestReservationsResource:
         mock_api.add(
             responses.POST,
             f"{BASE_URL}/reservations",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -85,7 +85,7 @@ class TestReservationsResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/reservations/rsv_123",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -122,7 +122,7 @@ class TestReservationsResource:
         mock_api.add(
             responses.PATCH,
             f"{BASE_URL}/reservations",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -141,7 +141,7 @@ class TestReservationsResource:
         mock_api.add(
             responses.DELETE,
             f"{BASE_URL}/reservations/rsv_123",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(True),
             status=200,
         )
@@ -212,7 +212,7 @@ class TestReservationsResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/reservations?page=1&pageSize=10",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -263,7 +263,7 @@ class TestReservationsResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/reservations/by-customer/cust_123?page=1&pageSize=10",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -303,7 +303,7 @@ class TestReservationsResource:
         mock_api.add(
             responses.POST,
             f"{BASE_URL}/reservations/rsv_123/cancel",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -322,7 +322,7 @@ class TestReservationsResource:
         mock_api.add(
             responses.POST,
             f"{BASE_URL}/reservations",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=error_response("VALIDATION_ERROR", "Customer ID is required"),
             status=400,
         )
@@ -343,7 +343,7 @@ class TestReservationsResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/reservations/nonexistent",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=error_response("NOT_FOUND", "Reservation not found"),
             status=404,
         )

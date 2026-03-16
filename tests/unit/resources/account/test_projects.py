@@ -37,7 +37,7 @@ class TestProjectsResource:
         mock_api.add(
             responses.POST,
             f"{BASE_URL}/projects",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -68,7 +68,7 @@ class TestProjectsResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/projects/proj_123",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -88,7 +88,7 @@ class TestProjectsResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/projects/invalid_id",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=error_response("NOT_FOUND", "Project not found"),
             status=404,
         )
@@ -118,7 +118,7 @@ class TestProjectsResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/projects/default",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -150,7 +150,7 @@ class TestProjectsResource:
         mock_api.add(
             responses.PATCH,
             f"{BASE_URL}/projects",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -165,7 +165,7 @@ class TestProjectsResource:
         mock_api.add(
             responses.DELETE,
             f"{BASE_URL}/projects/proj_123",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(True),
             status=200,
         )
@@ -184,7 +184,7 @@ class TestProjectsResource:
         mock_api.add(
             responses.DELETE,
             f"{BASE_URL}/projects/invalid_id",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=error_response("NOT_FOUND", "Project not found"),
             status=404,
         )
@@ -230,7 +230,7 @@ class TestProjectsResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/projects",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -263,7 +263,7 @@ class TestProjectsResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/projects?page=2&pageSize=50",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )

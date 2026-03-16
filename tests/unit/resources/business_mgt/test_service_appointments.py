@@ -42,7 +42,7 @@ class TestServiceAppointmentsResource:
         mock_api.add(
             responses.POST,
             f"{BASE_URL}/service-appointments",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -85,7 +85,7 @@ class TestServiceAppointmentsResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/service-appointments/appt_123",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -100,7 +100,7 @@ class TestServiceAppointmentsResource:
         mock_api.add(
             responses.DELETE,
             f"{BASE_URL}/service-appointments/appt_123",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(True),
             status=200,
         )
@@ -171,7 +171,7 @@ class TestServiceAppointmentsResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/service-appointments?page=1&pageSize=10",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -224,7 +224,7 @@ class TestServiceAppointmentsResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/service-appointments/by-customer/cust_123?page=1&pageSize=10",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -264,7 +264,7 @@ class TestServiceAppointmentsResource:
         mock_api.add(
             responses.PATCH,
             f"{BASE_URL}/service-appointments/appt_123/status",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -300,7 +300,7 @@ class TestServiceAppointmentsResource:
         mock_api.add(
             responses.POST,
             f"{BASE_URL}/service-appointments/appt_123/cancel",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -322,7 +322,7 @@ class TestServiceAppointmentsResource:
         mock_api.add(
             responses.POST,
             f"{BASE_URL}/service-appointments",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=error_response("VALIDATION_ERROR", "Service ID is required"),
             status=400,
         )
@@ -343,7 +343,7 @@ class TestServiceAppointmentsResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/service-appointments/nonexistent",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=error_response("NOT_FOUND", "Appointment not found"),
             status=404,
         )

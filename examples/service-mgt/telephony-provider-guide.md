@@ -1,23 +1,23 @@
 # Telephony Provider Guide
 
-This guide covers accessing telephony provider services using the WIIL Platform JS SDK. The telephony provider resource allows you to discover available phone numbers, check pricing, and purchase phone numbers for AI deployments.
+This guide covers accessing telephony provider services using the WIIL Platform Python SDK. The telephony provider resource allows you to discover available phone numbers, check pricing, and purchase phone numbers for AI deployments.
 
 ## Quick Start
 
-```typescript
-import { WiilClient } from 'wiil-js';
+```python
+import os
+from wiil import WiilClient
 
-const client = new WiilClient({
-  apiKey: 'your-api-key',
-});
+client = WiilClient(
+    api_key=os.environ['WIIL_API_KEY']
+)
 
-// Get available phone numbers
-const numbers = await client.telephonyProvider.getPhoneNumbers();
+# Get available phone numbers
+numbers = client.telephony_provider.get_phone_numbers()
 
-console.log('Available numbers:', numbers.length);
-numbers.forEach(num => {
-  console.log(`- ${num.phoneNumber} (${num.friendlyName})`);
-});
+print('Available numbers:', len(numbers))
+for num in numbers:
+    print(f'- {num.phone_number} ({num.friendly_name})')
 ```
 
 ## Architecture Overview
@@ -33,185 +33,187 @@ The telephony provider resource provides:
 
 | Field | Type | Description |
 |-------|------|-------------|
-| areaCode | string | Area code filter (e.g., '206', '415') |
-| contains | string | Number pattern to search for |
-| postalCode | string | Postal code filter |
+| area_code | str | Area code filter (e.g., '206', '415') |
+| contains | str | Number pattern to search for |
+| postal_code | str | Postal code filter |
 
 ## Operations
 
 ### Get Available Phone Numbers
 
-```typescript
-// Get all available numbers
-const numbers = await client.telephonyProvider.getPhoneNumbers();
+```python
+# Get all available numbers
+numbers = client.telephony_provider.get_phone_numbers()
 
-console.log('Found', numbers.length, 'available phone numbers');
+print('Found', len(numbers), 'available phone numbers')
 
-numbers.forEach(num => {
-  console.log(`${num.phoneNumber}:`);
-  console.log(`  Friendly Name: ${num.friendlyName}`);
-  console.log(`  Capabilities: ${num.capabilities?.join(', ')}`);
-});
+for num in numbers:
+    print(f'{num.phone_number}:')
+    print(f'  Friendly Name: {num.friendly_name}')
+    if num.capabilities:
+        print(f'  Capabilities: {", ".join(num.capabilities)}')
 ```
 
 ### Filter Phone Numbers by Area Code
 
-```typescript
-const numbers = await client.telephonyProvider.getPhoneNumbers({
-  areaCode: '206',
-});
+```python
+numbers = client.telephony_provider.get_phone_numbers(
+    area_code='206'
+)
 
-console.log('Seattle area numbers:', numbers.length);
-numbers.forEach(num => {
-  console.log(`- ${num.phoneNumber}`);
-});
+print('Seattle area numbers:', len(numbers))
+for num in numbers:
+    print(f'- {num.phone_number}')
 ```
 
 ### Filter by Pattern (Contains)
 
-```typescript
-const numbers = await client.telephonyProvider.getPhoneNumbers({
-  contains: '555',
-});
+```python
+numbers = client.telephony_provider.get_phone_numbers(
+    contains='555'
+)
 
-console.log('Numbers containing 555:', numbers.length);
+print('Numbers containing 555:', len(numbers))
 ```
 
 ### Filter by Postal Code
 
-```typescript
-const numbers = await client.telephonyProvider.getPhoneNumbers({
-  postalCode: '98101',
-});
+```python
+numbers = client.telephony_provider.get_phone_numbers(
+    postal_code='98101'
+)
 
-console.log('Numbers in postal code 98101:', numbers.length);
+print('Numbers in postal code 98101:', len(numbers))
 ```
 
 ### Get Pricing Information
 
-```typescript
-const pricing = await client.telephonyProvider.getPricing();
+```python
+pricing = client.telephony_provider.get_pricing()
 
-console.log('Phone number pricing:');
-pricing.forEach(price => {
-  console.log(`  ${price.number_type}: $${price.price}`);
-});
+print('Phone number pricing:')
+for price in pricing:
+    print(f'  {price.number_type}: ${price.price}')
 ```
 
 ### Purchase a Phone Number
 
-```typescript
-// Search for available numbers
-const numbers = await client.telephonyProvider.getPhoneNumbers({
-  areaCode: '415',
-});
+```python
+from wiil.models.service_mgt import PurchasePhoneNumber
 
-if (numbers.length === 0) {
-  throw new Error('No numbers available in this area');
-}
+# Search for available numbers
+numbers = client.telephony_provider.get_phone_numbers(
+    area_code='415'
+)
 
-// Purchase the first available number
-const purchase = await client.telephonyProvider.purchase({
-  phoneNumber: numbers[0].phoneNumber,
-  friendlyName: 'Customer Support Line',
-});
+if len(numbers) == 0:
+    raise Exception('No numbers available in this area')
 
-console.log('Purchase initiated:');
-console.log('  Phone Number:', purchase.phoneNumber);
-console.log('  Purchase ID:', purchase.id);
-console.log('  Status:', purchase.status);
+# Purchase the first available number
+purchase = client.telephony_provider.purchase(
+    PurchasePhoneNumber(
+        phone_number=numbers[0].phone_number,
+        friendly_name='Customer Support Line'
+    )
+)
+
+print('Purchase initiated:')
+print('  Phone Number:', purchase.phone_number)
+print('  Purchase ID:', purchase.id)
+print('  Status:', purchase.status)
 ```
 
 ### Check Purchase Status
 
-```typescript
-// The purchase() method automatically polls until completion
-// But you can also manually check status:
+```python
+# The purchase() method automatically polls until completion
+# But you can also manually check status:
 
-const status = await client.telephonyProvider.getPurchaseStatus('purchase_123');
+status = client.telephony_provider.get_purchase_status('purchase_123')
 
-console.log('Purchase Status:');
-console.log('  ID:', status.id);
-console.log('  Phone Number:', status.phoneNumber);
-console.log('  Status:', status.status);
+print('Purchase Status:')
+print('  ID:', status.id)
+print('  Phone Number:', status.phone_number)
+print('  Status:', status.status)
 ```
 
 ## Phone Purchase Status Values
 
-```typescript
-enum PhonePurchaseStatus {
-  PENDING = 'pending',       // Purchase initiated
-  PROCESSING = 'processing', // Being processed by provider
-  COMPLETED = 'completed',   // Successfully purchased
-  FAILED = 'failed',         // Purchase failed
-  CANCELLED = 'cancelled'    // Purchase cancelled
-}
+```python
+from wiil.models.service_mgt import PhonePurchaseStatus
+
+# Available values:
+PhonePurchaseStatus.PENDING      # 'pending' - Purchase initiated
+PhonePurchaseStatus.PROCESSING   # 'processing' - Being processed by provider
+PhonePurchaseStatus.COMPLETED    # 'completed' - Successfully purchased
+PhonePurchaseStatus.FAILED       # 'failed' - Purchase failed
+PhonePurchaseStatus.CANCELLED    # 'cancelled' - Purchase cancelled
 ```
 
 ## Complete Example
 
-```typescript
-import { WiilClient, PhonePurchaseStatus } from 'wiil-js';
+```python
+import os
+from wiil import WiilClient
+from wiil.models.service_mgt import PhonePurchaseStatus, PurchasePhoneNumber
 
-const client = new WiilClient({
-  apiKey: process.env.WIIL_API_KEY!,
-});
+client = WiilClient(
+    api_key=os.environ['WIIL_API_KEY']
+)
 
-async function exploreTelephonyProvider() {
-  // 1. Get pricing information
-  console.log('Fetching pricing information...');
-  const pricing = await client.telephonyProvider.getPricing();
+def explore_telephony_provider():
+    # 1. Get pricing information
+    print('Fetching pricing information...')
+    pricing = client.telephony_provider.get_pricing()
 
-  console.log('\nPhone number pricing:');
-  pricing.forEach(p => {
-    console.log(`  ${p.number_type}: $${p.price}`);
-  });
+    print('\nPhone number pricing:')
+    for p in pricing:
+        print(f'  {p.number_type}: ${p.price}')
 
-  // 2. Search for available numbers
-  console.log('\nSearching for available phone numbers...');
-  const numbers = await client.telephonyProvider.getPhoneNumbers();
+    # 2. Search for available numbers
+    print('\nSearching for available phone numbers...')
+    numbers = client.telephony_provider.get_phone_numbers()
 
-  console.log(`Found ${numbers.length} available numbers`);
+    print(f'Found {len(numbers)} available numbers')
 
-  if (numbers.length === 0) {
-    console.log('No numbers available');
-    return;
-  }
+    if len(numbers) == 0:
+        print('No numbers available')
+        return
 
-  // Display first 5 numbers
-  console.log('\nFirst 5 available numbers:');
-  numbers.slice(0, 5).forEach(num => {
-    console.log(`  ${num.phoneNumber} - ${num.friendlyName}`);
-  });
+    # Display first 5 numbers
+    print('\nFirst 5 available numbers:')
+    for num in numbers[:5]:
+        print(f'  {num.phone_number} - {num.friendly_name}')
 
-  // 3. Search with area code filter
-  console.log('\nSearching for 206 area code numbers...');
-  const seattleNumbers = await client.telephonyProvider.getPhoneNumbers({
-    areaCode: '206',
-  });
+    # 3. Search with area code filter
+    print('\nSearching for 206 area code numbers...')
+    seattle_numbers = client.telephony_provider.get_phone_numbers(
+        area_code='206'
+    )
 
-  console.log(`Found ${seattleNumbers.length} numbers in 206 area code`);
+    print(f'Found {len(seattle_numbers)} numbers in 206 area code')
 
-  // 4. Example purchase (commented out to prevent actual purchases)
-  /*
-  console.log('\nPurchasing phone number...');
-  const purchase = await client.telephonyProvider.purchase({
-    phoneNumber: numbers[0].phoneNumber,
-    friendlyName: 'Test Support Line',
-  });
+    # 4. Example purchase (commented out to prevent actual purchases)
+    """
+    print('\nPurchasing phone number...')
+    purchase = client.telephony_provider.purchase(
+        PurchasePhoneNumber(
+            phone_number=numbers[0].phone_number,
+            friendly_name='Test Support Line'
+        )
+    )
 
-  console.log('Purchase result:');
-  console.log('  ID:', purchase.id);
-  console.log('  Number:', purchase.phoneNumber);
-  console.log('  Status:', purchase.status);
+    print('Purchase result:')
+    print('  ID:', purchase.id)
+    print('  Number:', purchase.phone_number)
+    print('  Status:', purchase.status)
 
-  if (purchase.status === PhonePurchaseStatus.COMPLETED) {
-    console.log('Phone number successfully purchased!');
-  }
-  */
-}
+    if purchase.status == PhonePurchaseStatus.COMPLETED:
+        print('Phone number successfully purchased!')
+    """
 
-exploreTelephonyProvider().catch(console.error);
+if __name__ == '__main__':
+    explore_telephony_provider()
 ```
 
 ## Best Practices
@@ -231,64 +233,66 @@ exploreTelephonyProvider().catch(console.error);
 ### No Numbers Available
 
 **Error:**
-```
+
+```text
 No phone numbers available
 ```
 
 **Solution:**
 Try different filter criteria or check with a different area code:
 
-```typescript
-// Try multiple area codes
-const areaCodes = ['206', '415', '212', '310'];
+```python
+# Try multiple area codes
+area_codes = ['206', '415', '212', '310']
 
-for (const areaCode of areaCodes) {
-  const numbers = await client.telephonyProvider.getPhoneNumbers({ areaCode });
-  if (numbers.length > 0) {
-    console.log(`Found ${numbers.length} numbers in area code ${areaCode}`);
-    break;
-  }
-}
+for area_code in area_codes:
+    numbers = client.telephony_provider.get_phone_numbers(area_code=area_code)
+    if len(numbers) > 0:
+        print(f'Found {len(numbers)} numbers in area code {area_code}')
+        break
 ```
 
 ### Purchase Timeout
 
 **Error:**
-```
+
+```text
 Error: Phone number purchase timed out after 120000ms
 ```
 
 **Solution:**
 The purchase is still processing on the provider side. Check the status manually:
 
-```typescript
-// If you have the purchase ID, check status
-const status = await client.telephonyProvider.getPurchaseStatus(purchaseId);
+```python
+# If you have the purchase ID, check status
+status = client.telephony_provider.get_purchase_status(purchase_id)
 
-if (status.status === PhonePurchaseStatus.PROCESSING) {
-  console.log('Purchase still processing, please wait...');
-} else if (status.status === PhonePurchaseStatus.COMPLETED) {
-  console.log('Purchase completed:', status.phoneNumber);
-}
+if status.status == PhonePurchaseStatus.PROCESSING:
+    print('Purchase still processing, please wait...')
+elif status.status == PhonePurchaseStatus.COMPLETED:
+    print('Purchase completed:', status.phone_number)
 ```
 
 ### Invalid Phone Number Format
 
 **Error:**
-```
+
+```text
 WiilValidationError: Phone number must be in E.164 format
 ```
 
 **Solution:**
 Ensure phone numbers are in E.164 format (+1XXXXXXXXXX for US numbers):
 
-```typescript
-// Always use the phoneNumber value returned from getPhoneNumbers()
-const numbers = await client.telephonyProvider.getPhoneNumbers();
-const phoneNumber = numbers[0].phoneNumber; // Already in correct format
+```python
+# Always use the phone_number value returned from get_phone_numbers()
+numbers = client.telephony_provider.get_phone_numbers()
+phone_number = numbers[0].phone_number  # Already in correct format
 
-const purchase = await client.telephonyProvider.purchase({
-  phoneNumber: phoneNumber,  // Use as-is
-  friendlyName: 'Support Line',
-});
+purchase = client.telephony_provider.purchase(
+    PurchasePhoneNumber(
+        phone_number=phone_number,  # Use as-is
+        friendly_name='Support Line'
+    )
+)
 ```

@@ -31,12 +31,13 @@ class ReservationsResource:
         return self._http.post(
             self._base_path,
             data.model_dump(by_alias=True, exclude_none=True),
-            schema=CreateReservation
+            schema=CreateReservation,
+            response_model=Reservation
         )
 
     def get(self, reservation_id: str) -> Reservation:
         """Retrieve a reservation by ID."""
-        return self._http.get(f'{self._base_path}/{reservation_id}')
+        return self._http.get(f'{self._base_path}/{reservation_id}', response_model=Reservation)
 
     def get_by_customer(
         self,
@@ -50,7 +51,10 @@ class ReservationsResource:
             query_params['pageSize'] = params.page_size
 
         query_string = f'?{urlencode(query_params)}' if query_params else ''
-        return self._http.get(f'{self._base_path}/by-customer/{customer_id}{query_string}')
+        return self._http.get(
+            f'{self._base_path}/by-customer/{customer_id}{query_string}',
+            response_model=PaginatedResult[Reservation]
+        )
 
     def get_by_resource(
         self,
@@ -64,29 +68,38 @@ class ReservationsResource:
             query_params['pageSize'] = params.page_size
 
         query_string = f'?{urlencode(query_params)}' if query_params else ''
-        return self._http.get(f'{self._base_path}/by-resource/{resource_id}{query_string}')
+        return self._http.get(
+            f'{self._base_path}/by-resource/{resource_id}{query_string}',
+            response_model=PaginatedResult[Reservation]
+        )
 
     def update(self, data: UpdateReservation) -> Reservation:
         """Update an existing reservation."""
         return self._http.patch(
             self._base_path,
             data.model_dump(by_alias=True, exclude_none=True),
-            schema=UpdateReservation
+            schema=UpdateReservation,
+            response_model=Reservation
         )
 
     def update_status(self, reservation_id: str, status: str) -> Reservation:
         """Update reservation status."""
         return self._http.patch(
             f'{self._base_path}/{reservation_id}/status',
-            {'status': status}
+            {'status': status},
+            response_model=Reservation
         )
 
     def cancel(self, reservation_id: str, reason: Optional[str] = None) -> Reservation:
         """Cancel a reservation."""
         data: Dict[str, Any] = {}
         if reason is not None:
-            data['reason'] = reason
-        return self._http.post(f'{self._base_path}/{reservation_id}/cancel', data)
+            data['cancelReason'] = reason
+        return self._http.post(
+            f'{self._base_path}/{reservation_id}/cancel',
+            data,
+            response_model=Reservation
+        )
 
     def reschedule(
         self,
@@ -102,7 +115,11 @@ class ReservationsResource:
         }
         if resource_id is not None:
             data['resourceId'] = resource_id
-        return self._http.post(f'{self._base_path}/{reservation_id}/reschedule', data)
+        return self._http.post(
+            f'{self._base_path}/{reservation_id}/reschedule',
+            data,
+            response_model=Reservation
+        )
 
     def delete(self, reservation_id: str) -> bool:
         """Delete a reservation."""
@@ -116,20 +133,27 @@ class ReservationsResource:
             query_params['pageSize'] = params.page_size
 
         query_string = f'?{urlencode(query_params)}' if query_params else ''
-        return self._http.get(f'{self._base_path}{query_string}')
+        return self._http.get(
+            f'{self._base_path}{query_string}',
+            response_model=PaginatedResult[Reservation]
+        )
 
     # =============== Reservation Settings Methods ===============
 
     def get_settings(self) -> List[ReservationSettings]:
         """Retrieve reservation settings for the organization."""
-        return self._http.get(f'{self._base_path}/settings')
+        return self._http.get(
+            f'{self._base_path}/settings',
+            response_model=List[ReservationSettings]
+        )
 
     def update_settings(self, data: UpdateReservationSettings) -> ReservationSettings:
         """Update reservation settings."""
         return self._http.patch(
             f'{self._base_path}/settings',
             data.model_dump(by_alias=True, exclude_none=True),
-            schema=UpdateReservationSettings
+            schema=UpdateReservationSettings,
+            response_model=ReservationSettings
         )
 
     def delete_settings(self, settings_id: str) -> bool:

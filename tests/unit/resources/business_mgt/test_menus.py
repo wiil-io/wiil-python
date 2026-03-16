@@ -37,7 +37,7 @@ class TestMenusResource:
         mock_api.add(
             responses.POST,
             f"{BASE_URL}/menu-management/categories",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -65,7 +65,7 @@ class TestMenusResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/menu-management/categories/cat_123",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -101,7 +101,7 @@ class TestMenusResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/menu-management/categories",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_categories),
             status=200,
         )
@@ -126,7 +126,7 @@ class TestMenusResource:
         mock_api.add(
             responses.PATCH,
             f"{BASE_URL}/menu-management/categories",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -145,7 +145,7 @@ class TestMenusResource:
         mock_api.add(
             responses.DELETE,
             f"{BASE_URL}/menu-management/categories/cat_123",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(True),
             status=200,
         )
@@ -179,7 +179,7 @@ class TestMenusResource:
         mock_api.add(
             responses.POST,
             f"{BASE_URL}/menu-management/items",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -218,7 +218,7 @@ class TestMenusResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/menu-management/items/item_123",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -282,7 +282,7 @@ class TestMenusResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/menu-management/items?page=1&pageSize=10",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -319,7 +319,7 @@ class TestMenusResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/menu-management/items/by-category/cat_123",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_items),
             status=200,
         )
@@ -354,7 +354,7 @@ class TestMenusResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/menu-management/items/popular?limit=5",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_items),
             status=200,
         )
@@ -387,7 +387,7 @@ class TestMenusResource:
         mock_api.add(
             responses.PATCH,
             f"{BASE_URL}/menu-management/items",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -406,7 +406,7 @@ class TestMenusResource:
         mock_api.add(
             responses.DELETE,
             f"{BASE_URL}/menu-management/items/item_123",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(True),
             status=200,
         )
@@ -431,7 +431,7 @@ class TestMenusResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/menu-management/qr-codes",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_qr_codes),
             status=200,
         )
@@ -453,7 +453,7 @@ class TestMenusResource:
         mock_api.add(
             responses.POST,
             f"{BASE_URL}/menu-management/qr-codes",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -471,7 +471,7 @@ class TestMenusResource:
         mock_api.add(
             responses.DELETE,
             f"{BASE_URL}/menu-management/qr-codes/qr_123",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(True),
             status=200,
         )
@@ -489,7 +489,7 @@ class TestMenusResource:
         mock_api.add(
             responses.POST,
             f"{BASE_URL}/menu-management/categories",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=error_response("VALIDATION_ERROR", "Name is required"),
             status=400,
         )
@@ -506,7 +506,7 @@ class TestMenusResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/menu-management/items/nonexistent",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=error_response("NOT_FOUND", "Menu item not found"),
             status=404,
         )

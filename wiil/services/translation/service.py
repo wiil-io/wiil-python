@@ -12,7 +12,7 @@ from wiil.services.translation.models import (
 )
 
 
-TRANSLATION_CONNECTION_RESOURCE_PATH = "/translation/connect"
+TRANSLATION_CONNECTION_RESOURCE_PATH = "/translation/provision"
 
 
 class TranslationService:

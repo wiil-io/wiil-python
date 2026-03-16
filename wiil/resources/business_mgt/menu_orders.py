@@ -24,12 +24,13 @@ class MenuOrdersResource:
         return self._http.post(
             self._base_path,
             data.model_dump(by_alias=True, exclude_none=True),
-            schema=CreateMenuOrder
+            schema=CreateMenuOrder,
+            response_model=MenuOrder
         )
 
     def get(self, order_id: str) -> MenuOrder:
         """Retrieve a menu order by ID."""
-        return self._http.get(f'{self._base_path}/{order_id}')
+        return self._http.get(f'{self._base_path}/{order_id}', response_model=MenuOrder)
 
     def get_by_customer(
         self,
@@ -43,29 +44,38 @@ class MenuOrdersResource:
             query_params['pageSize'] = params.page_size
 
         query_string = f'?{urlencode(query_params)}' if query_params else ''
-        return self._http.get(f'{self._base_path}/by-customer/{customer_id}{query_string}')
+        return self._http.get(
+            f'{self._base_path}/by-customer/{customer_id}{query_string}',
+            response_model=PaginatedResult[MenuOrder]
+        )
 
     def update(self, data: UpdateMenuOrder) -> MenuOrder:
         """Update a menu order."""
         return self._http.patch(
             self._base_path,
             data.model_dump(by_alias=True, exclude_none=True),
-            schema=UpdateMenuOrder
+            schema=UpdateMenuOrder,
+            response_model=MenuOrder
         )
 
     def update_status(self, order_id: str, status: str) -> MenuOrder:
         """Update menu order status."""
         return self._http.patch(
             f'{self._base_path}/{order_id}/status',
-            {'status': status}
+            {'status': status},
+            response_model=MenuOrder
         )
 
     def cancel(self, order_id: str, reason: Optional[str] = None) -> MenuOrder:
         """Cancel a menu order."""
         data: Dict[str, Any] = {}
         if reason is not None:
-            data['reason'] = reason
-        return self._http.post(f'{self._base_path}/{order_id}/cancel', data)
+            data['cancelReason'] = reason
+        return self._http.post(
+            f'{self._base_path}/{order_id}/cancel',
+            data,
+            response_model=MenuOrder
+        )
 
     def delete(self, order_id: str) -> bool:
         """Delete a menu order."""
@@ -79,7 +89,10 @@ class MenuOrdersResource:
             query_params['pageSize'] = params.page_size
 
         query_string = f'?{urlencode(query_params)}' if query_params else ''
-        return self._http.get(f'{self._base_path}{query_string}')
+        return self._http.get(
+            f'{self._base_path}{query_string}',
+            response_model=PaginatedResult[MenuOrder]
+        )
 
 
 __all__ = ['MenuOrdersResource']

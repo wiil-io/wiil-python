@@ -11,10 +11,13 @@ Example:
     >>> item = client.menus.create_item(CreateBusinessMenuItem(name='Caesar Salad', category_id=category.id))
 """
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 from urllib.parse import urlencode
 
+from pydantic import BaseModel, ValidationError
+
 from wiil.client.http_client import HttpClient
+from wiil.errors import WiilValidationError
 from wiil.models.business_mgt import (
     MenuCategory,
     CreateMenuCategory,
@@ -25,6 +28,9 @@ from wiil.models.business_mgt import (
     MenuQRCode,
 )
 from wiil.types import PaginatedResult, PaginationRequest
+
+CATEGORY_BATCH_LIMIT = 50
+ITEM_BATCH_LIMIT = 100
 
 
 class MenusResource:
@@ -62,7 +68,8 @@ class MenusResource:
         return self._http.post(
             f'{self._base_path}/categories',
             data.model_dump(by_alias=True, exclude_none=True),
-            schema=CreateMenuCategory
+            schema=CreateMenuCategory,
+            response_model=MenuCategory
         )
 
     def get_category(self, category_id: str) -> MenuCategory:
@@ -74,15 +81,33 @@ class MenusResource:
         Returns:
             The requested menu category
         """
-        return self._http.get(f'{self._base_path}/categories/{category_id}')
+        return self._http.get(
+            f'{self._base_path}/categories/{category_id}',
+            response_model=MenuCategory
+        )
 
-    def list_categories(self) -> List[MenuCategory]:
-        """List all menu categories.
+    def list_categories(
+        self,
+        params: Optional[PaginationRequest] = None
+    ) -> List[MenuCategory]:
+        """List all menu categories with optional pagination.
+
+        Args:
+            params: Optional pagination parameters
 
         Returns:
-            List of all menu categories
+            List of menu categories
         """
-        return self._http.get(f'{self._base_path}/categories')
+        query_params: Dict[str, Any] = {}
+        if params:
+            query_params['page'] = params.page
+            query_params['pageSize'] = params.page_size
+
+        query_string = f'?{urlencode(query_params)}' if query_params else ''
+        return self._http.get(
+            f'{self._base_path}/categories{query_string}',
+            response_model=List[MenuCategory]
+        )
 
     def update_category(self, data: UpdateMenuCategory) -> MenuCategory:
         """Update a menu category.
@@ -96,7 +121,8 @@ class MenusResource:
         return self._http.patch(
             f'{self._base_path}/categories',
             data.model_dump(by_alias=True, exclude_none=True),
-            schema=UpdateMenuCategory
+            schema=UpdateMenuCategory,
+            response_model=MenuCategory
         )
 
     def delete_category(self, category_id: str) -> bool:
@@ -109,6 +135,58 @@ class MenusResource:
             True if deletion was successful
         """
         return self._http.delete(f'{self._base_path}/categories/{category_id}')
+
+    def create_category_batch(
+        self,
+        data: List[Union[CreateMenuCategory, Dict[str, Any]]]
+    ) -> PaginatedResult[MenuCategory]:
+        """Create multiple menu categories in a batch.
+
+        Args:
+            data: List of categories to create (max 50 items)
+
+        Returns:
+            PaginatedResult containing created categories
+
+        Raises:
+            WiilValidationError: When batch size exceeds limit or validation fails
+        """
+        if len(data) > CATEGORY_BATCH_LIMIT:
+            raise WiilValidationError(
+                f'Batch size exceeds maximum limit of {CATEGORY_BATCH_LIMIT}',
+                details=[{
+                    'path': ['data'],
+                    'message': f'Array length {len(data)} exceeds maximum of {CATEGORY_BATCH_LIMIT}'
+                }]
+            )
+
+        payload = []
+        for i, item in enumerate(data):
+            try:
+                if isinstance(item, dict):
+                    validated = CreateMenuCategory.model_validate(item)
+                    payload.append(validated.model_dump(by_alias=True, exclude_none=True))
+                elif isinstance(item, BaseModel):
+                    payload.append(item.model_dump(by_alias=True, exclude_none=True))
+                else:
+                    raise WiilValidationError(
+                        f'Invalid item type at index {i}',
+                        details=[{
+                            'path': ['data', i],
+                            'message': 'Expected dict or Pydantic model'
+                        }]
+                    )
+            except ValidationError as e:
+                raise WiilValidationError(
+                    f'Validation failed for item at index {i}',
+                    details=e.errors()
+                )
+
+        return self._http.post(
+            f'{self._base_path}/categories/batch',
+            payload,
+            response_model=PaginatedResult[MenuCategory]
+        )
 
     # =============== Menu Item Methods ===============
 
@@ -124,7 +202,8 @@ class MenusResource:
         return self._http.post(
             f'{self._base_path}/items',
             data.model_dump(by_alias=True, exclude_none=True),
-            schema=CreateBusinessMenuItem
+            schema=CreateBusinessMenuItem,
+            response_model=BusinessMenuItem
         )
 
     def get_item(self, item_id: str) -> BusinessMenuItem:
@@ -136,7 +215,10 @@ class MenusResource:
         Returns:
             The requested menu item
         """
-        return self._http.get(f'{self._base_path}/items/{item_id}')
+        return self._http.get(
+            f'{self._base_path}/items/{item_id}',
+            response_model=BusinessMenuItem
+        )
 
     def list_items(
         self,
@@ -160,7 +242,10 @@ class MenusResource:
             query_params['includeDeleted'] = str(include_deleted).lower()
 
         query_string = f'?{urlencode(query_params)}' if query_params else ''
-        return self._http.get(f'{self._base_path}/items{query_string}')
+        return self._http.get(
+            f'{self._base_path}/items{query_string}',
+            response_model=PaginatedResult[BusinessMenuItem]
+        )
 
     def get_items_by_category(
         self,
@@ -181,7 +266,10 @@ class MenusResource:
             params['includeUnavailable'] = str(include_unavailable).lower()
 
         query_string = f'?{urlencode(params)}' if params else ''
-        return self._http.get(f'{self._base_path}/items/by-category/{category_id}{query_string}')
+        return self._http.get(
+            f'{self._base_path}/items/by-category/{category_id}{query_string}',
+            response_model=List[BusinessMenuItem]
+        )
 
     def get_popular_items(self, limit: Optional[int] = None) -> List[BusinessMenuItem]:
         """Retrieve popular menu items.
@@ -197,7 +285,10 @@ class MenusResource:
             params['limit'] = limit
 
         query_string = f'?{urlencode(params)}' if params else ''
-        return self._http.get(f'{self._base_path}/items/popular{query_string}')
+        return self._http.get(
+            f'{self._base_path}/items/popular{query_string}',
+            response_model=List[BusinessMenuItem]
+        )
 
     def update_item(self, data: UpdateBusinessMenuItem) -> BusinessMenuItem:
         """Update a menu item.
@@ -211,7 +302,8 @@ class MenusResource:
         return self._http.patch(
             f'{self._base_path}/items',
             data.model_dump(by_alias=True, exclude_none=True),
-            schema=UpdateBusinessMenuItem
+            schema=UpdateBusinessMenuItem,
+            response_model=BusinessMenuItem
         )
 
     def delete_item(self, item_id: str) -> bool:
@@ -225,6 +317,58 @@ class MenusResource:
         """
         return self._http.delete(f'{self._base_path}/items/{item_id}')
 
+    def create_item_batch(
+        self,
+        data: List[Union[CreateBusinessMenuItem, Dict[str, Any]]]
+    ) -> PaginatedResult[BusinessMenuItem]:
+        """Create multiple menu items in a batch.
+
+        Args:
+            data: List of menu items to create (max 100 items)
+
+        Returns:
+            PaginatedResult containing created menu items
+
+        Raises:
+            WiilValidationError: When batch size exceeds limit or validation fails
+        """
+        if len(data) > ITEM_BATCH_LIMIT:
+            raise WiilValidationError(
+                f'Batch size exceeds maximum limit of {ITEM_BATCH_LIMIT}',
+                details=[{
+                    'path': ['data'],
+                    'message': f'Array length {len(data)} exceeds maximum of {ITEM_BATCH_LIMIT}'
+                }]
+            )
+
+        payload = []
+        for i, item in enumerate(data):
+            try:
+                if isinstance(item, dict):
+                    validated = CreateBusinessMenuItem.model_validate(item)
+                    payload.append(validated.model_dump(by_alias=True, exclude_none=True))
+                elif isinstance(item, BaseModel):
+                    payload.append(item.model_dump(by_alias=True, exclude_none=True))
+                else:
+                    raise WiilValidationError(
+                        f'Invalid item type at index {i}',
+                        details=[{
+                            'path': ['data', i],
+                            'message': 'Expected dict or Pydantic model'
+                        }]
+                    )
+            except ValidationError as e:
+                raise WiilValidationError(
+                    f'Validation failed for item at index {i}',
+                    details=e.errors()
+                )
+
+        return self._http.post(
+            f'{self._base_path}/items/batch',
+            payload,
+            response_model=PaginatedResult[BusinessMenuItem]
+        )
+
     # =============== Menu QR Code Methods ===============
 
     def get_qr_codes(self) -> List[MenuQRCode]:
@@ -233,7 +377,10 @@ class MenusResource:
         Returns:
             List of all menu QR codes
         """
-        return self._http.get(f'{self._base_path}/qr-codes')
+        return self._http.get(
+            f'{self._base_path}/qr-codes',
+            response_model=List[MenuQRCode]
+        )
 
     def generate_qr_code(
         self,
@@ -255,7 +402,11 @@ class MenusResource:
         if category_id is not None:
             data['categoryId'] = category_id
 
-        return self._http.post(f'{self._base_path}/qr-codes', data)
+        return self._http.post(
+            f'{self._base_path}/qr-codes',
+            data,
+            response_model=MenuQRCode
+        )
 
     def delete_qr_code(self, qr_code_id: str) -> bool:
         """Delete a menu QR code.

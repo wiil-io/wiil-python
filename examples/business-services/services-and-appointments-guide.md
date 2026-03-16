@@ -122,6 +122,65 @@ print(customer_appointments.meta.total_count, service_appointments.meta.total_co
 print(rescheduled.start_time, cancelled.status)
 ```
 
+## Batch Operations
+
+Create multiple business services in a single request.
+
+### Create Services in Batch
+
+```python
+from wiil.models.business_mgt import CreateBusinessService
+
+services = client.business_services.create_batch([
+    CreateBusinessService(
+        name="30-Minute Massage",
+        description="Relaxation massage",
+        duration=30,
+        price=50.00,
+        is_bookable=True,
+    ),
+    CreateBusinessService(
+        name="60-Minute Massage",
+        description="Deep tissue massage",
+        duration=60,
+        price=80.00,
+        is_bookable=True,
+    ),
+    CreateBusinessService(
+        name="90-Minute Massage",
+        description="Full body therapeutic massage",
+        duration=90,
+        price=110.00,
+        is_bookable=True,
+    ),
+])
+
+print(f"Created {len(services.data)} services")
+for service in services.data:
+    print(f"  - {service.name}: ${service.price}")
+```
+
+**Limits:** Maximum 50 services per batch
+
+### Handling Batch Errors
+
+Batch operations validate each item and report errors with index information:
+
+```python
+from wiil.errors import WiilValidationError
+from wiil.models.business_mgt import CreateBusinessService
+
+try:
+    services = client.business_services.create_batch([
+        CreateBusinessService(name="Valid Service", duration=30, price=25.00),
+        CreateBusinessService(name="", duration=30, price=25.00),  # Invalid: empty name
+    ])
+except WiilValidationError as e:
+    print(f"Validation error: {e.message}")
+    for detail in e.details:
+        print(f"  - {detail}")
+```
+
 ## Common Status Values
 
 - Appointments: `"pending"`, `"confirmed"`, `"completed"`, `"cancelled"`, `"no_show"`

@@ -80,6 +80,12 @@ class DynamicWebAgentSetupResult(DynamicAgentSetupResult):
         integration_snippets: Code snippets for deploying the web assistant
     """
 
+    model_config = ConfigDict(
+        validate_by_name=True,
+        validate_by_alias=True,
+        use_enum_values=True,
+    )
+
     integration_snippets: Optional[List[str]] = Field(
         None,
         description="List of code snippets or integration details for deploying the web assistant",

@@ -29,7 +29,7 @@ class TestOrganizationsResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/organizations",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -51,7 +51,7 @@ class TestOrganizationsResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/organizations",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=error_response("UNAUTHORIZED", "Invalid API key"),
             status=401,
         )
@@ -72,7 +72,7 @@ class TestOrganizationsResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/organizations",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=error_response("INTERNAL_ERROR", "Internal server error"),
             status=500,
         )

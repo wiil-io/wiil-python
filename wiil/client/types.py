@@ -102,56 +102,37 @@ class APIResponse(Generic[T]):
 
 
 @dataclass
-class APIErrorDetails:
-    """Error details from an API error response.
-
-    Attributes:
-        code: Error code for programmatic handling
-        message: Human-readable error message
-        details: Additional error details (optional)
-
-    Example:
-        >>> error_details = APIErrorDetails(
-        ...     code='VALIDATION_ERROR',
-        ...     message='Invalid organization name',
-        ...     details={'field': 'companyName', 'issue': 'Must be at least 2 characters'}
-        ... )
-    """
-
-    code: str
-    message: str
-    details: Any = None
-
-
-@dataclass
 class APIErrorResponse:
     """Error response from the API.
 
     This structure is returned when an API request fails (4xx or 5xx responses).
+    Matches the TypeScript SDK flat error structure.
 
     Attributes:
         success: Always False for error responses
-        error: Error details containing code, message, and optional details
-        metadata: Response metadata
+        status: HTTP status code
+        code: Error code for programmatic handling
+        message: Human-readable error message
+        meta: Additional error metadata (optional)
+        timestamp: ISO timestamp when the error occurred
 
     Example:
         >>> error_response = APIErrorResponse(
         ...     success=False,
-        ...     error={
-        ...         'code': 'VALIDATION_ERROR',
-        ...         'message': 'Invalid organization name',
-        ...         'details': {
-        ...             'field': 'companyName',
-        ...             'issue': 'Must be at least 2 characters'
-        ...         }
-        ...     },
-        ...     metadata={'timestamp': 1704067200000, 'version': 'v1'}
+        ...     status=400,
+        ...     code='VALIDATION_ERROR',
+        ...     message='Invalid organization name',
+        ...     meta={'field': 'companyName', 'issue': 'Must be at least 2 characters'},
+        ...     timestamp='2024-01-01T00:00:00.000Z'
         ... )
     """
 
     success: bool  # Always False for error responses
-    error: Dict[str, Any]
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    status: int
+    code: str
+    message: str
+    timestamp: str
+    meta: Dict[str, Any] = field(default_factory=dict)
 
 
 __all__ = [
@@ -159,5 +140,4 @@ __all__ = [
     'APIResponse',
     'APIResponseMetadata',
     'APIErrorResponse',
-    'APIErrorDetails',
 ]

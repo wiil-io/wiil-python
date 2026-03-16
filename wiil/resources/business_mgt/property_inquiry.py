@@ -36,7 +36,8 @@ class PropertyInquiryResource:
         return self._http.post(
             self._base_path,
             data.model_dump(by_alias=True, exclude_none=True),
-            schema=CreatePropertyInquiry
+            schema=CreatePropertyInquiry,
+            response_model=PropertyInquiry
         )
 
     def get(self, inquiry_id: str) -> PropertyInquiry:
@@ -48,7 +49,10 @@ class PropertyInquiryResource:
         Returns:
             The requested property inquiry
         """
-        return self._http.get(f'{self._base_path}/{inquiry_id}')
+        return self._http.get(
+            f'{self._base_path}/{inquiry_id}',
+            response_model=PropertyInquiry
+        )
 
     def get_by_property(
         self,
@@ -70,7 +74,10 @@ class PropertyInquiryResource:
             query_params['pageSize'] = params.page_size
 
         query_string = f'?{urlencode(query_params)}' if query_params else ''
-        return self._http.get(f'{self._base_path}/by-property/{property_id}{query_string}')
+        return self._http.get(
+            f'{self._base_path}/by-property/{property_id}{query_string}',
+            response_model=PaginatedResult[PropertyInquiry]
+        )
 
     def get_by_customer(
         self,
@@ -92,7 +99,10 @@ class PropertyInquiryResource:
             query_params['pageSize'] = params.page_size
 
         query_string = f'?{urlencode(query_params)}' if query_params else ''
-        return self._http.get(f'{self._base_path}/by-customer/{customer_id}{query_string}')
+        return self._http.get(
+            f'{self._base_path}/by-customer/{customer_id}{query_string}',
+            response_model=PaginatedResult[PropertyInquiry]
+        )
 
     def update(self, data: UpdatePropertyInquiry) -> PropertyInquiry:
         """Update a property inquiry.
@@ -106,7 +116,8 @@ class PropertyInquiryResource:
         return self._http.patch(
             self._base_path,
             data.model_dump(by_alias=True, exclude_none=True),
-            schema=UpdatePropertyInquiry
+            schema=UpdatePropertyInquiry,
+            response_model=PropertyInquiry
         )
 
     def update_status(
@@ -126,7 +137,8 @@ class PropertyInquiryResource:
         return self._http.patch(
             f'{self._base_path}/{inquiry_id}/status',
             data.model_dump(by_alias=True, exclude_none=True),
-            schema=UpdatePropertyInquiryStatus
+            schema=UpdatePropertyInquiryStatus,
+            response_model=PropertyInquiry
         )
 
     def delete(self, inquiry_id: str) -> bool:
@@ -158,7 +170,10 @@ class PropertyInquiryResource:
             query_params['pageSize'] = params.page_size
 
         query_string = f'?{urlencode(query_params)}' if query_params else ''
-        return self._http.get(f'{self._base_path}{query_string}')
+        return self._http.get(
+            f'{self._base_path}{query_string}',
+            response_model=PaginatedResult[PropertyInquiry]
+        )
 
 
 __all__ = ['PropertyInquiryResource']

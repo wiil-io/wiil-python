@@ -48,7 +48,7 @@ class TestPhoneConfigurationsResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/phone-configurations/phone_123",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -65,7 +65,7 @@ class TestPhoneConfigurationsResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/phone-configurations/invalid_id",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=error_response("NOT_FOUND", "Phone configuration not found"),
             status=404,
         )
@@ -108,7 +108,7 @@ class TestPhoneConfigurationsResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/phone-configurations/by-phone-number/+14155551234",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -150,7 +150,7 @@ class TestPhoneConfigurationsResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/phone-configurations/by-request/req_123",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -192,7 +192,7 @@ class TestPhoneConfigurationsResource:
         mock_api.add(
             responses.PATCH,
             f"{BASE_URL}/phone-configurations",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -212,7 +212,7 @@ class TestPhoneConfigurationsResource:
         mock_api.add(
             responses.DELETE,
             f"{BASE_URL}/phone-configurations/phone_123",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(True),
             status=200,
         )
@@ -228,7 +228,7 @@ class TestPhoneConfigurationsResource:
         mock_api.add(
             responses.DELETE,
             f"{BASE_URL}/phone-configurations/invalid_id",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=error_response("NOT_FOUND", "Phone configuration not found"),
             status=404,
         )
@@ -310,7 +310,7 @@ class TestPhoneConfigurationsResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/phone-configurations",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -340,7 +340,7 @@ class TestPhoneConfigurationsResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/phone-configurations?page=2&pageSize=50",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )

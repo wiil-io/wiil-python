@@ -36,12 +36,13 @@ class AgentConfigurationsResource:
         return self._http.post(
             self._base_path,
             data.model_dump(by_alias=True, exclude_none=True),
-            schema=CreateAgentConfiguration
+            schema=CreateAgentConfiguration,
+            response_model=AgentConfiguration
         )
 
     def get(self, config_id: str) -> AgentConfiguration:
         """Retrieve an agent configuration by ID."""
-        return self._http.get(f'{self._base_path}/{config_id}')
+        return self._http.get(f'{self._base_path}/{config_id}', response_model=AgentConfiguration)
 
     def update(self, data: UpdateAgentConfiguration) -> AgentConfiguration:
         """Update an existing agent configuration.
@@ -55,7 +56,8 @@ class AgentConfigurationsResource:
         return self._http.patch(
             self._base_path,
             data.model_dump(by_alias=True, exclude_none=True),
-            schema=UpdateAgentConfiguration
+            schema=UpdateAgentConfiguration,
+            response_model=AgentConfiguration
         )
 
     def delete(self, config_id: str) -> bool:
@@ -80,7 +82,10 @@ class AgentConfigurationsResource:
             query_params['pageSize'] = params.page_size
 
         query_string = f'?{urlencode(query_params)}' if query_params else ''
-        return self._http.get(f'{self._base_path}{query_string}')
+        return self._http.get(
+            f'{self._base_path}{query_string}',
+            response_model=PaginatedResult[AgentConfiguration]
+        )
 
 
 __all__ = ['AgentConfigurationsResource']

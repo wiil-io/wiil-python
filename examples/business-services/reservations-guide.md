@@ -120,3 +120,62 @@ rescheduled = client.reservations.reschedule(
 print(loaded.id, by_customer.meta.total_count, by_resource.meta.total_count)
 print(updated.persons_number, status_updated.status, rescheduled.start_time)
 ```
+
+## Batch Operations
+
+Create multiple reservation resources efficiently.
+
+### Create Resources in Batch
+
+```python
+from wiil.models.business_mgt import CreateResource
+
+resources = client.reservation_resources.create_batch([
+    CreateResource(
+        resource_type="table",
+        name="Table 1",
+        description="Corner table for 4",
+        capacity=4,
+        is_available=True,
+    ),
+    CreateResource(
+        resource_type="table",
+        name="Table 2",
+        description="Center table for 4",
+        capacity=4,
+        is_available=True,
+    ),
+    CreateResource(
+        resource_type="table",
+        name="Private Booth",
+        description="Enclosed booth for 6",
+        capacity=6,
+        is_available=True,
+    ),
+])
+
+print(f"Created {len(resources.data)} resources")
+for resource in resources.data:
+    print(f"  - {resource.name}: capacity {resource.capacity}")
+```
+
+**Limits:** Maximum 50 resources per batch
+
+### Handling Batch Errors
+
+Batch operations validate each item and report errors with index information:
+
+```python
+from wiil.errors import WiilValidationError
+from wiil.models.business_mgt import CreateResource
+
+try:
+    resources = client.reservation_resources.create_batch([
+        CreateResource(resource_type="table", name="Valid Table", capacity=4),
+        CreateResource(resource_type="table", name="", capacity=4),  # Invalid: empty name
+    ])
+except WiilValidationError as e:
+    print(f"Validation error: {e.message}")
+    for detail in e.details:
+        print(f"  - {detail}")
+```

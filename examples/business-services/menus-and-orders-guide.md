@@ -146,3 +146,81 @@ cancelled = client.menu_orders.cancel(order.id, reason="Customer requested cance
 
 print(loaded.id, customer_orders.meta.total_count, updated_status.status, cancelled.status)
 ```
+
+## Batch Operations
+
+Create multiple menu categories and items efficiently.
+
+### Create Categories in Batch
+
+```python
+from wiil.models.business_mgt import CreateMenuCategory
+
+categories = client.menus.create_category_batch([
+    CreateMenuCategory(name="Appetizers", display_order=1),
+    CreateMenuCategory(name="Main Courses", display_order=2),
+    CreateMenuCategory(name="Desserts", display_order=3),
+    CreateMenuCategory(name="Beverages", display_order=4),
+])
+
+print(f"Created {len(categories.data)} categories")
+for category in categories.data:
+    print(f"  - {category.name}")
+```
+
+**Limits:** Maximum 50 categories per batch
+
+### Create Items in Batch
+
+```python
+from wiil.models.business_mgt import CreateBusinessMenuItem
+
+items = client.menus.create_item_batch([
+    CreateBusinessMenuItem(
+        name="Caesar Salad",
+        description="Fresh romaine with caesar dressing",
+        price=12.00,
+        category_id="cat_appetizers",
+        is_available=True,
+    ),
+    CreateBusinessMenuItem(
+        name="Grilled Salmon",
+        description="Atlantic salmon with vegetables",
+        price=28.00,
+        category_id="cat_main",
+        is_available=True,
+    ),
+    CreateBusinessMenuItem(
+        name="Chocolate Cake",
+        description="Rich chocolate layer cake",
+        price=9.00,
+        category_id="cat_desserts",
+        is_available=True,
+    ),
+])
+
+print(f"Created {len(items.data)} menu items")
+for item in items.data:
+    print(f"  - {item.name}: ${item.price}")
+```
+
+**Limits:** Maximum 100 items per batch
+
+### Handling Batch Errors
+
+Batch operations validate each item and report errors with index information:
+
+```python
+from wiil.errors import WiilValidationError
+from wiil.models.business_mgt import CreateBusinessMenuItem
+
+try:
+    items = client.menus.create_item_batch([
+        CreateBusinessMenuItem(name="Valid Item", price=10.00, category_id="cat_123"),
+        CreateBusinessMenuItem(name="", price=10.00, category_id="cat_123"),  # Invalid: empty name
+    ])
+except WiilValidationError as e:
+    print(f"Validation error: {e.message}")
+    for detail in e.details:
+        print(f"  - {detail}")
+```

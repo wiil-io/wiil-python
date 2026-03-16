@@ -34,7 +34,7 @@ class TestBusinessServicesResource:
         mock_api.add(
             responses.POST,
             f"{BASE_URL}/business-services",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -73,7 +73,7 @@ class TestBusinessServicesResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/business-services/svc_123",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -102,7 +102,7 @@ class TestBusinessServicesResource:
         mock_api.add(
             responses.PATCH,
             f"{BASE_URL}/business-services",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -121,7 +121,7 @@ class TestBusinessServicesResource:
         mock_api.add(
             responses.DELETE,
             f"{BASE_URL}/business-services/svc_123",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(True),
             status=200,
         )
@@ -176,7 +176,7 @@ class TestBusinessServicesResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/business-services?page=1&pageSize=10",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -200,7 +200,7 @@ class TestBusinessServicesResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/business-services/qr-code/generate?serviceId=svc_123",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
         )
@@ -219,7 +219,7 @@ class TestBusinessServicesResource:
         mock_api.add(
             responses.POST,
             f"{BASE_URL}/business-services",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=error_response("VALIDATION_ERROR", "Name is required"),
             status=400,
         )
@@ -236,7 +236,7 @@ class TestBusinessServicesResource:
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/business-services/nonexistent",
-            headers={"X-WIIL-API-Key": API_KEY},
+            headers={"X-Wiil-Api-Key": API_KEY},
             json=error_response("NOT_FOUND", "Service not found"),
             status=404,
         )
