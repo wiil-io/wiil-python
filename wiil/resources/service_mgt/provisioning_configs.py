@@ -126,7 +126,7 @@ class ProvisioningConfigurationsResource:
         )
 
         return self._http.patch(
-            self._base_path,
+            f'{self._base_path}/{data.id}',
             data.model_dump(by_alias=True, exclude_none=True),
             schema=UpdateTranslationChainConfig,
             response_model=TranslationChainConfig
