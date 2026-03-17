@@ -24,7 +24,7 @@ class TestSupportModelsResource:
             "provider_model_id": "gpt-4-1106-preview",
             "proprietor": "OpenAI",
             "description": "Latest GPT-4 model with improved performance",
-            "type": "MULTI_MODE",
+            "type": "multi_mode",
             "discontinued": False,
             "supportedVoices": None,
             "supportLanguages": [
@@ -81,7 +81,7 @@ class TestSupportModelsResource:
                 "provider_model_id": "gpt-4-1106-preview",
                 "proprietor": "OpenAI",
                 "description": "Latest GPT-4 model with improved performance",
-                "type": "MULTI_MODE",
+                "type": "multi_mode",
                 "discontinued": False,
                 "supportedVoices": None,
                 "supportLanguages": [
@@ -100,7 +100,7 @@ class TestSupportModelsResource:
                 "provider_model_id": "claude-sonnet-4",
                 "proprietor": "Anthropic",
                 "description": "Anthropic Claude Sonnet 4 model",
-                "type": "TEXT_PROCESSING",
+                "type": "text",
                 "discontinued": False,
                 "supportedVoices": None,
                 "supportLanguages": [
@@ -139,7 +139,7 @@ class TestSupportModelsResource:
             "provider_model_id": "gpt-4o",
             "proprietor": "OpenAI",
             "description": "GPT-4 Omni multimodal model",
-            "type": "MULTI_MODE",
+            "type": "multi_mode",
             "discontinued": False,
             "supportedVoices": None,
             "supportLanguages": None,
@@ -155,7 +155,7 @@ class TestSupportModelsResource:
 
         result = client.support_models.get_default_multi_mode()
 
-        assert result.type == "MULTI_MODE"
+        assert result.type == "multi_mode"
         assert result.name == "GPT-4 Omni"
 
     def test_get_default_sts(
@@ -168,7 +168,7 @@ class TestSupportModelsResource:
             "provider_model_id": "sts-1",
             "proprietor": "OpenAI",
             "description": "OpenAI Speech-to-Speech model",
-            "type": "STS",
+            "type": "sts",
             "discontinued": False,
             "supportedVoices": None,
             "supportLanguages": None,
@@ -184,7 +184,7 @@ class TestSupportModelsResource:
 
         result = client.support_models.get_default_sts()
 
-        assert result.type == "STS"
+        assert result.type == "sts"
 
     def test_get_default_tts(
         self, client: WiilClient, mock_api, api_response
@@ -196,7 +196,7 @@ class TestSupportModelsResource:
             "provider_model_id": "eleven-multilingual-v2",
             "proprietor": "ElevenLabs",
             "description": "ElevenLabs multilingual TTS model",
-            "type": "TTS",
+            "type": "tts",
             "discontinued": False,
             "supportedVoices": [
                 {
@@ -229,7 +229,7 @@ class TestSupportModelsResource:
 
         result = client.support_models.get_default_tts()
 
-        assert result.type == "TTS"
+        assert result.type == "tts"
         assert len(result.supported_voices) == 2
 
     def test_get_default_stt(
@@ -242,7 +242,7 @@ class TestSupportModelsResource:
             "provider_model_id": "nova-2",
             "proprietor": "Deepgram",
             "description": "Deepgram Nova 2 STT model",
-            "type": "STT",
+            "type": "stt",
             "discontinued": False,
             "supportedVoices": None,
             "supportLanguages": [
@@ -266,7 +266,7 @@ class TestSupportModelsResource:
 
         result = client.support_models.get_default_stt()
 
-        assert result.type == "STT"
+        assert result.type == "stt"
         assert result.proprietor == "Deepgram"
 
     def test_get_default_transcribe(
@@ -279,7 +279,7 @@ class TestSupportModelsResource:
             "provider_model_id": "whisper-large-v3",
             "proprietor": "OpenAI",
             "description": "OpenAI Whisper Large V3 transcription model",
-            "type": "TRANSCRIBE",
+            "type": "transcribe",
             "discontinued": False,
             "supportedVoices": None,
             "supportLanguages": None,
@@ -295,7 +295,7 @@ class TestSupportModelsResource:
 
         result = client.support_models.get_default_transcribe()
 
-        assert result.type == "TRANSCRIBE"
+        assert result.type == "transcribe"
 
     def test_get_default_batch(
         self, client: WiilClient, mock_api, api_response
@@ -307,7 +307,7 @@ class TestSupportModelsResource:
             "provider_model_id": "gpt-4-turbo-batch",
             "proprietor": "OpenAI",
             "description": "GPT-4 Turbo batch processing model",
-            "type": "TEXT_PROCESSING",
+            "type": "text",
             "discontinued": False,
             "supportedVoices": None,
             "supportLanguages": None,
@@ -335,7 +335,7 @@ class TestSupportModelsResource:
             "provider_model_id": "translation-stt-1",
             "proprietor": "Deepgram",
             "description": "Deepgram translation-optimized STT model",
-            "type": "STT",
+            "type": "stt",
             "discontinued": False,
             "supportedVoices": None,
             "supportLanguages": None,
@@ -363,7 +363,7 @@ class TestSupportModelsResource:
             "provider_model_id": "translation-tts-1",
             "proprietor": "ElevenLabs",
             "description": "ElevenLabs translation-optimized TTS model",
-            "type": "TTS",
+            "type": "tts",
             "discontinued": False,
             "supportedVoices": None,
             "supportLanguages": None,
@@ -391,7 +391,7 @@ class TestSupportModelsResource:
             "provider_model_id": "claude-sonnet-4",
             "proprietor": "Anthropic",
             "description": "Anthropic Claude Sonnet 4 model",
-            "type": "TEXT_PROCESSING",
+            "type": "text",
             "discontinued": False,
             "supportedVoices": None,
             "supportLanguages": None,
@@ -422,7 +422,7 @@ class TestSupportModelsResource:
             "provider_model_id": "gemini-2.0-flash-exp",
             "proprietor": "Google",
             "description": "Google Gemini 2.0 Flash model",
-            "type": "MULTI_MODE",
+            "type": "multi_mode",
             "discontinued": False,
             "supportedVoices": None,
             "supportLanguages": None,

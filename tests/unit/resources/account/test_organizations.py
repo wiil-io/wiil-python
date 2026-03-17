@@ -21,7 +21,7 @@ class TestOrganizationsResource:
             "companyName": "Acme Corporation",
             "businessVerticalId": "technology",
             "platformEmail": "admin@acme.com",
-            "serviceStatus": "ACTIVE",
+            "serviceStatus": "active",
             "createdAt": 1234567890,
             "updatedAt": 1234567890,
         }

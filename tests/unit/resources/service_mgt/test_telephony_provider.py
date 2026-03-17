@@ -41,13 +41,13 @@ class TestTelephonyProviderResource:
 
         mock_api.add(
             responses.GET,
-            f"{BASE_URL}/phone-configurations/telephony-provider/signalwire/numbers?countryCode=US",
+            f"{BASE_URL}/phone-configurations/telephony-provider/numbers",
             headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_numbers),
             status=200,
         )
 
-        result = client.telephony_provider.get_phone_numbers("signalwire", "US")
+        result = client.telephony_provider.get_phone_numbers()
 
         assert len(result) == 1
         assert result[0].phone_number == "+12065551234"
@@ -76,15 +76,13 @@ class TestTelephonyProviderResource:
 
         mock_api.add(
             responses.GET,
-            f"{BASE_URL}/phone-configurations/telephony-provider/signalwire/numbers?countryCode=US&areaCode=206&contains=555&postalCode=98101",
+            f"{BASE_URL}/phone-configurations/telephony-provider/numbers?areaCode=206&contains=555&postalCode=98101",
             headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_numbers),
             status=200,
         )
 
         result = client.telephony_provider.get_phone_numbers(
-            "signalwire",
-            "US",
             area_code="206",
             contains="555",
             postal_code="98101"
@@ -97,14 +95,14 @@ class TestTelephonyProviderResource:
         """Test when no phone numbers are available."""
         mock_api.add(
             responses.GET,
-            f"{BASE_URL}/phone-configurations/telephony-provider/signalwire/numbers?countryCode=XX",
+            f"{BASE_URL}/phone-configurations/telephony-provider/numbers?areaCode=999",
             headers={"X-Wiil-Api-Key": API_KEY},
             json=error_response("NOT_FOUND", "No phone numbers available"),
             status=404,
         )
 
         with pytest.raises(WiilAPIError) as exc_info:
-            client.telephony_provider.get_phone_numbers("signalwire", "XX")
+            client.telephony_provider.get_phone_numbers(area_code="999")
 
         assert exc_info.value.status_code == 404
 
@@ -123,11 +121,11 @@ class TestTelephonyProviderResource:
                 ],
                 "price": 1.00,
                 "priceUnit": "per month",
-                "providerType": "signalwire",
+                "providerType": "signal-wire",
                 "currency": "USD"
             },
             {
-                "number_type": "toll_free",
+                "number_type": "toll-free",
                 "country": "United States",
                 "countryCode": "US",
                 "phoneNumberPrices": [
@@ -138,42 +136,41 @@ class TestTelephonyProviderResource:
                 ],
                 "price": 2.00,
                 "priceUnit": "per month",
-                "providerType": "signalwire",
+                "providerType": "signal-wire",
                 "currency": "USD"
             }
         ]
 
         mock_api.add(
             responses.GET,
-            f"{BASE_URL}/phone-configurations/telephony-provider/signalwire/pricing?countryCode=US",
+            f"{BASE_URL}/phone-configurations/telephony-provider/pricing",
             headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_pricing),
             status=200,
         )
 
-        result = client.telephony_provider.get_pricing("signalwire", "US")
+        result = client.telephony_provider.get_pricing()
 
         assert len(result) == 2
         assert result[0].number_type == "local"
         assert result[0].price == 1.00
-        assert result[1].number_type == "toll_free"
+        assert result[1].number_type == "toll-free"
         assert result[1].price == 2.00
 
     def test_get_pricing_error(self, client: WiilClient, mock_api, error_response):
         """Test API error when getting pricing."""
         mock_api.add(
             responses.GET,
-            f"{BASE_URL}/phone-configurations/telephony-provider/signalwire/pricing?countryCode=XX",
+            f"{BASE_URL}/phone-configurations/telephony-provider/pricing",
             headers={"X-Wiil-Api-Key": API_KEY},
-            json=error_response("NOT_FOUND", "Pricing not available for region"),
-            status=404,
+            json=error_response("SERVICE_UNAVAILABLE", "Pricing service unavailable"),
+            status=503,
         )
 
         with pytest.raises(WiilAPIError) as exc_info:
-            client.telephony_provider.get_pricing("signalwire", "XX")
+            client.telephony_provider.get_pricing()
 
-        assert exc_info.value.status_code == 404
-        assert exc_info.value.code == "NOT_FOUND"
+        assert exc_info.value.status_code == 503
 
     def test_get_purchase_status(self, client: WiilClient, mock_api, api_response):
         """Test retrieving phone number purchase status by request id."""
@@ -197,8 +194,8 @@ class TestTelephonyProviderResource:
 
         result = client.telephony_provider.get_purchase_status("req_123")
 
-        assert result["id"] == "req_123"
-        assert result["status"] == "completed"
+        assert result.id == "req_123"
+        assert result.status == "completed"
 
     def test_purchase_returns_terminal_status_immediately(
         self,
@@ -231,8 +228,8 @@ class TestTelephonyProviderResource:
 
         result = client.telephony_provider.purchase(purchase_payload)
 
-        assert result["id"] == "req_234"
-        assert result["status"] == "completed"
+        assert result.id == "req_234"
+        assert result.status == "completed"
 
     def test_purchase_polls_until_completed(
         self,
@@ -301,8 +298,8 @@ class TestTelephonyProviderResource:
 
         result = client.telephony_provider.purchase(purchase_payload)
 
-        assert result["id"] == "req_345"
-        assert result["status"] == "completed"
+        assert result.id == "req_345"
+        assert result.status == "completed"
 
     def test_purchase_timeout(self, client: WiilClient, mock_api, api_response, monkeypatch):
         """Test purchase polling timeout."""

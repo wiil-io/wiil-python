@@ -26,11 +26,11 @@ class TestAgentConfigurationsResource:
             "id": "agent_123",
             "modelId": "YUSI21217J1",
             "name": "Customer Service Agent",
-            "defaultFunctionState": "MULTI_MODE",
+            "defaultFunctionState": "multi_mode",
             "usesWiilSupportModel": True,
             "requiredModelConfig": None,
             "instructionConfigurationId": "inst_789",
-            "assistantType": "GENERAL",
+            "assistantType": "general",
             "callTransferConfig": [],
             "metadata": None,
             "model": None,
@@ -49,7 +49,7 @@ class TestAgentConfigurationsResource:
         result = client.agent_configs.create(CreateAgentConfiguration(
             name="Customer Service Agent",
             instruction_configuration_id="inst_789",
-            assistant_type="GENERAL"
+            assistant_type="general"
         ))
 
         assert result.id == "agent_123"
@@ -64,11 +64,11 @@ class TestAgentConfigurationsResource:
             "id": "agent_123",
             "modelId": "YUSI21217J1",
             "name": "Customer Service Agent",
-            "defaultFunctionState": "MULTI_MODE",
+            "defaultFunctionState": "multi_mode",
             "usesWiilSupportModel": True,
             "requiredModelConfig": None,
             "instructionConfigurationId": "inst_789",
-            "assistantType": "GENERAL",
+            "assistantType": "general",
             "callTransferConfig": [],
             "metadata": None,
             "model": None,
@@ -117,11 +117,11 @@ class TestAgentConfigurationsResource:
             "id": "agent_123",
             "modelId": "YUSI21217J1",
             "name": "Updated Agent Name",
-            "defaultFunctionState": "MULTI_MODE",
+            "defaultFunctionState": "multi_mode",
             "usesWiilSupportModel": True,
             "requiredModelConfig": None,
             "instructionConfigurationId": "inst_789",
-            "assistantType": "GENERAL",
+            "assistantType": "general",
             "callTransferConfig": [],
             "metadata": {"description": "Updated description"},
             "model": None,
@@ -187,11 +187,11 @@ class TestAgentConfigurationsResource:
                 "id": "agent_1",
                 "modelId": "YUSI21217J1",
                 "name": "Agent 1",
-                "defaultFunctionState": "MULTI_MODE",
+                "defaultFunctionState": "multi_mode",
                 "usesWiilSupportModel": True,
                 "requiredModelConfig": None,
                 "instructionConfigurationId": "inst_101",
-                "assistantType": "GENERAL",
+                "assistantType": "general",
                 "callTransferConfig": [],
                 "metadata": None,
                 "model": None,
@@ -202,11 +202,11 @@ class TestAgentConfigurationsResource:
                 "id": "agent_2",
                 "modelId": "YUSI21217J2",
                 "name": "Agent 2",
-                "defaultFunctionState": "TEXT",
+                "defaultFunctionState": "text",
                 "usesWiilSupportModel": True,
                 "requiredModelConfig": None,
                 "instructionConfigurationId": "inst_102",
-                "assistantType": "PHONE",
+                "assistantType": "phone",
                 "callTransferConfig": [],
                 "metadata": None,
                 "model": None,
@@ -241,7 +241,7 @@ class TestAgentConfigurationsResource:
         assert result.meta.total_count == 2
         assert result.meta.page == 1
         assert result.data[0].name == "Agent 1"
-        assert result.data[1].assistant_type == "PHONE"
+        assert result.data[1].assistant_type == "phone"
 
     def test_list_agent_configurations_with_pagination(
         self, client: WiilClient, mock_api, api_response

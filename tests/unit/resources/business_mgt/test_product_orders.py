@@ -104,7 +104,22 @@ class TestProductOrdersResource:
             "id": "order_123",
             "orderNumber": "PO-12345",
             "status": "pending",
-            "items": [],
+            "items": [
+                {
+                    "id": "order_item_1",
+                    "productOrderId": "order_123",
+                    "productId": "prod_123",
+                    "itemName": "Wireless Mouse",
+                    "sku": "WM-001",
+                    "quantity": 2,
+                    "unitPrice": 29.99,
+                    "totalPrice": 59.98,
+                    "selectedVariant": None,
+                    "warrantyInfo": None,
+                    "status": "pending",
+                    "notes": None,
+                }
+            ],
             "customerId": "cust_123",
             "customer": None,
             "pricing": {
@@ -155,8 +170,23 @@ class TestProductOrdersResource:
         mock_response = {
             "id": "order_123",
             "orderNumber": "PO-12345",
-            "status": "shipped",
-            "items": [],
+            "status": "out_for_delivery",
+            "items": [
+                {
+                    "id": "order_item_1",
+                    "productOrderId": "order_123",
+                    "productId": "prod_123",
+                    "itemName": "Wireless Mouse",
+                    "sku": "WM-001",
+                    "quantity": 2,
+                    "unitPrice": 29.99,
+                    "totalPrice": 59.98,
+                    "selectedVariant": None,
+                    "warrantyInfo": None,
+                    "status": "pending",
+                    "notes": None,
+                }
+            ],
             "customerId": "cust_123",
             "customer": None,
             "pricing": {
@@ -203,7 +233,7 @@ class TestProductOrdersResource:
             tracking_number="TRK123456"
         ))
 
-        assert result.status == "shipped"
+        assert result.status == "out_for_delivery"
         assert result.tracking_number == "TRK123456"
 
     def test_delete(self, client: WiilClient, mock_api, api_response):
@@ -227,7 +257,22 @@ class TestProductOrdersResource:
                 "id": "order_1",
                 "orderNumber": "PO-12345",
                 "status": "pending",
-                "items": [],
+                "items": [
+                    {
+                        "id": "order_item_1",
+                        "productOrderId": "order_1",
+                        "productId": "prod_123",
+                        "itemName": "Wireless Mouse",
+                        "sku": "WM-001",
+                        "quantity": 2,
+                        "unitPrice": 29.99,
+                        "totalPrice": 59.98,
+                        "selectedVariant": None,
+                        "warrantyInfo": None,
+                        "status": "pending",
+                        "notes": None,
+                    }
+                ],
                 "customerId": "cust_123",
                 "customer": None,
                 "pricing": {
@@ -291,8 +336,23 @@ class TestProductOrdersResource:
         mock_response = {
             "id": "order_123",
             "orderNumber": "PO-12345",
-            "status": "delivered",
-            "items": [],
+            "status": "completed",
+            "items": [
+                {
+                    "id": "order_item_1",
+                    "productOrderId": "order_123",
+                    "productId": "prod_123",
+                    "itemName": "Wireless Mouse",
+                    "sku": "WM-001",
+                    "quantity": 2,
+                    "unitPrice": 29.99,
+                    "totalPrice": 59.98,
+                    "selectedVariant": None,
+                    "warrantyInfo": None,
+                    "status": "completed",
+                    "notes": None,
+                }
+            ],
             "customerId": "cust_123",
             "customer": None,
             "pricing": {
@@ -333,9 +393,9 @@ class TestProductOrdersResource:
             status=200,
         )
 
-        result = client.product_orders.update_status("order_123", "delivered")
+        result = client.product_orders.update_status("order_123", "completed")
 
-        assert result.status == "delivered"
+        assert result.status == "completed"
 
     # =============== Error Handling Tests ===============
 

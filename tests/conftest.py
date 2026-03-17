@@ -38,15 +38,13 @@ def create_api_response(data: any, success: bool = True) -> dict:
 
 
 def create_error_response(code: str, message: str) -> dict:
-    """Create a standardized error response."""
+    """Create a standardized error response (flat structure)."""
     import time
     return {
         "success": False,
-        "error": {
-            "code": code,
-            "message": message
-        },
-        "metadata": {
+        "code": code,
+        "message": message,
+        "meta": {
             "timestamp": int(time.time() * 1000),
             "version": "v1"
         }

@@ -106,7 +106,22 @@ class TestMenuOrdersResource:
             "orderNumber": "A-42",
             "type": "takeout",
             "status": "pending",
-            "items": [],
+            "items": [
+                {
+                    "id": "order_item_1",
+                    "menuOrderId": "order_123",
+                    "menuItemId": "item_123",
+                    "itemName": "Grilled Salmon",
+                    "quantity": 2,
+                    "unitPrice": 12.99,
+                    "totalPrice": 25.98,
+                    "specialInstructions": None,
+                    "customizations": None,
+                    "status": "pending",
+                    "preparationTime": None,
+                    "notes": None,
+                }
+            ],
             "customerId": "cust_123",
             "customer": None,
             "pricing": {
@@ -158,7 +173,22 @@ class TestMenuOrdersResource:
             "orderNumber": "A-42",
             "type": "takeout",
             "status": "confirmed",
-            "items": [],
+            "items": [
+                {
+                    "id": "order_item_1",
+                    "menuOrderId": "order_123",
+                    "menuItemId": "item_123",
+                    "itemName": "Grilled Salmon",
+                    "quantity": 2,
+                    "unitPrice": 12.99,
+                    "totalPrice": 25.98,
+                    "specialInstructions": None,
+                    "customizations": None,
+                    "status": "pending",
+                    "preparationTime": None,
+                    "notes": None,
+                }
+            ],
             "customerId": "cust_123",
             "customer": None,
             "pricing": {
@@ -229,7 +259,22 @@ class TestMenuOrdersResource:
                 "orderNumber": "A-42",
                 "type": "takeout",
                 "status": "pending",
-                "items": [],
+                "items": [
+                    {
+                        "id": "order_item_1",
+                        "menuOrderId": "order_1",
+                        "menuItemId": "item_123",
+                        "itemName": "Grilled Salmon",
+                        "quantity": 2,
+                        "unitPrice": 12.99,
+                        "totalPrice": 25.98,
+                        "specialInstructions": None,
+                        "customizations": None,
+                        "status": "pending",
+                        "preparationTime": None,
+                        "notes": None,
+                    }
+                ],
                 "customerId": "cust_123",
                 "customer": None,
                 "pricing": {
@@ -294,7 +339,22 @@ class TestMenuOrdersResource:
             "orderNumber": "A-42",
             "type": "takeout",
             "status": "completed",
-            "items": [],
+            "items": [
+                {
+                    "id": "order_item_1",
+                    "menuOrderId": "order_123",
+                    "menuItemId": "item_123",
+                    "itemName": "Grilled Salmon",
+                    "quantity": 2,
+                    "unitPrice": 12.99,
+                    "totalPrice": 25.98,
+                    "specialInstructions": None,
+                    "customizations": None,
+                    "status": "completed",
+                    "preparationTime": None,
+                    "notes": None,
+                }
+            ],
             "customerId": "cust_123",
             "customer": None,
             "pricing": {

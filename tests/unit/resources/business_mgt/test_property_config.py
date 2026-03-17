@@ -787,7 +787,7 @@ class TestPropertyConfigResource:
             "addressId": "addr_123",
             "address": None,
             "listingType": "sale",
-            "listingStatus": "pending",
+            "listingStatus": "under_offer",
             "salePrice": 475000,
             "salePriceCurrency": "USD",
             "rentalPrice": None,

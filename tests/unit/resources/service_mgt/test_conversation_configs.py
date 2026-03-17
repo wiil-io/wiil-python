@@ -20,12 +20,12 @@ class TestConversationConfigurationsResource:
         """Test retrieving a conversation configuration by ID."""
         mock_response = {
             "id": "conv_123",
-            "channelId": "channel_456",
-            "organizationId": "org_789",
-            "projectId": "proj_012",
-            "deploymentConfigId": "deploy_345",
-            "channelIdentifier": "+12125551234",
-            "conversationType": "TELEPHONY_CALL",
+            "channel_id": "channel_456",
+            "organization_id": "org_789",
+            "project_id": "proj_012",
+            "deployment_config_id": "deploy_345",
+            "channel_identifier": "+12125551234",
+            "conversation_type": "TELEPHONY_CALL",
             "status": "active",
             "durationInSeconds": 120,
             "createdAt": 1234567890,
@@ -34,7 +34,7 @@ class TestConversationConfigurationsResource:
 
         mock_api.add(
             responses.GET,
-            f"{BASE_URL}/conversation-configs/conv_123",
+            f"{BASE_URL}/conversation-configurations/conv_123",
             headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
@@ -53,7 +53,7 @@ class TestConversationConfigurationsResource:
         """Test API error when conversation configuration not found."""
         mock_api.add(
             responses.GET,
-            f"{BASE_URL}/conversation-configs/invalid_id",
+            f"{BASE_URL}/conversation-configurations/invalid_id",
             headers={"X-Wiil-Api-Key": API_KEY},
             json=error_response("NOT_FOUND", "Conversation configuration not found"),
             status=404,
@@ -72,12 +72,12 @@ class TestConversationConfigurationsResource:
         mock_configs = [
             {
                 "id": "conv_1",
-                "channelId": "channel_101",
-                "organizationId": "org_789",
-                "projectId": "proj_012",
-                "deploymentConfigId": "deploy_345",
-                "channelIdentifier": "+12125551111",
-                "conversationType": "OTT_CHAT",
+                "channel_id": "channel_101",
+                "organization_id": "org_789",
+                "project_id": "proj_012",
+                "deployment_config_id": "deploy_345",
+                "channel_identifier": "+12125551111",
+                "conversation_type": "OTT_CHAT",
                 "status": "active",
                 "durationInSeconds": 45,
                 "createdAt": 1234567890,
@@ -85,12 +85,12 @@ class TestConversationConfigurationsResource:
             },
             {
                 "id": "conv_2",
-                "channelId": "channel_102",
-                "organizationId": "org_789",
-                "projectId": "proj_012",
-                "deploymentConfigId": "deploy_345",
-                "channelIdentifier": "+12125552222",
-                "conversationType": "SMS",
+                "channel_id": "channel_102",
+                "organization_id": "org_789",
+                "project_id": "proj_012",
+                "deployment_config_id": "deploy_345",
+                "channel_identifier": "+12125552222",
+                "conversation_type": "SMS",
                 "status": "ended",
                 "durationInSeconds": 90,
                 "createdAt": 1234567891,
@@ -112,7 +112,7 @@ class TestConversationConfigurationsResource:
 
         mock_api.add(
             responses.GET,
-            f"{BASE_URL}/conversation-configs",
+            f"{BASE_URL}/conversation-configurations",
             headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
@@ -146,7 +146,7 @@ class TestConversationConfigurationsResource:
 
         mock_api.add(
             responses.GET,
-            f"{BASE_URL}/conversation-configs?page=2&pageSize=50",
+            f"{BASE_URL}/conversation-configurations?page=2&pageSize=50",
             headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,

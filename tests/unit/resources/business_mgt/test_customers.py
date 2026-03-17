@@ -150,7 +150,7 @@ class TestCustomersResource:
             "lastname": None,
             "company": None,
             "timezone": None,
-            "email": "john.doe%40example.com",
+            "email": "john.doe@example.com",
             "preferred_language": "en",
             "call_priority": "medium",
             "preferred_contact_method": "email",

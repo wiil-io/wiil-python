@@ -29,8 +29,8 @@ class TestDeploymentConfigurationsResource:
             "deploymentName": "Customer Service Deployment",
             "agentConfigurationId": "agent_123",
             "instructionConfigurationId": "inst_456",
-            "deploymentStatus": "PENDING",
-            "provisioningType": "DIRECT",
+            "deploymentStatus": "pending",
+            "provisioningType": "direct",
             "provisioningConfigChainId": None,
             "isActive": False,
             "createdAt": 1234567890,
@@ -67,8 +67,8 @@ class TestDeploymentConfigurationsResource:
             "deploymentName": "Customer Service Deployment",
             "agentConfigurationId": "agent_123",
             "instructionConfigurationId": "inst_456",
-            "deploymentStatus": "ACTIVE",
-            "provisioningType": "DIRECT",
+            "deploymentStatus": "active",
+            "provisioningType": "direct",
             "provisioningConfigChainId": None,
             "isActive": True,
             "createdAt": 1234567890,
@@ -87,7 +87,7 @@ class TestDeploymentConfigurationsResource:
 
         assert result.id == "deploy_123"
         assert result.deployment_name == "Customer Service Deployment"
-        assert result.deployment_status == "ACTIVE"
+        assert result.deployment_status == "active"
 
     def test_get_deployment_configuration_by_channel(
         self, client: WiilClient, mock_api, api_response
@@ -100,8 +100,8 @@ class TestDeploymentConfigurationsResource:
             "deploymentName": "Customer Service Deployment",
             "agentConfigurationId": "agent_123",
             "instructionConfigurationId": "inst_456",
-            "deploymentStatus": "ACTIVE",
-            "provisioningType": "DIRECT",
+            "deploymentStatus": "active",
+            "provisioningType": "direct",
             "provisioningConfigChainId": None,
             "isActive": True,
             "createdAt": 1234567890,
@@ -132,8 +132,8 @@ class TestDeploymentConfigurationsResource:
             "deploymentName": "Updated Deployment Name",
             "agentConfigurationId": "agent_123",
             "instructionConfigurationId": "inst_456",
-            "deploymentStatus": "ACTIVE",
-            "provisioningType": "DIRECT",
+            "deploymentStatus": "active",
+            "provisioningType": "direct",
             "provisioningConfigChainId": None,
             "isActive": True,
             "createdAt": 1234567890,
@@ -184,8 +184,8 @@ class TestDeploymentConfigurationsResource:
                 "deploymentName": "Deployment 1",
                 "agentConfigurationId": "agent_123",
                 "instructionConfigurationId": "inst_456",
-                "deploymentStatus": "ACTIVE",
-                "provisioningType": "DIRECT",
+                "deploymentStatus": "active",
+                "provisioningType": "direct",
                 "provisioningConfigChainId": None,
                 "isActive": True,
                 "createdAt": 1234567890,
@@ -198,8 +198,8 @@ class TestDeploymentConfigurationsResource:
                 "deploymentName": "Deployment 2",
                 "agentConfigurationId": "agent_456",
                 "instructionConfigurationId": "inst_789",
-                "deploymentStatus": "PENDING",
-                "provisioningType": "DIRECT",
+                "deploymentStatus": "pending",
+                "provisioningType": "direct",
                 "provisioningConfigChainId": None,
                 "isActive": False,
                 "createdAt": 1234567891,
@@ -232,7 +232,7 @@ class TestDeploymentConfigurationsResource:
         assert len(result.data) == 2
         assert result.meta.total_count == 2
         assert result.data[0].deployment_name == "Deployment 1"
-        assert result.data[1].deployment_status == "PENDING"
+        assert result.data[1].deployment_status == "pending"
 
     def test_list_deployment_configurations_by_project(
         self, client: WiilClient, mock_api, api_response

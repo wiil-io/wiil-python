@@ -21,15 +21,15 @@ class TestTranslationSessionsResource:
         """Test retrieving a translation session by ID."""
         mock_response = {
             "id": "session_123",
-            "organizationId": "org_456",
-            "projectId": "proj_789",
-            "partnerInitiatorId": "initiator_001",
-            "partnerSessionId": "sess_abc",
+            "organization_id": "org_456",
+            "project_id": "proj_789",
+            "partner_initiator_id": "initiator_001",
+            "partner_session_id": "sess_abc",
             "sdrtId": None,
             "translationConfigId": "config_123",
             "participants": ["participant_1", "participant_2"],
             "durationInSeconds": 120,
-            "status": "completed",
+            "status": "ended",
             "direction": "bidirectional",
             "transcribedConversationLog": None,
             "logTranscriptionInParticipantRecords": False,
@@ -51,7 +51,7 @@ class TestTranslationSessionsResource:
 
         assert result.id == "session_123"
         assert result.organization_id == "org_456"
-        assert result.status == "completed"
+        assert result.status == "ended"
 
     def test_get_translation_session_not_found(
         self, client: WiilClient, mock_api, error_response
@@ -78,15 +78,15 @@ class TestTranslationSessionsResource:
         mock_sessions = [
             {
                 "id": "session_1",
-                "organizationId": "org_456",
-                "projectId": "proj_789",
-                "partnerInitiatorId": "initiator_001",
-                "partnerSessionId": "sess_1",
+                "organization_id": "org_456",
+                "project_id": "proj_789",
+                "partner_initiator_id": "initiator_001",
+                "partner_session_id": "sess_1",
                 "sdrtId": None,
                 "translationConfigId": "config_123",
                 "participants": ["participant_1", "participant_2"],
                 "durationInSeconds": 90,
-                "status": "completed",
+                "status": "ended",
                 "direction": "bidirectional",
                 "transcribedConversationLog": None,
                 "logTranscriptionInParticipantRecords": False,
@@ -97,15 +97,15 @@ class TestTranslationSessionsResource:
             },
             {
                 "id": "session_2",
-                "organizationId": "org_456",
-                "projectId": "proj_789",
-                "partnerInitiatorId": "initiator_002",
-                "partnerSessionId": "sess_2",
+                "organization_id": "org_456",
+                "project_id": "proj_789",
+                "partner_initiator_id": "initiator_002",
+                "partner_session_id": "sess_2",
                 "sdrtId": None,
                 "translationConfigId": "config_123",
                 "participants": ["participant_3", "participant_4"],
                 "durationInSeconds": 150,
-                "status": "completed",
+                "status": "ended",
                 "direction": "bidirectional",
                 "transcribedConversationLog": None,
                 "logTranscriptionInParticipantRecords": False,
