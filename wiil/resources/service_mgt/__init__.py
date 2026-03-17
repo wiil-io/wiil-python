@@ -21,6 +21,7 @@ from wiil.resources.service_mgt.support_models import SupportModelsResource
 from wiil.resources.service_mgt.telephony_provider import TelephonyProviderResource
 from wiil.resources.service_mgt.dynamic_agent_status import (
     DynamicAgentStatusResource,
+    PollOptions,
     PollTimeoutError,
 )
 from wiil.resources.service_mgt.dynamic_web_agent import (
@@ -45,6 +46,7 @@ __all__ = [
     'SupportModelsResource',
     'TelephonyProviderResource',
     'DynamicAgentStatusResource',
+    'PollOptions',
     'PollTimeoutError',
     'DynamicWebAgentResource',
     'WebAgentCreateOptions',
