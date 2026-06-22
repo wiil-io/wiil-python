@@ -7,6 +7,7 @@ from wiil.models.service_mgt.dynamic_setup import (
     DynamicPhoneAgentSetup,
     UpdateDynamicPhoneAgent,
 )
+from wiil.models.type_definitions import SupportedProprietor
 from wiil.resources.service_mgt.dynamic_phone_agent import PhoneAgentCreateOptions
 
 
@@ -22,7 +23,6 @@ class TestDynamicPhoneAgentResource:
     ):
         """Test creating a new dynamic phone agent."""
         mock_response = {
-            "id": "setup_123",
             "processingState": {
                 "status": "completed",
                 "progressPercentage": 100,
@@ -31,8 +31,6 @@ class TestDynamicPhoneAgentResource:
             "agentConfigurationId": "agent_123",
             "instructionConfigurationId": "instr_456",
             "phoneNumber": "+15551234567",
-            "createdAt": 1234567890,
-            "updatedAt": 1234567890,
         }
 
         mock_api.add(
@@ -66,7 +64,6 @@ class TestDynamicPhoneAgentResource:
     ):
         """Test creating a phone agent with STT and TTS configurations."""
         mock_response = {
-            "id": "setup_456",
             "processingState": {
                 "status": "completed",
                 "progressPercentage": 100,
@@ -75,8 +72,6 @@ class TestDynamicPhoneAgentResource:
             "agentConfigurationId": "agent_456",
             "instructionConfigurationId": "instr_789",
             "phoneNumber": "+15559876543",
-            "createdAt": 1234567890,
-            "updatedAt": 1234567890,
         }
 
         # Mock support model validation calls
@@ -110,12 +105,12 @@ class TestDynamicPhoneAgentResource:
                 capabilities=[],
                 phone_configuration_id="phone_config_123",
                 stt_configuration={
-                    "provider_type": "Deepgram",
+                    "provider_type": SupportedProprietor.DEEPGRAM,
                     "provider_model_id": "nova-2",
                     "language_id": "en-US",
                 },
                 tts_configuration={
-                    "provider_type": "ElevenLabs",
+                    "provider_type": SupportedProprietor.ELEVENLABS,
                     "provider_model_id": "eleven_turbo_v2",
                     "language_id": "en-US",
                     "voice_id": "voice_rachel",
@@ -136,7 +131,6 @@ class TestDynamicPhoneAgentResource:
     ):
         """Test updating a dynamic phone agent."""
         mock_response = {
-            "id": "setup_123",
             "processingState": {
                 "status": "completed",
                 "progressPercentage": 100,
@@ -145,8 +139,6 @@ class TestDynamicPhoneAgentResource:
             "agentConfigurationId": "agent_123",
             "instructionConfigurationId": "instr_456",
             "phoneNumber": "+15551234567",
-            "createdAt": 1234567890,
-            "updatedAt": 1234567891,
         }
 
         mock_api.add(

@@ -20,24 +20,34 @@ class TestTelephonyProviderResource:
 
     def test_get_phone_numbers(self, client: WiilClient, mock_api, api_response):
         """Test retrieving available phone numbers."""
-        mock_numbers = [
-            {
-                "friendlyName": "Seattle Number",
-                "phoneNumber": "+12065551234",
-                "lata": None,
-                "rateCenter": "Seattle",
-                "region": "WA",
-                "postalCode": "98101",
-                "countryCode": "US",
-                "capabilities": {
-                    "voice": True,
-                    "SMS": True,
-                    "MMS": False
-                },
-                "beta": False,
-                "numberType": "local"
-            }
-        ]
+        mock_numbers = {
+            "data": [
+                {
+                    "friendlyName": "Seattle Number",
+                    "phoneNumber": "+12065551234",
+                    "lata": None,
+                    "rateCenter": "Seattle",
+                    "region": "WA",
+                    "postalCode": "98101",
+                    "countryCode": "US",
+                    "capabilities": {
+                        "voice": True,
+                        "SMS": True,
+                        "MMS": False
+                    },
+                    "beta": False,
+                    "numberType": "local"
+                }
+            ],
+            "meta": {
+                "page": 1,
+                "pageSize": 20,
+                "totalCount": 1,
+                "totalPages": 1,
+                "hasNextPage": False,
+                "hasPreviousPage": False,
+            },
+        }
 
         mock_api.add(
             responses.GET,
@@ -49,30 +59,40 @@ class TestTelephonyProviderResource:
 
         result = client.telephony_provider.get_phone_numbers()
 
-        assert len(result) == 1
-        assert result[0].phone_number == "+12065551234"
-        assert result[0].region == "WA"
+        assert len(result.data) == 1
+        assert result.data[0].phone_number == "+12065551234"
+        assert result.data[0].region == "WA"
 
     def test_get_phone_numbers_with_filters(self, client: WiilClient, mock_api, api_response):
         """Test retrieving phone numbers with search filters."""
-        mock_numbers = [
-            {
-                "friendlyName": "Seattle 206 Number",
-                "phoneNumber": "+12065551234",
-                "lata": None,
-                "rateCenter": "Seattle",
-                "region": "WA",
-                "postalCode": "98101",
-                "countryCode": "US",
-                "capabilities": {
-                    "voice": True,
-                    "SMS": True,
-                    "MMS": False
-                },
-                "beta": False,
-                "numberType": "local"
-            }
-        ]
+        mock_numbers = {
+            "data": [
+                {
+                    "friendlyName": "Seattle 206 Number",
+                    "phoneNumber": "+12065551234",
+                    "lata": None,
+                    "rateCenter": "Seattle",
+                    "region": "WA",
+                    "postalCode": "98101",
+                    "countryCode": "US",
+                    "capabilities": {
+                        "voice": True,
+                        "SMS": True,
+                        "MMS": False
+                    },
+                    "beta": False,
+                    "numberType": "local"
+                }
+            ],
+            "meta": {
+                "page": 1,
+                "pageSize": 20,
+                "totalCount": 1,
+                "totalPages": 1,
+                "hasNextPage": False,
+                "hasPreviousPage": False,
+            },
+        }
 
         mock_api.add(
             responses.GET,
@@ -88,8 +108,8 @@ class TestTelephonyProviderResource:
             postal_code="98101"
         )
 
-        assert len(result) == 1
-        assert result[0].phone_number == "+12065551234"
+        assert len(result.data) == 1
+        assert result.data[0].phone_number == "+12065551234"
 
     def test_get_phone_numbers_not_found(self, client: WiilClient, mock_api, error_response):
         """Test when no phone numbers are available."""
@@ -108,38 +128,46 @@ class TestTelephonyProviderResource:
 
     def test_get_pricing(self, client: WiilClient, mock_api, api_response):
         """Test retrieving pricing information."""
-        mock_pricing = [
-            {
-                "number_type": "local",
-                "country": "United States",
-                "countryCode": "US",
-                "phoneNumberPrices": [
-                    {
-                        "base_price": "1.00",
-                        "current_price": "1.00"
-                    }
-                ],
-                "price": 1.00,
-                "priceUnit": "per month",
-                "providerType": "signal-wire",
-                "currency": "USD"
+        mock_pricing = {
+            "data": [
+                {
+                    "number_type": "local",
+                    "country": "United States",
+                    "countryCode": "US",
+                    "phoneNumberPrices": [
+                        {
+                            "base_price": "1.00",
+                            "current_price": "1.00"
+                        }
+                    ],
+                    "price": 1.00,
+                    "priceUnit": "per month",
+                    "currency": "USD"
+                },
+                {
+                    "number_type": "toll-free",
+                    "country": "United States",
+                    "countryCode": "US",
+                    "phoneNumberPrices": [
+                        {
+                            "base_price": "2.00",
+                            "current_price": "2.00"
+                        }
+                    ],
+                    "price": 2.00,
+                    "priceUnit": "per month",
+                    "currency": "USD"
+                }
+            ],
+            "meta": {
+                "page": 1,
+                "pageSize": 20,
+                "totalCount": 2,
+                "totalPages": 1,
+                "hasNextPage": False,
+                "hasPreviousPage": False,
             },
-            {
-                "number_type": "toll-free",
-                "country": "United States",
-                "countryCode": "US",
-                "phoneNumberPrices": [
-                    {
-                        "base_price": "2.00",
-                        "current_price": "2.00"
-                    }
-                ],
-                "price": 2.00,
-                "priceUnit": "per month",
-                "providerType": "signal-wire",
-                "currency": "USD"
-            }
-        ]
+        }
 
         mock_api.add(
             responses.GET,
@@ -151,11 +179,11 @@ class TestTelephonyProviderResource:
 
         result = client.telephony_provider.get_pricing()
 
-        assert len(result) == 2
-        assert result[0].number_type == "local"
-        assert result[0].price == 1.00
-        assert result[1].number_type == "toll-free"
-        assert result[1].price == 2.00
+        assert len(result.data) == 2
+        assert result.data[0].number_type == "local"
+        assert result.data[0].price == 1.00
+        assert result.data[1].number_type == "toll-free"
+        assert result.data[1].price == 2.00
 
     def test_get_pricing_error(self, client: WiilClient, mock_api, error_response):
         """Test API error when getting pricing."""

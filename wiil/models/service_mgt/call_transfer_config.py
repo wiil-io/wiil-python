@@ -7,15 +7,16 @@ and warm (announced) transfer types.
 
 from typing import List, Literal
 
-from pydantic import BaseModel as PydanticBaseModel
-from pydantic import ConfigDict, Field
+from pydantic import Field
+
+from wiil.models.base import BaseModel
 
 
 # Transfer type
 TransferType = Literal["blind", "warm"]
 
 
-class CallTransferConfig(PydanticBaseModel):
+class CallTransferConfig(BaseModel):
     """Call transfer configuration.
 
     Defines the structure for configuring call transfers in the telephony system. Call transfer
@@ -49,12 +50,6 @@ class CallTransferConfig(PydanticBaseModel):
         )
         ```
     """
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
 
     transfer_number: str = Field(
         ...,

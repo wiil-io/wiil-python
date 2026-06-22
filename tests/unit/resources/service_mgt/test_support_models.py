@@ -74,46 +74,56 @@ class TestSupportModelsResource:
         self, client: WiilClient, mock_api, api_response
     ):
         """Test listing all support models."""
-        mock_models = [
-            {
-                "modelId": "model_1",
-                "name": "GPT-4 Turbo",
-                "provider_model_id": "gpt-4-1106-preview",
-                "proprietor": "OpenAI",
-                "description": "Latest GPT-4 model with improved performance",
-                "type": "multi_mode",
-                "discontinued": False,
-                "supportedVoices": None,
-                "supportLanguages": [
-                    {
-                        "languageId": "en-us",
-                        "name": "English (United States)",
-                        "code": "en-US",
-                        "isDefault": True,
-                        "isExperimental": False,
-                    },
-                ],
+        mock_models = {
+            "data": [
+                {
+                    "modelId": "model_1",
+                    "name": "GPT-4 Turbo",
+                    "provider_model_id": "gpt-4-1106-preview",
+                    "proprietor": "OpenAI",
+                    "description": "Latest GPT-4 model with improved performance",
+                    "type": "multi_mode",
+                    "discontinued": False,
+                    "supportedVoices": None,
+                    "supportLanguages": [
+                        {
+                            "languageId": "en-us",
+                            "name": "English (United States)",
+                            "code": "en-US",
+                            "isDefault": True,
+                            "isExperimental": False,
+                        },
+                    ],
+                },
+                {
+                    "modelId": "model_2",
+                    "name": "Claude Sonnet 4",
+                    "provider_model_id": "claude-sonnet-4",
+                    "proprietor": "Anthropic",
+                    "description": "Anthropic Claude Sonnet 4 model",
+                    "type": "text",
+                    "discontinued": False,
+                    "supportedVoices": None,
+                    "supportLanguages": [
+                        {
+                            "languageId": "en-us",
+                            "name": "English (United States)",
+                            "code": "en-US",
+                            "isDefault": True,
+                            "isExperimental": False,
+                        },
+                    ],
+                },
+            ],
+            "meta": {
+                "page": 1,
+                "pageSize": 20,
+                "totalCount": 2,
+                "totalPages": 1,
+                "hasNextPage": False,
+                "hasPreviousPage": False,
             },
-            {
-                "modelId": "model_2",
-                "name": "Claude Sonnet 4",
-                "provider_model_id": "claude-sonnet-4",
-                "proprietor": "Anthropic",
-                "description": "Anthropic Claude Sonnet 4 model",
-                "type": "text",
-                "discontinued": False,
-                "supportedVoices": None,
-                "supportLanguages": [
-                    {
-                        "languageId": "en-us",
-                        "name": "English (United States)",
-                        "code": "en-US",
-                        "isDefault": True,
-                        "isExperimental": False,
-                    },
-                ],
-            },
-        ]
+        }
 
         mock_api.add(
             responses.GET,
@@ -125,9 +135,9 @@ class TestSupportModelsResource:
 
         result = client.support_models.list()
 
-        assert len(result) == 2
-        assert result[0].name == "GPT-4 Turbo"
-        assert result[1].name == "Claude Sonnet 4"
+        assert len(result.data) == 2
+        assert result.data[0].name == "GPT-4 Turbo"
+        assert result.data[1].name == "Claude Sonnet 4"
 
     def test_get_default_multi_mode(
         self, client: WiilClient, mock_api, api_response

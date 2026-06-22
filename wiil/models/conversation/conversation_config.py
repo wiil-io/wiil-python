@@ -5,11 +5,11 @@ Conversations represent individual interaction sessions between users and AI age
 to deployment configurations. Each conversation is scoped to a project and organization.
 """
 
+import time
 from datetime import datetime
-from typing import Any, Dict, List, Literal, Optional, TypedDict, Union
+from typing import Any, Dict, List, Literal, Optional, TypedDict
 
-from pydantic import BaseModel as PydanticBaseModel
-from pydantic import ConfigDict, Field
+from pydantic import Field
 
 from wiil.models.base import BaseModel
 from wiil.types.conversation_types import (
@@ -21,7 +21,7 @@ from wiil.types.conversation_types import (
 )
 
 
-class ConversationSummary(PydanticBaseModel):
+class ConversationSummary(BaseModel):
     """AI-generated conversation summary.
 
     AI-generated summary capturing the essence of a conversation including key discussion points,
@@ -33,12 +33,6 @@ class ConversationSummary(PydanticBaseModel):
         - Used For: Analytics dashboards, quality assurance, and customer service reports
         - Stored In: ServiceConversationConfig.conversation_summary field (optional)
     """
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
 
     summary: str = Field(
         ...,
@@ -58,7 +52,7 @@ class ConversationSummary(PydanticBaseModel):
     )
 
 
-class Message(PydanticBaseModel):
+class Message(BaseModel):
     """Lightweight message representation used within conversation configurations.
 
     Simplified version compared to the full ConversationMessageSchema for efficient storage and
@@ -69,12 +63,6 @@ class Message(PydanticBaseModel):
         - Relationship: Simplified version of full message schemas (UserChatMessage, AssistantChatMessage, etc.)
         - Storage: Embedded within conversation documents for fast message loading
     """
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
 
     id: Optional[str] = Field(
         None,
@@ -107,7 +95,32 @@ class Message(PydanticBaseModel):
     )
 
 
-class ConversationStateHistory(PydanticBaseModel):
+class DisplayMessage(BaseModel):
+    """Simplified message format for UI display."""
+
+    id: str = Field(..., description="Unique identifier for display purposes")
+    sender: Literal["user", "assistant"] = Field(
+        ...,
+        description="Who sent this message - user or AI assistant"
+    )
+    content: str = Field(..., description="Message content to display to users")
+    timestamp: datetime = Field(..., description="When the message was sent")
+
+
+class ConversationContext(BaseModel):
+    """Optional context for deep-linking and pre-population."""
+
+    message: Optional[str] = Field(None, description="Auto-sends as the user's first message when conversation starts")
+    product_id: Optional[str] = Field(None, alias="productId", description="Deep-link to a specific product for product inquiries")
+    menu_item_id: Optional[str] = Field(None, alias="menuItemId", description="Deep-link to a specific menu item for food/beverage inquiries")
+    service_id: Optional[str] = Field(None, alias="serviceId", description="Deep-link to a specific service for service booking")
+    property_id: Optional[str] = Field(None, alias="propertyId", description="Deep-link to a specific property for real estate inquiries")
+    resource_id: Optional[str] = Field(None, alias="resourceId", description="Deep-link to a specific resource (rental item, room) for reservations")
+    required_service_id: Optional[str] = Field(None, alias="requiredServiceId", description="Pre-select a required service for the conversation")
+    location_id: Optional[str] = Field(None, alias="locationId", description="Context of a specific business location for multi-location businesses")
+
+
+class ConversationStateHistory(BaseModel):
     """Conversation state history for tracking status changes.
 
     Audit trail recording each status transition throughout a conversation's lifecycle. Enables tracking
@@ -127,12 +140,6 @@ class ConversationStateHistory(PydanticBaseModel):
         - TRANSFERRED: Call transferred to human agent
     """
 
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
-
     status: ConversationStatus = Field(
         ...,
         description="The conversation status at this point in the lifecycle (ACTIVE: in progress, COMPLETED: successfully concluded, FAILED: encountered errors, ABANDONED: user left, TRANSFERRED: escalated to human)"
@@ -151,7 +158,7 @@ class ConversationStateHistory(PydanticBaseModel):
     )
 
 
-class CallTransfer(PydanticBaseModel):
+class CallTransfer(BaseModel):
     """Call transfer details for tracking call transfer in telephony conversations.
 
     Captures metadata about call transfers to human agents including transfer type, timing, destination,
@@ -174,12 +181,6 @@ class CallTransfer(PydanticBaseModel):
         - failed: Transfer failed due to busy line, no answer, or technical error
         - returned: Call returned to AI agent after human agent consultation
     """
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
 
     transfer_type: Optional[Literal["blind", "warm"]] = Field(
         None,
@@ -207,7 +208,7 @@ class CallTransfer(PydanticBaseModel):
     )
 
 
-class BaseConversationConfig(PydanticBaseModel):
+class BaseConversationConfig(BaseModel):
     """Base conversation configuration schema.
 
     Foundation schema for all conversation types capturing the essential attributes of an interaction session
@@ -229,19 +230,9 @@ class BaseConversationConfig(PydanticBaseModel):
         - WHATSAPP: WhatsApp messaging conversations
     """
 
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
-
     channel_id: str = Field(
         ...,
         description="ID of the deployment channel through which this conversation is conducted (references DeploymentChannel for phone, SMS, web, or email configuration)"
-    )
-    organization_id: str = Field(
-        ...,
-        description="ID of the organization that owns this conversation for multi-tenant data isolation, access control, and billing attribution"
     )
     project_id: str = Field(
         ...,
@@ -276,7 +267,7 @@ class BaseConversationConfig(PydanticBaseModel):
         description="Internal platform user ID for authenticated users enabling personalized conversations and user-specific history, null for anonymous or guest interactions"
     )
     created_at: Optional[int] = Field(
-        None,
+        default_factory=lambda: int(time.time() * 1000),
         description="Unix timestamp in milliseconds when conversation was initiated by user or outbound campaign (default: current time, used for chronological sorting)"
     )
     messages: Optional[List["ConversationMessage"]] = Field(
@@ -290,6 +281,10 @@ class BaseConversationConfig(PydanticBaseModel):
     customer_id: Optional[str] = Field(
         None,
         description="Customer or contact ID from CRM or external system for customer relationship tracking, conversation history aggregation, and personalization"
+    )
+    location_id: Optional[str] = Field(
+        None,
+        description="Business location ID associated with this conversation for multi-location businesses, enables location-specific analytics and routing"
     )
     status: Optional[ConversationStatus] = Field(
         None,
@@ -329,9 +324,18 @@ class BaseConversationConfig(PydanticBaseModel):
         None,
         description="Unix timestamp in milliseconds when conversation was soft-deleted for data retention compliance, null if active (enables GDPR right-to-be-forgotten while preserving analytics)"
     )
+    is_test_conversation: bool = Field(
+        False,
+        description="Flag indicating if this conversation is for testing purposes (true) or a real customer interaction (false, default)"
+    )
+    conversation_context: Optional[ConversationContext] = Field(
+        None,
+        alias="conversation_context",
+        description="Optional context to guide the conversation including deep-links to products, services, or resources"
+    )
 
 
-class ServiceConversationConfig(BaseModel):
+class ServiceConversationConfig(BaseConversationConfig):
     """Service conversation configuration schema.
 
     Complete conversation record extending base configuration with conversation-specific identifiers,
@@ -339,7 +343,7 @@ class ServiceConversationConfig(BaseModel):
     schema used for storing and retrieving conversation records in the system.
 
     Architecture Context:
-        - Extends: BaseModel (has id, created_at, updated_at) with conversation-specific fields
+        - Extends: BaseConversationConfig with conversation-specific fields (id, record_id, etc.)
         - Storage: Primary conversation entity in database with unique id
         - Provider Integration: Tracks external provider IDs for email services, telephony platforms
         - Call Recordings: resource_url links to call recording storage for compliance and quality assurance
@@ -351,101 +355,10 @@ class ServiceConversationConfig(BaseModel):
         - Integrating with external email providers (Gmail, Outlook, etc.)
     """
 
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
-
-    # All fields from BaseConversationConfig
-    channel_id: str = Field(
+    id: str = Field(
         ...,
-        description="ID of the deployment channel through which this conversation is conducted (references DeploymentChannel for phone, SMS, web, or email configuration)"
+        description="Unique identifier for this conversation record (typically UUID), used as primary key for database queries and cross-system references"
     )
-    organization_id: str = Field(
-        ...,
-        description="ID of the organization that owns this conversation for multi-tenant data isolation, access control, and billing attribution"
-    )
-    project_id: str = Field(
-        ...,
-        description="ID of the project this conversation is associated with for organizational grouping, reporting, and access control (N:1 relationship with Project)"
-    )
-    deployment_config_id: str = Field(
-        ...,
-        description="ID of the deployment configuration that powers this conversation including agent, instruction, and channel settings (N:1 relationship with DeploymentConfiguration)"
-    )
-    channel_identifier: str = Field(
-        ...,
-        description="Unique identifier for the specific communication endpoint: phone number in E.164 format (+12125551234), chat widget ID, email address, or WhatsApp number"
-    )
-    instruction_config_id: Optional[str] = Field(
-        None,
-        description="Optional ID of the instruction configuration overriding deployment defaults for conversation-specific behavior or A/B testing (references InstructionConfiguration)"
-    )
-    partner_user_id: Optional[str] = Field(
-        None,
-        description="External partner or user identifier from integrated systems (CRM, help desk, e-commerce) for cross-platform user tracking and unified customer view"
-    )
-    conversation_type: ServiceConversationType = Field(
-        ...,
-        description="Type of conversation defining the communication channel and interaction mode (OTT_CHAT: web/mobile chat, TELEPHONY_CALL: voice, SMS: text, EMAIL: email, WHATSAPP: WhatsApp)"
-    )
-    model_id: Optional[str] = Field(
-        None,
-        description="AI model ID used for this conversation, may override deployment configuration model for A/B testing, specialized scenarios, or model version upgrades (references WiilSupportModel)"
-    )
-    user_id: Optional[int] = Field(
-        None,
-        description="Internal platform user ID for authenticated users enabling personalized conversations and user-specific history, null for anonymous or guest interactions"
-    )
-    messages: Optional[List["ConversationMessage"]] = Field(
-        None,
-        description="Array of messages exchanged in this conversation embedded for quick access without separate database queries (includes user and assistant messages with metadata)"
-    )
-    is_campaign: bool = Field(
-        False,
-        description="Flag indicating if this conversation is part of a marketing or outbound campaign (true) or an inbound customer-initiated interaction (false, default)"
-    )
-    customer_id: Optional[str] = Field(
-        None,
-        description="Customer or contact ID from CRM or external system for customer relationship tracking, conversation history aggregation, and personalization"
-    )
-    status: Optional[ConversationStatus] = Field(
-        None,
-        description="Current operational status of the conversation (ACTIVE: ongoing, COMPLETED: concluded successfully, FAILED: errors, ABANDONED: user left, TRANSFERRED: escalated to human)"
-    )
-    duration_in_seconds: int = Field(
-        15,
-        description="Duration of the conversation in seconds for billing calculations, analytics reporting, and average handling time (AHT) metrics (default: 15 for minimum billing)",
-        alias="durationInSeconds"
-    )
-    stt_model_id: Optional[str] = Field(
-        None,
-        description="Speech-to-Text model ID used for voice conversations to transcribe user speech into text (e.g., 'whisper-v3', 'google-stt-enhanced', references WiilSupportModel)"
-    )
-    tts_model_id: Optional[str] = Field(
-        None,
-        description="Text-to-Speech model ID used for voice conversations to synthesize agent text responses into natural speech (e.g., 'eleven-labs-v2', 'azure-neural-tts', references WiilSupportModel)"
-    )
-    conversation_summary: Optional[ConversationSummary] = Field(
-        None,
-        description="Optional AI-generated summary of the conversation including key discussion points, action items, and sentiment analysis (populated post-conversation for reporting and QA)",
-        alias="conversationSummary"
-    )
-    created_day: Optional[str] = Field(
-        None,
-        description="The day the conversation was created in YYYY-MM-DD ISO format for efficient daily aggregation queries, analytics partitioning, and time-series reporting"
-    )
-    state_history: Optional[List[ConversationStateHistory]] = Field(
-        None,
-        description="Historical audit trail of status changes throughout the conversation lifecycle for flow analysis, troubleshooting, and measuring time-to-resolution"
-    )
-    deleted_at: Optional[int] = Field(
-        None,
-        description="Unix timestamp in milliseconds when conversation was soft-deleted for data retention compliance, null if active (enables GDPR right-to-be-forgotten while preserving analytics)"
-    )
-
-    # Additional fields specific to ServiceConversationConfig
     record_id: Optional[str] = Field(
         None,
         description="Optional external record ID for integration with partner systems, CRM platforms, or help desk software for conversation linkage and data synchronization"
@@ -465,36 +378,6 @@ class ServiceConversationConfig(BaseModel):
     call_transfer: Optional[CallTransfer] = Field(
         None,
         description="Call transfer details if the conversation was transferred to a human agent including transfer type, destination, timing, and outcome (null if no transfer occurred)"
-    )
-
-
-class DecommissionConfig(PydanticBaseModel):
-    """Decommission configuration schema.
-
-    Request payload for decommissioning and shutting down active conversation services. Used for
-    gracefully terminating conversation sessions, cleaning up resources, and releasing telephony
-    connections when deployments are disabled or conversations are force-closed.
-
-    Architecture Context:
-        - Used For: Graceful shutdown of active conversation sessions
-        - Triggered By: Admin actions, deployment deactivation, or timeout policies
-        - Effects: Releases telephony resources, closes WebSocket connections, archives conversation
-
-    Use Cases:
-        - Emergency shutdown of misbehaving conversation sessions
-        - Cleanup when deployments are deactivated
-        - Forced conversation termination for policy violations
-    """
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
-
-    decommission_service_id: str = Field(
-        ...,
-        description="Service ID of the active conversation session to decommission and shut down gracefully, releases resources and closes all active connections"
     )
 
 

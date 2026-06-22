@@ -7,16 +7,15 @@ deployments. The Instruction Configuration (1:N relationship) governs agent beha
 
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel as PydanticBaseModel
-from pydantic import ConfigDict, Field, field_validator
+from pydantic import Field, field_validator
 
-from wiil.models.base import BaseModel
+from wiil.models.base import BaseModel, EntityModel
 from wiil.models.service_mgt.call_transfer_config import CallTransferConfig
 from wiil.models.service_mgt.support_llm import WiilSupportModel
 from wiil.models.type_definitions import AssistantType, LLMType
 
 
-class AgentConfiguration(BaseModel):
+class AgentConfiguration(EntityModel):
     """Agent configuration for AI assistant behavior.
 
     Agent Configurations define the core behavior, capabilities, and personality of AI agents in the
@@ -42,18 +41,14 @@ class AgentConfiguration(BaseModel):
         default_function_state: Default operational mode (TEXT, VOICE, MULTI_MODE)
         uses_wiil_support_model: Whether this agent uses Wiil's supported model registry
         required_model_config: Additional model parameters
+        use_custom_model: Whether to opt out of platform default model configurations and use only the specified modelId and requiredModelConfig
+        text_processing_model_id: Specific model ID to use for text processing, if different from the main modelId
         instruction_configuration_id: ID of the instruction configuration providing behavioral guidelines
         assistant_type: Channel specialization type (GENERAL, WEB, PHONE, etc.)
         call_transfer_config: Call transfer configurations for phone deployments
         metadata: Additional metadata for organization and filtering
         model: Auto-populated model information from registry
     """
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
 
     model_id: str = Field(
         ...,
@@ -80,6 +75,16 @@ class AgentConfiguration(BaseModel):
         description="Model-specific configuration parameters as key-value pairs (e.g., { voiceId: 'adam', languageId: 'en-US' })",
         alias="requiredModelConfig"
     )
+    use_custom_model: bool = Field(
+        False,
+        description="Whether to opt out of platform default model configurations and only use the specified modelId and requiredModelConfig",
+        alias="useCustomModel"
+    )
+    text_processing_model_id: Optional[str] = Field(
+        None,
+        description="Specific model ID to use for text processing, if different from the main modelId",
+        alias="textProcessingModelId"
+    )
     instruction_configuration_id: str = Field(
         ...,
         description="ID of the Instruction Configuration providing behavioral guidelines. Multiple agents can share the same instruction configuration (N:1)",
@@ -104,23 +109,19 @@ class AgentConfiguration(BaseModel):
     )
 
 
-class CreateAgentConfiguration(PydanticBaseModel):
+class CreateAgentConfiguration(BaseModel):
     """Schema for creating a new agent configuration.
 
     Omits auto-generated fields (id, timestamps, model) that are populated by the system.
     """
 
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
-
-    model_id: Optional[str] = Field(None, alias="modelId")
+    model_id: str = Field(..., alias="modelId")
     name: str = Field(..., max_length=30)
     default_function_state: LLMType = Field(LLMType.MULTI_MODE, alias="defaultFunctionState")
     uses_wiil_support_model: bool = Field(True, alias="usesWiilSupportModel")
     required_model_config: Optional[Dict[str, Any]] = Field(None, alias="requiredModelConfig")
+    use_custom_model: bool = Field(False, alias="useCustomModel")
+    text_processing_model_id: Optional[str] = Field(None, alias="textProcessingModelId")
     instruction_configuration_id: str = Field(..., alias="instructionConfigurationId")
     assistant_type: AssistantType = Field(AssistantType.GENERAL, alias="assistantType")
     call_transfer_config: List[CallTransferConfig] = Field(default_factory=list)
@@ -129,22 +130,18 @@ class CreateAgentConfiguration(PydanticBaseModel):
     @field_validator("assistant_type", mode="before")
     @classmethod
     def normalize_assistant_type(cls, value: Any) -> Any:
+        if isinstance(value, AssistantType):
+            return value
         if isinstance(value, str):
-            return value.lower()
+            return AssistantType(value.lower())
         return value
 
 
-class UpdateAgentConfiguration(PydanticBaseModel):
+class UpdateAgentConfiguration(BaseModel):
     """Schema for updating an existing agent configuration.
 
     All fields are optional except id.
     """
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
 
     id: str
     model_id: Optional[str] = Field(None, alias="modelId")
@@ -152,6 +149,8 @@ class UpdateAgentConfiguration(PydanticBaseModel):
     default_function_state: Optional[LLMType] = Field(None, alias="defaultFunctionState")
     uses_wiil_support_model: Optional[bool] = Field(None, alias="usesWiilSupportModel")
     required_model_config: Optional[Dict[str, Any]] = Field(None, alias="requiredModelConfig")
+    use_custom_model: Optional[bool] = Field(None, alias="useCustomModel")
+    text_processing_model_id: Optional[str] = Field(None, alias="textProcessingModelId")
     instruction_configuration_id: Optional[str] = Field(None, alias="instructionConfigurationId")
     assistant_type: Optional[AssistantType] = Field(None, alias="assistantType")
     call_transfer_config: Optional[List[CallTransferConfig]] = None
@@ -160,19 +159,15 @@ class UpdateAgentConfiguration(PydanticBaseModel):
     @field_validator("assistant_type", mode="before")
     @classmethod
     def normalize_assistant_type(cls, value: Any) -> Any:
+        if isinstance(value, AssistantType):
+            return value
         if isinstance(value, str):
-            return value.lower()
+            return AssistantType(value.lower())
         return value
 
 
-class AgentConfigurationDeleteRequest(PydanticBaseModel):
+class AgentConfigurationDeleteRequest(BaseModel):
     """Request to delete an agent configuration."""
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
 
     id: str = Field(..., description="Unique identifier of the agent configuration to delete")
     delete_phone_config: bool = Field(

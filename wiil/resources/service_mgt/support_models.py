@@ -11,10 +11,11 @@ Example:
     >>> tts_model = client.support_models.get_default_tts()
 """
 
-from typing import List, Optional
+from typing import Optional
 
 from wiil.client.http_client import HttpClient
 from wiil.models.service_mgt.support_llm import WiilSupportModel
+from wiil.types import PaginatedResult
 
 
 class SupportModelsResource:
@@ -35,8 +36,8 @@ class SupportModelsResource:
         >>> print('Proprietor:', model.proprietor)
         >>>
         >>> # List all support models
-        >>> models = client.support_models.list()
-        >>> print(f"Found {len(models)} models")
+        >>> result = client.support_models.list()
+        >>> print(f"Found {result.meta.total_count} models")
         >>>
         >>> # Get default TTS model
         >>> tts_model = client.support_models.get_default_tts()
@@ -77,23 +78,23 @@ class SupportModelsResource:
         """
         return self._http.get(f'{self._base_path}/{model_id}', response_model=WiilSupportModel)
 
-    def list(self) -> List[WiilSupportModel]:
+    def list(self) -> PaginatedResult[WiilSupportModel]:
         """List all support models in the registry.
 
         Returns:
-            Array of all support models
+            Paginated list of all support models
 
         Raises:
             WiilAPIError: When the API returns an error
             WiilNetworkError: When network communication fails
 
         Example:
-            >>> models = client.support_models.list()
-            >>> print(f"Found {len(models)} models")
-            >>> for model in models:
+            >>> result = client.support_models.list()
+            >>> print(f"Found {result.meta.total_count} models")
+            >>> for model in result.data:
             ...     print(f"- {model.name} ({model.proprietor})")
         """
-        return self._http.get(self._base_path, response_model=List[WiilSupportModel])
+        return self._http.get(self._base_path, response_model=PaginatedResult[WiilSupportModel])
 
     def get_default_multi_mode(self) -> Optional[WiilSupportModel]:
         """Retrieve the default multi-mode model.

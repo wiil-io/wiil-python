@@ -5,7 +5,9 @@ This module mirrors src/request/models/paginated-quest.schema.ts
 
 from typing import Optional
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import Field
+
+from wiil.models.base import BaseModel
 
 
 class TimestampQuery(BaseModel):
@@ -16,11 +18,6 @@ class TimestampQuery(BaseModel):
             (e.g., for fetching updates since this time)
         to_timestamp: Optional end Unix timestamp to filter records up to this time
     """
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-    )
 
     from_timestamp: int = Field(
         ...,

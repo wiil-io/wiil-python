@@ -47,6 +47,7 @@ class TestDeploymentConfigurationsResource:
 
         result = client.deployment_configs.create(CreateDeploymentConfiguration(
             deployment_name="Customer Service Deployment",
+            deployment_channel_id="channel_999",
             agent_configuration_id="agent_123",
             instruction_configuration_id="inst_456",
             project_id="proj_789"

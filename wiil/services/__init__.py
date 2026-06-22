@@ -4,6 +4,7 @@ This package mirrors TypeScript service abstractions that are not directly tied
 to CRUD-style resources.
 """
 
+from wiil.services.messaging import MessagingService
 from wiil.services.ott import (
     GetOttConfigurationRequest,
     OttChatConnectionConfig,
@@ -19,6 +20,7 @@ from wiil.services.translation import (
 )
 
 __all__ = [
+    "MessagingService",
     "GetOttConfigurationRequest",
     "OttChatConnectionConfig",
     "OttContactInfo",

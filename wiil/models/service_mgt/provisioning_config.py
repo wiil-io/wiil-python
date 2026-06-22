@@ -7,10 +7,9 @@ provisioning type.
 
 from typing import Any, Dict, Optional, Union
 
-from pydantic import BaseModel as PydanticBaseModel
-from pydantic import ConfigDict, Field
+from pydantic import Field
 
-from wiil.models.base import BaseModel
+from wiil.models.base import BaseModel, EntityModel
 from wiil.models.service_mgt.dynamic_setup import (
     DynamicModelConfiguration,
     DynamicSTTModelConfiguration,
@@ -18,7 +17,7 @@ from wiil.models.service_mgt.dynamic_setup import (
 )
 
 
-class SttModelConfig(PydanticBaseModel):
+class SttModelConfig(BaseModel):
     """Speech-to-Text model configuration.
 
     Defines the STT model used to convert user speech to text in voice-based interactions.
@@ -34,12 +33,6 @@ class SttModelConfig(PydanticBaseModel):
         default_language: Default language code for speech recognition in ISO format
     """
 
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
-
     model_id: str = Field(
         ...,
         description="Identifier of the STT (Speech-to-Text) model from Wiil registry (e.g., 'whisper-v3', 'google-stt-enhanced')",
@@ -52,7 +45,7 @@ class SttModelConfig(PydanticBaseModel):
     )
 
 
-class TtsModelConfig(PydanticBaseModel):
+class TtsModelConfig(BaseModel):
     """Text-to-Speech model configuration.
 
     Defines the TTS model and voice used to convert agent text responses to speech in voice interactions.
@@ -70,12 +63,6 @@ class TtsModelConfig(PydanticBaseModel):
         default_language: Default language code for speech synthesis
         voice_settings: Optional voice-specific settings (pitch, speed, stability, etc.)
     """
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
 
     model_id: str = Field(
         ...,
@@ -99,7 +86,7 @@ class TtsModelConfig(PydanticBaseModel):
     )
 
 
-class ProvisioningConfigChain(BaseModel):
+class ProvisioningConfigChain(EntityModel):
     """Provisioning configuration chain.
 
     Represents a complete voice interaction processing pipeline that chains Speech-to-Text (STT),
@@ -124,12 +111,6 @@ class ProvisioningConfigChain(BaseModel):
         agent_configuration_id: ID of the agent configuration (pipeline stage 2)
         tts_config: Text-to-speech model configuration (pipeline stage 3)
     """
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
 
     chain_name: str = Field(
         ...,
@@ -157,17 +138,11 @@ class ProvisioningConfigChain(BaseModel):
     )
 
 
-class CreateProvisioningConfig(PydanticBaseModel):
+class CreateProvisioningConfig(BaseModel):
     """Schema for creating a new provisioning configuration chain.
 
     Omits auto-generated fields that are populated by the system.
     """
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
 
     chain_name: str = Field(..., alias="chainName")
     description: Optional[str] = None
@@ -176,17 +151,11 @@ class CreateProvisioningConfig(PydanticBaseModel):
     tts_config: DynamicTTSModelConfiguration = Field(..., alias="ttsConfig")
 
 
-class UpdateProvisioningConfig(PydanticBaseModel):
+class UpdateProvisioningConfig(BaseModel):
     """Schema for updating an existing provisioning configuration chain.
 
     All fields are optional except id.
     """
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
 
     id: str
     chain_name: Optional[str] = Field(None, alias="chainName")
@@ -196,7 +165,7 @@ class UpdateProvisioningConfig(PydanticBaseModel):
     tts_config: Optional[DynamicTTSModelConfiguration] = Field(None, alias="ttsConfig")
 
 
-class TranslationChainConfig(BaseModel):
+class TranslationChainConfig(EntityModel):
     """Translation chain configuration.
 
     Extends the provisioning chain concept with translation-specific processing capabilities.
@@ -221,12 +190,6 @@ class TranslationChainConfig(BaseModel):
         tts_config: Text-to-speech configuration for target language synthesis
         is_translation: Flag indicating this chain performs translation
     """
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
 
     chain_name: str = Field(
         ...,
@@ -259,17 +222,11 @@ class TranslationChainConfig(BaseModel):
     )
 
 
-class CreateTranslationChainConfig(PydanticBaseModel):
+class CreateTranslationChainConfig(BaseModel):
     """Schema for creating a new translation chain configuration.
 
     Omits auto-generated fields and sets isTranslation to true by default.
     """
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
 
     chain_name: str = Field(..., alias="chainName")
     description: Optional[str] = None
@@ -279,17 +236,11 @@ class CreateTranslationChainConfig(PydanticBaseModel):
     is_translation: bool = Field(True, alias="isTranslation")
 
 
-class UpdateTranslationChainConfig(PydanticBaseModel):
+class UpdateTranslationChainConfig(BaseModel):
     """Schema for updating an existing translation chain configuration.
 
     All fields are optional except id.
     """
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
 
     id: str
     chain_name: Optional[str] = Field(None, alias="chainName")

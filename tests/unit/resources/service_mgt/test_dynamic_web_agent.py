@@ -7,6 +7,7 @@ from wiil.models.service_mgt.dynamic_setup import (
     DynamicWebAgentSetup,
     UpdateDynamicWebAgent,
 )
+from wiil.models.type_definitions import SupportedProprietor
 from wiil.resources.service_mgt.dynamic_web_agent import WebAgentCreateOptions
 
 
@@ -22,7 +23,6 @@ class TestDynamicWebAgentResource:
     ):
         """Test creating a new dynamic web agent."""
         mock_response = {
-            "id": "setup_123",
             "processingState": {
                 "status": "completed",
                 "progressPercentage": 100,
@@ -34,8 +34,6 @@ class TestDynamicWebAgentResource:
                 '<script src="https://cdn.wiil.io/widget.js"></script>',
                 '<div id="wiil-widget" data-agent="agent_123"></div>',
             ],
-            "createdAt": 1234567890,
-            "updatedAt": 1234567890,
         }
 
         mock_api.add(
@@ -70,7 +68,6 @@ class TestDynamicWebAgentResource:
     ):
         """Test creating a web agent with voice communication type."""
         mock_response = {
-            "id": "setup_456",
             "processingState": {
                 "status": "completed",
                 "progressPercentage": 100,
@@ -81,8 +78,6 @@ class TestDynamicWebAgentResource:
             "integrationSnippets": [
                 '<script src="https://cdn.wiil.io/voice-widget.js"></script>',
             ],
-            "createdAt": 1234567890,
-            "updatedAt": 1234567890,
         }
 
         # Mock support model validation calls
@@ -117,12 +112,12 @@ class TestDynamicWebAgentResource:
                 language="en-US",
                 capabilities=[],
                 stt_configuration={
-                    "provider_type": "Deepgram",
+                    "provider_type": SupportedProprietor.DEEPGRAM,
                     "provider_model_id": "nova-2",
                     "language_id": "en-US",
                 },
                 tts_configuration={
-                    "provider_type": "ElevenLabs",
+                    "provider_type": SupportedProprietor.ELEVENLABS,
                     "provider_model_id": "eleven_turbo_v2",
                     "language_id": "en-US",
                     "voice_id": "voice_rachel",
@@ -142,7 +137,6 @@ class TestDynamicWebAgentResource:
     ):
         """Test updating a dynamic web agent."""
         mock_response = {
-            "id": "setup_123",
             "processingState": {
                 "status": "completed",
                 "progressPercentage": 100,
@@ -153,8 +147,6 @@ class TestDynamicWebAgentResource:
             "integrationSnippets": [
                 '<script src="https://cdn.wiil.io/widget.js"></script>',
             ],
-            "createdAt": 1234567890,
-            "updatedAt": 1234567891,
         }
 
         mock_api.add(

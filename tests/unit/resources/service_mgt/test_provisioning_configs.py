@@ -9,6 +9,7 @@ from wiil.models.service_mgt import (
     CreateTranslationChainConfig,
     UpdateTranslationChainConfig,
 )
+from wiil.models.type_definitions import SupportedProprietor
 from wiil.types import PaginationRequest
 
 BASE_URL = "https://api.wiil.io/v1"
@@ -76,16 +77,16 @@ class TestProvisioningConfigurationsResource:
             chain_name="spanish-english-translation",
             description="Spanish to English translation chain",
             stt_config={
-                "provider_type": "Deepgram",
+                "provider_type": SupportedProprietor.DEEPGRAM,
                 "provider_model_id": "nova-2",
                 "language_id": "es",
             },
             processing_config={
-                "provider_type": "OpenAI",
+                "provider_type": SupportedProprietor.OPENAI,
                 "provider_model_id": "gpt-4o-mini",
             },
             tts_config={
-                "provider_type": "ElevenLabs",
+                "provider_type": SupportedProprietor.ELEVENLABS,
                 "provider_model_id": "eleven_multilingual_v2",
                 "language_id": "en-US",
                 "voice_id": "adam",
@@ -357,31 +358,3 @@ class TestProvisioningConfigurationsResource:
         assert result.meta.page == 2
         assert result.meta.page_size == 50
         assert result.meta.has_previous_page is True
-
-    def test_list_translation_chain_configurations_with_include_deleted(
-        self, client: WiilClient, mock_api, api_response
-    ):
-        """Test listing translation chain configs including deleted items."""
-        mock_response = {
-            "data": [],
-            "meta": {
-                "page": 1,
-                "pageSize": 20,
-                "totalCount": 5,
-                "totalPages": 1,
-                "hasNextPage": False,
-                "hasPreviousPage": False,
-            },
-        }
-
-        mock_api.add(
-            responses.GET,
-            f"{BASE_URL}/provisioning-configurations/translations?includeDeleted=true",
-            headers={"X-Wiil-Api-Key": API_KEY},
-            json=api_response(mock_response),
-            status=200,
-        )
-
-        result = client.provisioning_configs.list(include_deleted=True)
-
-        assert result.meta.total_count == 5

@@ -8,20 +8,17 @@ Configurations for each channel.
 
 from typing import Any, Dict, Literal, Optional, Union
 
-from pydantic import BaseModel as PydanticBaseModel
-from pydantic import ConfigDict, Field, field_validator
+from pydantic import Field, field_validator
 
-from wiil.models.base import BaseModel
+from wiil.models.base import BaseModel, EntityModel
 from wiil.models.type_definitions import (
-    DeploymentProvisioningType,
-    DeploymentStatus,
     DeploymentType,
     MobilePlatform,
     OttCommunicationType,
 )
 
 
-class PhoneChannelConfig(PydanticBaseModel):
+class PhoneChannelConfig(BaseModel):
     """Phone channel configuration.
 
     Configuration specific to phone-based channels supporting voice calls and SMS messaging.
@@ -34,12 +31,6 @@ class PhoneChannelConfig(PydanticBaseModel):
         - Features: Supports call forwarding to external numbers for escalation or overflow
     """
 
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
-
     phone_configuration_id: str = Field(
         ...,
         description="ID of the PhoneConfiguration resource that manages the phone number and telephony provider settings",
@@ -47,7 +38,7 @@ class PhoneChannelConfig(PydanticBaseModel):
     )
 
 
-class WebChannelConfig(PydanticBaseModel):
+class WebChannelConfig(BaseModel):
     """Web channel configuration.
 
     Configuration specific to web-based chat widget channels that can be embedded in websites
@@ -58,12 +49,6 @@ class WebChannelConfig(PydanticBaseModel):
         - Features: Embeddable chat widget, WebSocket communication, rich media support
         - Customization: Supports custom CSS and theming for brand consistency
     """
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
 
     communication_type: OttCommunicationType = Field(
         OttCommunicationType.UNIFIED,
@@ -77,7 +62,7 @@ class WebChannelConfig(PydanticBaseModel):
     )
 
 
-class MobileAppChannelConfig(PydanticBaseModel):
+class MobileAppChannelConfig(BaseModel):
     """Mobile app channel configuration.
 
     Configuration specific to mobile application channels for native iOS and Android integrations.
@@ -88,12 +73,6 @@ class MobileAppChannelConfig(PydanticBaseModel):
         - Features: SDK-based integration, deep linking, platform-specific UI
         - Status: Coming soon - currently in development
     """
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
 
     package_name: str = Field(
         "",
@@ -110,7 +89,7 @@ class MobileAppChannelConfig(PydanticBaseModel):
 ChannelConfiguration = Union[PhoneChannelConfig, WebChannelConfig, MobileAppChannelConfig]
 
 
-class DeploymentChannel(BaseModel):
+class DeploymentChannel(EntityModel):
     """Deployment channel.
 
     Defines the single communication channel through which a Deployment Configuration is accessible.
@@ -128,12 +107,6 @@ class DeploymentChannel(BaseModel):
         channel_identifier: Channel-specific identifier (phone number, URL, or package name)
         configuration: Channel-specific configuration object
     """
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
 
     deployment_type: DeploymentType = Field(
         ...,
@@ -161,7 +134,7 @@ class DeploymentChannel(BaseModel):
     )
 
 
-class CallChannel(BaseModel):
+class CallChannel(EntityModel):
     """Call-based deployment channel.
 
     Defines a voice telephony channel for inbound and outbound phone calls. Integrates with
@@ -172,12 +145,6 @@ class CallChannel(BaseModel):
         - Integration: PBX systems, contact centers, SIP trunks, cloud telephony
         - Features: Call recording, DTMF input, call forwarding, SIP/VoIP support
     """
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
 
     channel_identifier: str = Field(
         ...,
@@ -197,7 +164,7 @@ class CallChannel(BaseModel):
     )
 
 
-class SmsChannel(BaseModel):
+class SmsChannel(EntityModel):
     """SMS-based deployment channel.
 
     Defines an SMS messaging channel for text-based communication. Uses the same telephony
@@ -208,12 +175,6 @@ class SmsChannel(BaseModel):
         - Integration: SMS gateways, telephony providers
         - Features: Asynchronous messaging, message history, multimedia support (MMS)
     """
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
 
     channel_identifier: str = Field(
         ...,
@@ -233,7 +194,7 @@ class SmsChannel(BaseModel):
     )
 
 
-class WebChannel(BaseModel):
+class WebChannel(EntityModel):
     """Web-based deployment channel.
 
     Defines a browser-based chat widget channel for website integration. Provides real-time
@@ -244,12 +205,6 @@ class WebChannel(BaseModel):
         - Integration: Websites, web apps, customer portals, help centers
         - Features: Embeddable widget, WebSocket real-time communication, rich media, session persistence
     """
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
 
     channel_identifier: str = Field(
         ...,
@@ -269,7 +224,7 @@ class WebChannel(BaseModel):
     )
 
 
-class MobileAppChannel(BaseModel):
+class MobileAppChannel(EntityModel):
     """Mobile app deployment channel.
 
     Defines a native mobile application channel for iOS and Android apps. Enables SDK-based
@@ -281,12 +236,6 @@ class MobileAppChannel(BaseModel):
         - Features: SDK integration, deep linking, platform-specific UI, push notifications
         - Status: Coming soon - currently in development
     """
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
 
     channel_identifier: str = Field(
         ...,
@@ -313,14 +262,8 @@ WebChannelType = WebChannel
 MobileAppChannelType = MobileAppChannel
 
 
-class CreateWebChannel(PydanticBaseModel):
+class CreateWebChannel(BaseModel):
     """Schema for creating a new web channel."""
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
 
     channel_identifier: str = Field(..., alias="channelIdentifier")
     deployment_type: Literal[DeploymentType.WEB] = Field(
@@ -332,14 +275,8 @@ class CreateWebChannel(PydanticBaseModel):
     configuration: WebChannelConfig
 
 
-class CreateMobileAppChannel(PydanticBaseModel):
+class CreateMobileAppChannel(BaseModel):
     """Schema for creating a new mobile app channel."""
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
 
     channel_identifier: str = Field(..., alias="channelIdentifier")
     deployment_type: Literal[DeploymentType.MOBILE] = Field(
@@ -351,7 +288,7 @@ class CreateMobileAppChannel(PydanticBaseModel):
     configuration: MobileAppChannelConfig
 
 
-class DeploymentChannelRequest(PydanticBaseModel):
+class DeploymentChannelRequest(BaseModel):
     """Deployment channel creation request.
 
     Flexible schema that validates channel configuration based on deployment type.
@@ -362,12 +299,6 @@ class DeploymentChannelRequest(PydanticBaseModel):
         - Validation: Type-specific validation ensures correct configuration for each channel type
         - Usage: Used by API endpoints for channel creation
     """
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
 
     deployment_type: DeploymentType = Field(
         ...,
@@ -399,12 +330,14 @@ class DeploymentChannelRequest(PydanticBaseModel):
     @field_validator("deployment_type", mode="before")
     @classmethod
     def normalize_deployment_type(cls, value: Any) -> Any:
+        if isinstance(value, DeploymentType):
+            return value
         if isinstance(value, str):
-            return value.lower()
+            return DeploymentType(value.lower())
         return value
 
 
-class DeploymentChannelUpdateRequest(PydanticBaseModel):
+class DeploymentChannelUpdateRequest(BaseModel):
     """Deployment channel update request.
 
     Supports partial updates to existing deployment channels. All fields are optional except id.
@@ -414,12 +347,6 @@ class DeploymentChannelUpdateRequest(PydanticBaseModel):
         - Validation: Partial validation ensures only provided fields are validated
         - Usage: Used by API endpoints for channel updates
     """
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
 
     id: str = Field(..., description="Unique identifier of the deployment channel to update")
     deployment_type: Optional[DeploymentType] = Field(None, alias="deploymentType")
@@ -431,12 +358,14 @@ class DeploymentChannelUpdateRequest(PydanticBaseModel):
     @field_validator("deployment_type", mode="before")
     @classmethod
     def normalize_deployment_type(cls, value: Any) -> Any:
+        if isinstance(value, DeploymentType):
+            return value
         if isinstance(value, str):
-            return value.lower()
+            return DeploymentType(value.lower())
         return value
 
 
-class ChannelSetupRequest(PydanticBaseModel):
+class ChannelSetupRequest(BaseModel):
     """Channel setup request.
 
     Complete setup request for creating a new deployment with its associated channel and configurations.
@@ -447,12 +376,6 @@ class ChannelSetupRequest(PydanticBaseModel):
         - Relationship: Creates a Deployment Configuration with associated channel, project, agent, and instruction
         - Pattern: One request creates the complete deployment stack
     """
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
 
     channel: DeploymentChannelRequest = Field(
         ...,
@@ -475,7 +398,7 @@ class ChannelSetupRequest(PydanticBaseModel):
     )
 
 
-class ChannelUpdateRequest(PydanticBaseModel):
+class ChannelUpdateRequest(BaseModel):
     """Channel update request.
 
     Partial update request for modifying an existing deployment and its associated channel.
@@ -487,12 +410,6 @@ class ChannelUpdateRequest(PydanticBaseModel):
         - Usage: Used to update deployments without full recreation
     """
 
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
-
     channel: DeploymentChannelUpdateRequest = Field(
         ...,
         description="Partial update to the deployment channel configuration"
@@ -502,7 +419,7 @@ class ChannelUpdateRequest(PydanticBaseModel):
     instruction_configuration_id: Optional[str] = Field(None, alias="instructionConfigurationId")
 
 
-class DeploymentChannelWithDeployment(PydanticBaseModel):
+class DeploymentChannelWithDeployment(BaseModel):
     """Deployment channel with deployment information.
 
     Extended view that includes both the channel configuration and its associated deployment details.
@@ -513,12 +430,6 @@ class DeploymentChannelWithDeployment(PydanticBaseModel):
         - Usage: Used for detail views and administrative interfaces
         - Relationship: Combines DeploymentChannel with its associated Deployment Configuration
     """
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
 
     id: str = Field(..., description="Unique identifier for the deployment channel")
     deployment_type: DeploymentType = Field(..., alias="deploymentType")
@@ -541,14 +452,8 @@ DeploymentChannelUpdateRequestType = ChannelUpdateRequest
 DeploymentChannelInfo = DeploymentChannelWithDeployment
 
 
-class DeploymentChannelDeletionRequest(PydanticBaseModel):
+class DeploymentChannelDeletionRequest(BaseModel):
     """Request to delete a deployment channel."""
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
 
     id: str = Field(..., description="Unique identifier of the deployment channel to delete")
     delete_phone_config: bool = Field(

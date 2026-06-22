@@ -7,14 +7,13 @@ and conversation status for multilingual communication across language barriers.
 
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel as PydanticBaseModel
-from pydantic import ConfigDict, Field
+from pydantic import Field
 
-from wiil.models.base import BaseModel, LanguageCode
+from wiil.models.base import BaseModel, EntityModel, LanguageCode
 from wiil.types.conversation_types import ConversationStatus, TranslationDirection
 
 
-class TranslationMessage(PydanticBaseModel):
+class TranslationMessage(BaseModel):
     """Translation message schema - represents one translation interaction.
 
     Individual translation message capturing the complete translation pipeline from speaker's original speech
@@ -40,12 +39,6 @@ class TranslationMessage(PydanticBaseModel):
         - processing_time_ms: Total pipeline latency
         - translation_model: LLM model used for translation
     """
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
 
     message_id: str = Field(
         ...,
@@ -97,7 +90,7 @@ class TranslationMessage(PydanticBaseModel):
     )
 
 
-class TranslationParticipant(BaseModel):
+class TranslationParticipant(EntityModel):
     """Translation participant schema.
 
     Represents an individual participant in a translation session including their language preferences,
@@ -123,12 +116,6 @@ class TranslationParticipant(BaseModel):
         - Enables unified participant profiles across multiple sessions
     """
 
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
-
     translation_service_log_id: Optional[str] = Field(
         None,
         description="ID of the translation service log this participant belongs to (N:1 relationship, references TranslationServiceLog)",
@@ -176,17 +163,11 @@ class TranslationParticipant(BaseModel):
     )
 
 
-class CreateTranslationParticipant(PydanticBaseModel):
+class CreateTranslationParticipant(BaseModel):
     """Schema for creating a new translation participant.
     Omits auto-generated fields (id, created_at, updated_at).
     """
 
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
-
     translation_service_log_id: Optional[str] = Field(
         None,
         description="ID of the translation service log this participant belongs to (N:1 relationship, references TranslationServiceLog)",
@@ -234,16 +215,10 @@ class CreateTranslationParticipant(PydanticBaseModel):
     )
 
 
-class UpdateTranslationParticipant(PydanticBaseModel):
+class UpdateTranslationParticipant(BaseModel):
     """Schema for updating an existing translation participant.
     All fields are optional except id.
     """
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
 
     id: str = Field(..., description="Unique identifier for the translation participant")
     translation_service_log_id: Optional[str] = Field(
@@ -293,7 +268,7 @@ class UpdateTranslationParticipant(PydanticBaseModel):
     )
 
 
-class TranslationServiceLog(BaseModel):
+class TranslationServiceLog(EntityModel):
     """Translation service log schema.
 
     Complete record of a translation session including participant information, session metadata, message
@@ -328,12 +303,6 @@ class TranslationServiceLog(BaseModel):
         - Quality assurance and compliance auditing
     """
 
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
-
     organization_id: str = Field(
         ...,
         description="ID of the organization requesting the translation service for multi-tenant isolation, billing attribution, and access control"
@@ -397,17 +366,11 @@ class TranslationServiceLog(BaseModel):
     )
 
 
-class CreateTranslationServiceLog(PydanticBaseModel):
+class CreateTranslationServiceLog(BaseModel):
     """Schema for creating a new translation service log.
     Omits auto-generated fields (id, created_at, updated_at).
     """
 
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
-
     organization_id: str = Field(
         ...,
         description="ID of the organization requesting the translation service for multi-tenant isolation, billing attribution, and access control"
@@ -471,16 +434,10 @@ class CreateTranslationServiceLog(PydanticBaseModel):
     )
 
 
-class UpdateTranslationServiceLog(PydanticBaseModel):
+class UpdateTranslationServiceLog(BaseModel):
     """Schema for updating an existing translation service log.
     All fields are optional except id.
     """
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
 
     id: str = Field(..., description="Unique identifier for the translation service log")
     organization_id: Optional[str] = Field(

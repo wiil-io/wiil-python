@@ -9,6 +9,7 @@ from wiil.models.business_mgt import (
     CreateProductCategory,
     UpdateProductCategory,
     CreateBusinessProduct,
+    CreateBusinessProductVariant,
     UpdateBusinessProduct,
 )
 from wiil.types import PaginationRequest
@@ -189,6 +190,14 @@ class TestProductsResource:
             "dimensions": None,
             "isActive": True,
             "displayOrder": None,
+            "variants": [
+                {
+                    "id": "var_1",
+                    "productId": "prod_123",
+                    "axisValues": {"color": "black"},
+                    "stockStatus": "in_stock",
+                }
+            ],
             "createdAt": 1234567890,
             "updatedAt": 1234567890,
         }
@@ -206,7 +215,10 @@ class TestProductsResource:
             category_id="cat_123",
             sku="WM-001",
             price=29.99,
-            description="Ergonomic wireless mouse"
+            description="Ergonomic wireless mouse",
+            variants=[
+                CreateBusinessProductVariant(axis_values={"color": "black"})
+            ]
         ))
 
         assert result.id == "prod_123"
@@ -430,7 +442,10 @@ class TestProductsResource:
 
         mock_api.add(
             responses.GET,
-            f"{BASE_URL}/product-management/products/by-category/cat_123?page=1&pageSize=10",
+            (
+                f"{BASE_URL}/product-management/products/by-category/"
+                "cat_123?page=1&pageSize=10"
+            ),
             headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
@@ -483,7 +498,10 @@ class TestProductsResource:
 
         mock_api.add(
             responses.GET,
-            f"{BASE_URL}/product-management/products/search?query=mouse&page=1&pageSize=10",
+            (
+                f"{BASE_URL}/product-management/products/search?"
+                "query=mouse&page=1&pageSize=10"
+            ),
             headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_response),
             status=200,
@@ -551,6 +569,110 @@ class TestProductsResource:
 
         assert result is True
 
+    def test_create_category_batch(
+        self,
+        client: WiilClient,
+        mock_api,
+        api_response,
+    ):
+        """Test creating product categories in batch."""
+        mock_response = {
+            "data": [
+                {
+                    "id": "cat_1",
+                    "name": "Electronics",
+                    "description": None,
+                    "displayOrder": 1,
+                    "isDefault": False,
+                    "createdAt": 1234567890,
+                    "updatedAt": 1234567890,
+                }
+            ],
+            "meta": {
+                "page": 1,
+                "pageSize": 1,
+                "totalCount": 1,
+                "totalPages": 1,
+                "hasNextPage": False,
+                "hasPreviousPage": False,
+            },
+        }
+
+        mock_api.add(
+            responses.POST,
+            f"{BASE_URL}/product-management/categories/batch",
+            headers={"X-Wiil-Api-Key": API_KEY},
+            json=api_response(mock_response),
+            status=200,
+        )
+
+        result = client.products.create_category_batch(
+            [CreateProductCategory(name="Electronics")]
+        )
+
+        assert len(result.data) == 1
+
+    def test_create_batch(self, client: WiilClient, mock_api, api_response):
+        """Test creating products in batch."""
+        mock_response = {
+            "data": [
+                {
+                    "id": "prod_1",
+                    "name": "Wireless Mouse",
+                    "description": None,
+                    "price": 29.99,
+                    "sku": "WM-001",
+                    "barcode": None,
+                    "categoryId": "cat_123",
+                    "category": None,
+                    "brand": None,
+                    "trackInventory": False,
+                    "stockQuantity": None,
+                    "lowStockThreshold": None,
+                    "weight": None,
+                    "dimensions": None,
+                    "isActive": True,
+                    "displayOrder": None,
+                    "createdAt": 1234567890,
+                    "updatedAt": 1234567890,
+                }
+            ],
+            "meta": {
+                "page": 1,
+                "pageSize": 1,
+                "totalCount": 1,
+                "totalPages": 1,
+                "hasNextPage": False,
+                "hasPreviousPage": False,
+            },
+        }
+
+        mock_api.add(
+            responses.POST,
+            f"{BASE_URL}/product-management/products/batch",
+            headers={"X-Wiil-Api-Key": API_KEY},
+            json=api_response(mock_response),
+            status=200,
+        )
+
+        result = client.products.create_batch(
+            [
+                CreateBusinessProduct(
+                    name="Wireless Mouse",
+                    category_id="cat_123",
+                    sku="WM-001",
+                    price=29.99,
+                    variants=[
+                        CreateBusinessProductVariant(
+                            axis_values={"color": "black"}
+                        )
+                    ],
+                )
+            ]
+        )
+
+        assert len(result.data) == 1
+
     # =============== Error Handling Tests ===============
 
     def test_create_api_error(
@@ -568,7 +690,10 @@ class TestProductsResource:
         with pytest.raises(WiilAPIError) as exc_info:
             client.products.create(CreateBusinessProduct(
                 name="Test Product",
-                price=0
+                price=0,
+                variants=[
+                    CreateBusinessProductVariant(axis_values={"color": "black"})
+                ]
             ))
 
         assert exc_info.value.code == "VALIDATION_ERROR"

@@ -7,9 +7,9 @@ communication type, and optional voice interaction configurations.
 
 from typing import List, Optional
 
-from pydantic import BaseModel as PydanticBaseModel
-from pydantic import ConfigDict, Field, field_validator, model_validator
+from pydantic import Field, field_validator, model_validator
 
+from wiil.models.base import BaseModel
 from wiil.models.service_mgt.dynamic_setup.base_agent_setup import (
     DynamicAgentSetupResult,
     DynamicBaseAgentSetup,
@@ -66,8 +66,10 @@ class DynamicWebAgentSetup(DynamicBaseAgentSetup):
     @field_validator("communication_type", mode="before")
     @classmethod
     def normalize_communication_type(cls, value: Optional[str]) -> Optional[str]:
+        if isinstance(value, OttCommunicationType):
+            return value
         if isinstance(value, str):
-            return value.lower()
+            return OttCommunicationType(value.lower())
         return value
 
 
@@ -80,12 +82,6 @@ class DynamicWebAgentSetupResult(DynamicAgentSetupResult):
         integration_snippets: Code snippets for deploying the web assistant
     """
 
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
-
     integration_snippets: Optional[List[str]] = Field(
         None,
         description="List of code snippets or integration details for deploying the web assistant",
@@ -93,17 +89,11 @@ class DynamicWebAgentSetupResult(DynamicAgentSetupResult):
     )
 
 
-class UpdateDynamicWebAgent(PydanticBaseModel):
+class UpdateDynamicWebAgent(BaseModel):
     """Schema for updating an existing web agent configuration.
 
     All fields are optional except id.
     """
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
 
     id: str = Field(
         ...,
@@ -130,6 +120,8 @@ class UpdateDynamicWebAgent(PydanticBaseModel):
     @field_validator("communication_type", mode="before")
     @classmethod
     def normalize_communication_type(cls, value: Optional[str]) -> Optional[str]:
+        if isinstance(value, OttCommunicationType):
+            return value
         if isinstance(value, str):
-            return value.lower()
+            return OttCommunicationType(value.lower())
         return value

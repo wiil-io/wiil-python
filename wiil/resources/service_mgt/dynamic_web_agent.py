@@ -197,6 +197,23 @@ class DynamicWebAgentResource:
             response_model=DynamicWebAgentSetupResult
         )
 
+    def snippets(self, agent_id: str):
+        """Retrieve the integration snippets for a dynamic web agent.
+
+        Args:
+            agent_id: Dynamic web agent setup ID
+
+        Returns:
+            The integration snippets payload for embedding the agent
+
+        Raises:
+            WiilAPIError: When the web agent is not found or API error
+        """
+        return self._http.get(
+            f'{self._base_path}/{agent_id}/snippets',
+            response_model=None
+        )
+
     def _validate_model_configurations(
         self,
         stt_config: Optional[DynamicSTTModelConfiguration],

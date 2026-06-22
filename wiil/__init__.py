@@ -5,7 +5,7 @@ for intelligent customer interactions, voice processing, real-time translation,
 and business management.
 """
 
-from wiil.client import AsyncWiilClient, WiilClient, WillService
+from wiil.client import AsyncWiilClient, WiilClient, WiilService
 from wiil.errors import (
     WiilAPIError,
     WiilConfigurationError,
@@ -18,7 +18,7 @@ __version__ = "0.0.0"
 __all__ = [
     "WiilClient",
     "AsyncWiilClient",
-    "WillService",
+    "WiilService",
     "WiilError",
     "WiilAPIError",
     "WiilValidationError",

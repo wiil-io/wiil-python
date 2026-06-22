@@ -7,14 +7,13 @@ operate during conversations.
 
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel as PydanticBaseModel
-from pydantic import ConfigDict, Field
+from pydantic import Field
 
-from wiil.models.base import BaseModel
+from wiil.models.base import BaseModel, EntityModel
 from wiil.models.type_definitions import BusinessSupportServices
 
 
-class InstructionConfiguration(BaseModel):
+class InstructionConfiguration(EntityModel):
     """Instruction configuration for agent behavior.
 
     The Instruction Configuration is the heart of agent behaviour in the Service Configuration architecture.
@@ -49,12 +48,6 @@ class InstructionConfiguration(BaseModel):
         metadata: Additional metadata for the instruction configuration
         knowledge_source_ids: Array of IDs referencing knowledge sources
     """
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
 
     instruction_name: str = Field(
         ...,
@@ -123,17 +116,11 @@ class InstructionConfiguration(BaseModel):
     )
 
 
-class CreateInstructionConfiguration(PydanticBaseModel):
+class CreateInstructionConfiguration(BaseModel):
     """Schema for creating a new instruction configuration.
 
     Omits auto-generated fields (id, timestamps) that are populated by the system.
     """
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
 
     instruction_name: str = Field(..., alias="instructionName")
     role: str
@@ -157,17 +144,11 @@ class CreateInstructionConfiguration(PydanticBaseModel):
     )
 
 
-class UpdateInstructionConfiguration(PydanticBaseModel):
+class UpdateInstructionConfiguration(BaseModel):
     """Schema for updating an existing instruction configuration.
 
     All fields are optional except id.
     """
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
 
     id: str
     instruction_name: Optional[str] = Field(None, alias="instructionName")

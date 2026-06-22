@@ -1,7 +1,16 @@
 """Business management type definitions and enumerations."""
 
 from enum import Enum
-from typing import List, TypedDict
+from typing import List, Optional, TypedDict
+
+
+class ExternalRef(TypedDict):
+    """External system reference for imported/synced records."""
+
+    external_id: str
+    source: str
+    url: Optional[str]
+    synced_at: Optional[int]
 
 
 class BusinessServiceType(str, Enum):
@@ -210,6 +219,44 @@ class PaymentStatus(str, Enum):
 
     REFUNDED = "refunded"
     """Payment refunded"""
+
+
+class PricingChannel(str, Enum):
+    """Pricing channel for menu pricing rules."""
+
+    ALL = "all"
+    """Applies across all channels"""
+
+    DINE_IN = "dine_in"
+    """Dine-in orders"""
+
+    TAKEOUT = "takeout"
+    """Takeout orders"""
+
+    DELIVERY = "delivery"
+    """Delivery orders"""
+
+    ONLINE = "online"
+    """Online ordering channels"""
+
+
+class MenuPricingChannel(str, Enum):
+    """Menu-pricing channel enumeration for menu pricing rules."""
+
+    ALL = "all"
+    """Applies across all menu ordering channels"""
+
+    DINE_IN = "dine_in"
+    """Dine-in orders"""
+
+    TAKEOUT = "takeout"
+    """Takeout orders"""
+
+    DELIVERY = "delivery"
+    """Delivery orders"""
+
+    ONLINE = "online"
+    """Online ordering channels"""
 
 
 class MenuOrderType(str, Enum):

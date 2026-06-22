@@ -24,7 +24,7 @@ Example:
 """
 
 import time
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, Optional, Union
 from urllib.parse import urlencode
 
 from wiil.client.http_client import HttpClient
@@ -34,6 +34,7 @@ from wiil.models.service_mgt.phone_number import (
     PhoneNumberPricing,
     PhoneNumberPurchase,
 )
+from wiil.types import PaginatedResult
 
 
 class TelephonyProviderResource:
@@ -62,7 +63,7 @@ class TelephonyProviderResource:
         area_code: Optional[str] = None,
         contains: Optional[str] = None,
         postal_code: Optional[str] = None
-    ) -> List[BasePhoneNumberInfo]:
+    ) -> PaginatedResult[BasePhoneNumberInfo]:
         """Retrieve available phone numbers.
 
         Args:
@@ -71,7 +72,7 @@ class TelephonyProviderResource:
             postal_code: Optional postal code filter
 
         Returns:
-            List of available phone numbers matching the search criteria
+            Paginated list of available phone numbers matching the search criteria
 
         Raises:
             WiilAPIError: When the API returns an error
@@ -103,14 +104,14 @@ class TelephonyProviderResource:
         query_string = f'?{urlencode(params)}' if params else ''
         return self._http.get(
             f"{self._resource_path}/numbers{query_string}",
-            response_model=List[BasePhoneNumberInfo]
+            response_model=PaginatedResult[BasePhoneNumberInfo]
         )
 
-    def get_pricing(self) -> List[PhoneNumberPricing]:
+    def get_pricing(self) -> PaginatedResult[PhoneNumberPricing]:
         """Retrieve pricing information for phone numbers.
 
         Returns:
-            List of pricing information for phone numbers
+            Paginated list of pricing information for phone numbers
 
         Raises:
             WiilAPIError: When the API returns an error
@@ -126,7 +127,7 @@ class TelephonyProviderResource:
         """
         return self._http.get(
             f"{self._resource_path}/pricing",
-            response_model=List[PhoneNumberPricing]
+            response_model=PaginatedResult[PhoneNumberPricing]
         )
 
     def purchase(

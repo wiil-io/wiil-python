@@ -9,6 +9,7 @@ from wiil.models.business_mgt import (
     CreateMenuCategory,
     UpdateMenuCategory,
     CreateBusinessMenuItem,
+    CreateBusinessMenuItemVariant,
     UpdateBusinessMenuItem,
 )
 from wiil.types import PaginationRequest
@@ -29,7 +30,6 @@ class TestMenusResource:
             "name": "Appetizers",
             "description": "Starter dishes",
             "displayOrder": 1,
-            "isDefault": False,
             "createdAt": 1234567890,
             "updatedAt": 1234567890,
         }
@@ -57,7 +57,6 @@ class TestMenusResource:
             "name": "Appetizers",
             "description": "Starter dishes",
             "displayOrder": 1,
-            "isDefault": False,
             "createdAt": 1234567890,
             "updatedAt": 1234567890,
         }
@@ -83,7 +82,6 @@ class TestMenusResource:
                 "name": "Appetizers",
                 "description": None,
                 "displayOrder": 1,
-                "isDefault": False,
                 "createdAt": 1234567890,
                 "updatedAt": 1234567890,
             },
@@ -92,7 +90,6 @@ class TestMenusResource:
                 "name": "Main Course",
                 "description": None,
                 "displayOrder": 2,
-                "isDefault": False,
                 "createdAt": 1234567891,
                 "updatedAt": 1234567891,
             },
@@ -118,7 +115,6 @@ class TestMenusResource:
             "name": "Updated Appetizers",
             "description": "New description",
             "displayOrder": 1,
-            "isDefault": False,
             "createdAt": 1234567890,
             "updatedAt": 1234567891,
         }
@@ -172,6 +168,14 @@ class TestMenusResource:
             "preparationTime": None,
             "isActive": True,
             "displayOrder": None,
+            "variants": [
+                {
+                    "id": "var_1",
+                    "menuItemId": "item_123",
+                    "name": "Regular",
+                    "price": 12.99,
+                }
+            ],
             "createdAt": 1234567890,
             "updatedAt": 1234567890,
         }
@@ -188,7 +192,10 @@ class TestMenusResource:
             name="Caesar Salad",
             category_id="cat_123",
             price=12.99,
-            description="Fresh romaine lettuce"
+            description="Fresh romaine lettuce",
+            variants=[
+                CreateBusinessMenuItemVariant(name="Regular", price=12.99)
+            ]
         ))
 
         assert result.id == "item_123"
@@ -211,6 +218,14 @@ class TestMenusResource:
             "preparationTime": None,
             "isActive": True,
             "displayOrder": None,
+            "variants": [
+                {
+                    "id": "var_1",
+                    "menuItemId": "item_123",
+                    "name": "Regular",
+                    "price": 12.99,
+                }
+            ],
             "createdAt": 1234567890,
             "updatedAt": 1234567890,
         }
@@ -245,6 +260,14 @@ class TestMenusResource:
                 "preparationTime": None,
                 "isActive": True,
                 "displayOrder": None,
+                "variants": [
+                    {
+                        "id": "var_1",
+                        "menuItemId": "item_1",
+                        "name": "Regular",
+                        "price": 12.99,
+                    }
+                ],
                 "createdAt": 1234567890,
                 "updatedAt": 1234567890,
             },
@@ -262,6 +285,14 @@ class TestMenusResource:
                 "preparationTime": None,
                 "isActive": True,
                 "displayOrder": None,
+                "variants": [
+                    {
+                        "id": "var_2",
+                        "menuItemId": "item_2",
+                        "name": "Regular",
+                        "price": 10.99,
+                    }
+                ],
                 "createdAt": 1234567891,
                 "updatedAt": 1234567891,
             },
@@ -287,7 +318,9 @@ class TestMenusResource:
             status=200,
         )
 
-        result = client.menus.list_items(PaginationRequest(page=1, page_size=10))
+        result = client.menus.list_items(
+            PaginationRequest(page=1, page_size=10)
+        )
 
         assert len(result.data) == 2
         assert result.meta.total_count == 2
@@ -296,73 +329,232 @@ class TestMenusResource:
         self, client: WiilClient, mock_api, api_response
     ):
         """Test retrieving menu items by category."""
-        mock_items = [
-            {
-                "id": "item_1",
-                "name": "Caesar Salad",
-                "description": None,
-                "price": 12.99,
-                "categoryId": "cat_123",
-                "category": None,
-                "ingredients": None,
-                "allergens": None,
-                "nutritionalInfo": None,
-                "isAvailable": True,
-                "preparationTime": None,
-                "isActive": True,
-                "displayOrder": None,
-                "createdAt": 1234567890,
-                "updatedAt": 1234567890,
+        mock_items = {
+            "data": [
+                {
+                    "id": "item_1",
+                    "name": "Caesar Salad",
+                    "description": None,
+                    "price": 12.99,
+                    "categoryId": "cat_123",
+                    "category": None,
+                    "ingredients": None,
+                    "allergens": None,
+                    "nutritionalInfo": None,
+                    "isAvailable": True,
+                    "preparationTime": None,
+                    "isActive": True,
+                    "displayOrder": None,
+                    "variants": [
+                        {
+                            "id": "var_1",
+                            "menuItemId": "item_1",
+                            "name": "Regular",
+                            "price": 12.99,
+                        }
+                    ],
+                    "createdAt": 1234567890,
+                    "updatedAt": 1234567890,
+                },
+            ],
+            "meta": {
+                "page": 1,
+                "pageSize": 10,
+                "totalCount": 1,
+                "totalPages": 1,
+                "hasNextPage": False,
+                "hasPreviousPage": False,
             },
-        ]
+        }
 
         mock_api.add(
             responses.GET,
-            f"{BASE_URL}/menu-management/items/by-category/cat_123",
+            (
+                f"{BASE_URL}/menu-management/items/by-category/"
+                "cat_123?page=1&pageSize=10"
+            ),
             headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_items),
             status=200,
         )
 
-        result = client.menus.get_items_by_category("cat_123")
+        result = client.menus.get_items_by_category(
+            "cat_123",
+            PaginationRequest(page=1, page_size=10),
+        )
 
-        assert len(result) == 1
-        assert result[0].category_id == "cat_123"
+        assert len(result.data) == 1
+        assert result.data[0].category_id == "cat_123"
 
-    def test_get_popular_items(self, client: WiilClient, mock_api, api_response):
+    def test_get_popular_items(
+        self,
+        client: WiilClient,
+        mock_api,
+        api_response,
+    ):
         """Test retrieving popular menu items."""
-        mock_items = [
-            {
-                "id": "item_1",
-                "name": "Caesar Salad",
-                "description": None,
-                "price": 12.99,
-                "categoryId": "cat_123",
-                "category": None,
-                "ingredients": None,
-                "allergens": None,
-                "nutritionalInfo": None,
-                "isAvailable": True,
-                "preparationTime": None,
-                "isActive": True,
-                "displayOrder": None,
-                "createdAt": 1234567890,
-                "updatedAt": 1234567890,
+        mock_items = {
+            "data": [
+                {
+                    "id": "item_1",
+                    "name": "Caesar Salad",
+                    "description": None,
+                    "price": 12.99,
+                    "categoryId": "cat_123",
+                    "category": None,
+                    "ingredients": None,
+                    "allergens": None,
+                    "nutritionalInfo": None,
+                    "isAvailable": True,
+                    "preparationTime": None,
+                    "isActive": True,
+                    "displayOrder": None,
+                    "variants": [
+                        {
+                            "id": "var_1",
+                            "menuItemId": "item_1",
+                            "name": "Regular",
+                            "price": 12.99,
+                        }
+                    ],
+                    "createdAt": 1234567890,
+                    "updatedAt": 1234567890,
+                },
+            ],
+            "meta": {
+                "page": 1,
+                "pageSize": 10,
+                "totalCount": 1,
+                "totalPages": 1,
+                "hasNextPage": False,
+                "hasPreviousPage": False,
             },
-        ]
+        }
 
         mock_api.add(
             responses.GET,
-            f"{BASE_URL}/menu-management/items/popular?limit=5",
+            (
+                f"{BASE_URL}/menu-management/items/popular?"
+                "page=1&pageSize=10&limit=5"
+            ),
             headers={"X-Wiil-Api-Key": API_KEY},
             json=api_response(mock_items),
             status=200,
         )
 
-        result = client.menus.get_popular_items(limit=5)
+        result = client.menus.get_popular_items(
+            PaginationRequest(page=1, page_size=10),
+            limit=5,
+        )
 
-        assert len(result) == 1
-        assert result[0].name == "Caesar Salad"
+        assert len(result.data) == 1
+        assert result.data[0].name == "Caesar Salad"
+
+    def test_create_category_batch(
+        self,
+        client: WiilClient,
+        mock_api,
+        api_response,
+    ):
+        """Test creating menu categories in batch."""
+        mock_response = {
+            "data": [
+                {
+                    "id": "cat_1",
+                    "name": "Appetizers",
+                    "description": None,
+                    "displayOrder": 1,
+                    "createdAt": 1234567890,
+                    "updatedAt": 1234567890,
+                }
+            ],
+            "meta": {
+                "page": 1,
+                "pageSize": 1,
+                "totalCount": 1,
+                "totalPages": 1,
+                "hasNextPage": False,
+                "hasPreviousPage": False,
+            },
+        }
+
+        mock_api.add(
+            responses.POST,
+            f"{BASE_URL}/menu-management/categories/batch",
+            headers={"X-Wiil-Api-Key": API_KEY},
+            json=api_response(mock_response),
+            status=200,
+        )
+
+        result = client.menus.create_category_batch(
+            [CreateMenuCategory(name="Appetizers")]
+        )
+
+        assert len(result.data) == 1
+        assert result.data[0].name == "Appetizers"
+
+    def test_create_item_batch(
+        self,
+        client: WiilClient,
+        mock_api,
+        api_response,
+    ):
+        """Test creating menu items in batch."""
+        mock_response = {
+            "data": [
+                {
+                    "id": "item_1",
+                    "name": "Caesar Salad",
+                    "description": None,
+                    "price": 12.99,
+                    "categoryId": "cat_123",
+                    "category": None,
+                    "ingredients": None,
+                    "allergens": None,
+                    "nutritionalInfo": None,
+                    "isAvailable": True,
+                    "preparationTime": None,
+                    "isActive": True,
+                    "displayOrder": None,
+                    "createdAt": 1234567890,
+                    "updatedAt": 1234567890,
+                }
+            ],
+            "meta": {
+                "page": 1,
+                "pageSize": 1,
+                "totalCount": 1,
+                "totalPages": 1,
+                "hasNextPage": False,
+                "hasPreviousPage": False,
+            },
+        }
+
+        mock_api.add(
+            responses.POST,
+            f"{BASE_URL}/menu-management/items/batch",
+            headers={"X-Wiil-Api-Key": API_KEY},
+            json=api_response(mock_response),
+            status=200,
+        )
+
+        result = client.menus.create_item_batch(
+            [
+                CreateBusinessMenuItem(
+                    name="Caesar Salad",
+                    category_id="cat_123",
+                    price=12.99,
+                    variants=[
+                        CreateBusinessMenuItemVariant(
+                            name="Regular", price=12.99
+                        )
+                    ],
+                )
+            ]
+        )
+
+        assert len(result.data) == 1
+        assert result.data[0].name == "Caesar Salad"
 
     def test_update_item(self, client: WiilClient, mock_api, api_response):
         """Test updating a menu item."""
@@ -380,6 +572,14 @@ class TestMenusResource:
             "preparationTime": None,
             "isActive": True,
             "displayOrder": None,
+            "variants": [
+                {
+                    "id": "var_1",
+                    "menuItemId": "item_123",
+                    "name": "Regular",
+                    "price": 13.99,
+                }
+            ],
             "createdAt": 1234567890,
             "updatedAt": 1234567891,
         }
@@ -415,71 +615,6 @@ class TestMenusResource:
 
         assert result is True
 
-    # =============== Menu QR Code Tests ===============
-
-    def test_get_qr_codes(self, client: WiilClient, mock_api, api_response):
-        """Test retrieving all menu QR codes."""
-        mock_qr_codes = [
-            {
-                "id": "qr_123",
-                "menuUrl": "https://menu.example.com/qr_123",
-                "qrCodeImage": None,
-                "tableNumber": "Table 1",
-            },
-        ]
-
-        mock_api.add(
-            responses.GET,
-            f"{BASE_URL}/menu-management/qr-codes",
-            headers={"X-Wiil-Api-Key": API_KEY},
-            json=api_response(mock_qr_codes),
-            status=200,
-        )
-
-        result = client.menus.get_qr_codes()
-
-        assert len(result) == 1
-        assert result[0].table_number == "Table 1"
-
-    def test_generate_qr_code(self, client: WiilClient, mock_api, api_response):
-        """Test generating a new menu QR code."""
-        mock_response = {
-            "id": "qr_123",
-            "menuUrl": "https://menu.example.com/qr_123",
-            "qrCodeImage": None,
-            "tableNumber": "Table 1",
-        }
-
-        mock_api.add(
-            responses.POST,
-            f"{BASE_URL}/menu-management/qr-codes",
-            headers={"X-Wiil-Api-Key": API_KEY},
-            json=api_response(mock_response),
-            status=200,
-        )
-
-        result = client.menus.generate_qr_code(
-            name="Table 1 Menu",
-            category_id="cat_123"
-        )
-
-        assert result.id == "qr_123"
-        assert result.menu_url == "https://menu.example.com/qr_123"
-
-    def test_delete_qr_code(self, client: WiilClient, mock_api, api_response):
-        """Test deleting a menu QR code."""
-        mock_api.add(
-            responses.DELETE,
-            f"{BASE_URL}/menu-management/qr-codes/qr_123",
-            headers={"X-Wiil-Api-Key": API_KEY},
-            json=api_response(True),
-            status=200,
-        )
-
-        result = client.menus.delete_qr_code("qr_123")
-
-        assert result is True
-
     # =============== Error Handling Tests ===============
 
     def test_create_category_api_error(
@@ -495,7 +630,7 @@ class TestMenusResource:
         )
 
         with pytest.raises(WiilAPIError) as exc_info:
-            client.menus.create_category(CreateMenuCategory(name=""))
+            client.menus.create_category(CreateMenuCategory(name="Appetizers"))
 
         assert exc_info.value.code == "VALIDATION_ERROR"
 

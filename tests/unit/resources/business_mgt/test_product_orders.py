@@ -12,6 +12,7 @@ from wiil.models.business_mgt import (
     OrderPricing,
 )
 from wiil.types import PaginationRequest
+from wiil.types.business_types import OrderStatus
 
 BASE_URL = "https://api.wiil.io/v1"
 API_KEY = "test-api-key"
@@ -43,7 +44,6 @@ class TestProductOrdersResource:
                 }
             ],
             "customerId": "cust_123",
-            "customer": None,
             "pricing": {
                 "subtotal": 59.98,
                 "tax": 0.0,
@@ -65,7 +65,6 @@ class TestProductOrdersResource:
             "shippingMethod": None,
             "trackingNumber": None,
             "shippingCarrier": None,
-            "externalOrderId": None,
             "source": "direct",
             "cancelReason": None,
             "notes": None,
@@ -121,7 +120,6 @@ class TestProductOrdersResource:
                 }
             ],
             "customerId": "cust_123",
-            "customer": None,
             "pricing": {
                 "subtotal": 59.98,
                 "tax": 0.0,
@@ -143,7 +141,6 @@ class TestProductOrdersResource:
             "shippingMethod": None,
             "trackingNumber": None,
             "shippingCarrier": None,
-            "externalOrderId": None,
             "source": "direct",
             "cancelReason": None,
             "notes": None,
@@ -188,7 +185,6 @@ class TestProductOrdersResource:
                 }
             ],
             "customerId": "cust_123",
-            "customer": None,
             "pricing": {
                 "subtotal": 59.98,
                 "tax": 0.0,
@@ -210,7 +206,6 @@ class TestProductOrdersResource:
             "shippingMethod": "Standard",
             "trackingNumber": "TRK123456",
             "shippingCarrier": "UPS",
-            "externalOrderId": None,
             "source": "direct",
             "cancelReason": None,
             "notes": None,
@@ -229,7 +224,7 @@ class TestProductOrdersResource:
 
         result = client.product_orders.update(UpdateProductOrder(
             id="order_123",
-            status="out_for_delivery",
+            status=OrderStatus.OUT_FOR_DELIVERY,
             tracking_number="TRK123456"
         ))
 
@@ -274,7 +269,6 @@ class TestProductOrdersResource:
                     }
                 ],
                 "customerId": "cust_123",
-                "customer": None,
                 "pricing": {
                     "subtotal": 59.98,
                     "tax": 0.0,
@@ -296,7 +290,6 @@ class TestProductOrdersResource:
                 "shippingMethod": None,
                 "trackingNumber": None,
                 "shippingCarrier": None,
-                "externalOrderId": None,
                 "source": "direct",
                 "cancelReason": None,
                 "notes": None,
@@ -326,7 +319,9 @@ class TestProductOrdersResource:
             status=200,
         )
 
-        result = client.product_orders.list(PaginationRequest(page=1, page_size=10))
+        result = client.product_orders.list(
+            PaginationRequest(page=1, page_size=10)
+        )
 
         assert len(result.data) == 1
         assert result.meta.total_count == 1
@@ -354,7 +349,6 @@ class TestProductOrdersResource:
                 }
             ],
             "customerId": "cust_123",
-            "customer": None,
             "pricing": {
                 "subtotal": 59.98,
                 "tax": 0.0,
@@ -376,7 +370,6 @@ class TestProductOrdersResource:
             "shippingMethod": None,
             "trackingNumber": None,
             "shippingCarrier": None,
-            "externalOrderId": None,
             "source": "direct",
             "cancelReason": None,
             "notes": None,
@@ -396,6 +389,156 @@ class TestProductOrdersResource:
         result = client.product_orders.update_status("order_123", "completed")
 
         assert result.status == "completed"
+
+    def test_get_by_customer(self, client: WiilClient, mock_api, api_response):
+        """Test retrieving orders by customer."""
+        mock_response = {
+            "data": [
+                {
+                    "id": "order_1",
+                    "orderNumber": "PO-12345",
+                    "status": "pending",
+                    "items": [
+                        {
+                            "id": "order_item_1",
+                            "productOrderId": "order_1",
+                            "productId": "prod_123",
+                            "itemName": "Wireless Mouse",
+                            "sku": "WM-001",
+                            "quantity": 2,
+                            "unitPrice": 29.99,
+                            "totalPrice": 59.98,
+                            "selectedVariant": None,
+                            "warrantyInfo": None,
+                            "status": "pending",
+                            "notes": None,
+                        }
+                    ],
+                    "customerId": "cust_123",
+                    "pricing": {
+                        "subtotal": 59.98,
+                        "tax": 0.0,
+                        "tip": 0.0,
+                        "shippingAmount": 0.0,
+                        "discount": 0.0,
+                        "total": 59.98,
+                        "currency": "USD",
+                    },
+                    "paymentStatus": "pending",
+                    "paymentMethod": None,
+                    "paymentReference": None,
+                    "billingAddress": None,
+                    "orderDate": 1234567890,
+                    "requestedDeliveryDate": None,
+                    "shippedDate": None,
+                    "shippingAddress": None,
+                    "deliveredDate": None,
+                    "shippingMethod": None,
+                    "trackingNumber": None,
+                    "shippingCarrier": None,
+                    "source": "direct",
+                    "cancelReason": None,
+                    "notes": None,
+                    "serviceConversationConfigId": None,
+                    "createdAt": 1234567890,
+                    "updatedAt": 1234567890,
+                }
+            ],
+            "meta": {
+                "page": 1,
+                "pageSize": 10,
+                "totalCount": 1,
+                "totalPages": 1,
+                "hasNextPage": False,
+                "hasPreviousPage": False,
+            },
+        }
+
+        mock_api.add(
+            responses.GET,
+            (
+                f"{BASE_URL}/product-orders/by-customer/"
+                "cust_123?page=1&pageSize=10"
+            ),
+            headers={"X-Wiil-Api-Key": API_KEY},
+            json=api_response(mock_response),
+            status=200,
+        )
+
+        result = client.product_orders.get_by_customer(
+            "cust_123",
+            PaginationRequest(page=1, page_size=10),
+        )
+
+        assert len(result.data) == 1
+        assert result.data[0].customer_id == "cust_123"
+
+    def test_cancel(self, client: WiilClient, mock_api, api_response):
+        """Test cancelling an order."""
+        mock_response = {
+            "id": "order_123",
+            "orderNumber": "PO-12345",
+            "status": "cancelled",
+            "items": [
+                {
+                    "id": "order_item_1",
+                    "productOrderId": "order_123",
+                    "productId": "prod_123",
+                    "itemName": "Wireless Mouse",
+                    "sku": "WM-001",
+                    "quantity": 2,
+                    "unitPrice": 29.99,
+                    "totalPrice": 59.98,
+                    "selectedVariant": None,
+                    "warrantyInfo": None,
+                    "status": "pending",
+                    "notes": None,
+                }
+            ],
+            "customerId": "cust_123",
+            "pricing": {
+                "subtotal": 59.98,
+                "tax": 0.0,
+                "tip": 0.0,
+                "shippingAmount": 0.0,
+                "discount": 0.0,
+                "total": 59.98,
+                "currency": "USD",
+            },
+            "paymentStatus": "pending",
+            "paymentMethod": None,
+            "paymentReference": None,
+            "billingAddress": None,
+            "orderDate": 1234567890,
+            "requestedDeliveryDate": None,
+            "shippedDate": None,
+            "shippingAddress": None,
+            "deliveredDate": None,
+            "shippingMethod": None,
+            "trackingNumber": None,
+            "shippingCarrier": None,
+            "source": "direct",
+            "cancelReason": "Customer request",
+            "notes": None,
+            "serviceConversationConfigId": None,
+            "createdAt": 1234567890,
+            "updatedAt": 1234567891,
+        }
+
+        mock_api.add(
+            responses.POST,
+            f"{BASE_URL}/product-orders/order_123/cancel",
+            headers={"X-Wiil-Api-Key": API_KEY},
+            json=api_response(mock_response),
+            status=200,
+        )
+
+        result = client.product_orders.cancel(
+            "order_123",
+            reason="Customer request",
+        )
+
+        assert result.status == "cancelled"
 
     # =============== Error Handling Tests ===============
 

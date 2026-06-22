@@ -470,14 +470,14 @@ import asyncio
 asyncio.run(main())
 ```
 
-## WillService (OTT + Translation)
+## WiilService (OTT + Translation)
 
-`WillService` is a service-focused client exposes high-level workflows for OTT and translation services.
+`WiilService` is a service-focused client exposes high-level workflows for OTT and translation services.
 
 ```python
-from wiil import WillService
+from wiil import WiilService
 
-service = WillService(api_key="your-api-key")
+service = WiilService(api_key="your-api-key")
 
 # Create translation connection config
 translation = service.translation.create_connection_config(

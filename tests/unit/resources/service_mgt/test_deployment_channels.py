@@ -1,5 +1,7 @@
 """Tests for Deployment Channels resource."""
 
+import json
+
 import pytest
 import responses
 
@@ -30,8 +32,6 @@ class TestDeploymentChannelsResource:
             "recordingEnabled": True,
             "configuration": {
                 "phoneConfigurationId": "phone_789",
-                "hasForwardingEnabled": False,
-                "forwardingPhoneNumber": None,
             },
             "createdAt": 1234567890,
             "updatedAt": 1234567890,
@@ -45,11 +45,17 @@ class TestDeploymentChannelsResource:
             status=200,
         )
 
-        result = client.deployment_channels.create(CreateDeploymentChannel(
-            deployment_type="calls",
-            channel_identifier="+14155551234",
-            channel_name="Main Support Line"
-        ))
+        result = client.deployment_channels.create(
+            CreateDeploymentChannel.model_validate_json(
+                json.dumps(
+                    {
+                        "deploymentType": "calls",
+                        "channelIdentifier": "+14155551234",
+                        "channelName": "Main Support Line",
+                    }
+                )
+            )
+        )
 
         assert result.id == "channel_123"
         assert result.channel_identifier == "+14155551234"
@@ -67,8 +73,6 @@ class TestDeploymentChannelsResource:
             "recordingEnabled": True,
             "configuration": {
                 "phoneConfigurationId": "phone_789",
-                "hasForwardingEnabled": False,
-                "forwardingPhoneNumber": None,
             },
             "createdAt": 1234567890,
             "updatedAt": 1234567890,
@@ -118,8 +122,6 @@ class TestDeploymentChannelsResource:
             "recordingEnabled": True,
             "configuration": {
                 "phoneConfigurationId": "phone_789",
-                "hasForwardingEnabled": False,
-                "forwardingPhoneNumber": None,
             },
             "createdAt": 1234567890,
             "updatedAt": 1234567890,
@@ -151,8 +153,6 @@ class TestDeploymentChannelsResource:
             "recordingEnabled": True,
             "configuration": {
                 "phoneConfigurationId": "phone_789",
-                "hasForwardingEnabled": False,
-                "forwardingPhoneNumber": None,
             },
             "createdAt": 1234567890,
             "updatedAt": 1234567891,
@@ -220,8 +220,6 @@ class TestDeploymentChannelsResource:
                 "recordingEnabled": True,
                 "configuration": {
                     "phoneConfigurationId": "phone_101",
-                    "hasForwardingEnabled": False,
-                    "forwardingPhoneNumber": None,
                 },
                 "createdAt": 1234567890,
                 "updatedAt": 1234567890,
@@ -234,8 +232,6 @@ class TestDeploymentChannelsResource:
                 "recordingEnabled": True,
                 "configuration": {
                     "phoneConfigurationId": "phone_102",
-                    "hasForwardingEnabled": False,
-                    "forwardingPhoneNumber": None,
                 },
                 "createdAt": 1234567891,
                 "updatedAt": 1234567891,
@@ -315,8 +311,6 @@ class TestDeploymentChannelsResource:
                 "recordingEnabled": True,
                 "configuration": {
                     "phoneConfigurationId": "phone_201",
-                    "hasForwardingEnabled": False,
-                    "forwardingPhoneNumber": None,
                 },
                 "createdAt": 1234567890,
                 "updatedAt": 1234567890,

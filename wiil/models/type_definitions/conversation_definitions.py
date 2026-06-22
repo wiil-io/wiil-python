@@ -53,3 +53,43 @@ class ConversationSummarySentiment(str, Enum):
     POSITIVE = "positive"
     NEUTRAL = "neutral"
     NEGATIVE = "negative"
+
+
+class CallRequestStatus(str, Enum):
+    """Outbound call request status."""
+
+    PENDING = "pending"
+    SCHEDULED = "scheduled"
+    IN_PROGRESS = "in_progress"
+    COMPLETED = "completed"
+    FAILED = "failed"
+    CANCELLED = "cancelled"
+
+
+class ScheduleType(str, Enum):
+    """Schedule type for outbound calls."""
+
+    IMMEDIATE = "immediate"
+    SCHEDULED = "scheduled"
+    RECURRING = "recurring"
+
+
+class EmailStatus(str, Enum):
+    """Email delivery status."""
+
+    QUEUED = "queued"
+    SENT = "sent"
+    DELIVERED = "delivered"
+    BOUNCED = "bounced"
+    FAILED = "failed"
+    COMPLAINED = "complained"
+
+
+class SmsStatus(str, Enum):
+    """SMS delivery status."""
+
+    QUEUED = "queued"
+    SENT = "sent"
+    DELIVERED = "delivered"
+    FAILED = "failed"
+    UNDELIVERED = "undelivered"

@@ -7,14 +7,13 @@ Referenced by Phone Channel configurations for call and SMS deployments.
 
 from typing import Any, Dict, Optional
 
-from pydantic import BaseModel as PydanticBaseModel
-from pydantic import ConfigDict, Field
+from pydantic import Field
 
-from wiil.models.base import BaseModel
+from wiil.models.base import BaseModel, EntityModel
 from wiil.models.type_definitions import PhoneStatus, ProviderType
 
 
-class PhoneConfiguration(BaseModel):
+class PhoneConfiguration(EntityModel):
     """Phone configuration for telephony management.
 
     Manages a phone number resource from a telephony provider, tracking its configuration, status,
@@ -35,7 +34,7 @@ class PhoneConfiguration(BaseModel):
         - RELEASED: Disconnected and returned to provider
 
     Attributes:
-        phone_number: Phone number in E.164 international format
+        phone_number: Phone number, short code, or alphanumeric sender ID
         provider_phone_number_id: Unique identifier from the telephony provider
         phone_request_id: Reference ID for the original purchase transaction
         friendly_name: Human-readable display name for administrative interfaces
@@ -56,15 +55,9 @@ class PhoneConfiguration(BaseModel):
         is_us_sms_permitted: Whether US SMS messaging is permitted
     """
 
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
-
     phone_number: str = Field(
         ...,
-        description="Phone number in E.164 international format (e.g., '+12125551234')",
+        description="Phone number, short code, or alphanumeric sender ID",
         alias="phoneNumber"
     )
     provider_phone_number_id: str = Field(
@@ -157,17 +150,11 @@ class PhoneConfiguration(BaseModel):
     )
 
 
-class UpdatePhoneConfiguration(PydanticBaseModel):
+class UpdatePhoneConfiguration(BaseModel):
     """Schema for updating an existing phone configuration.
 
     Only allows updating the friendly name and requires the id to identify the configuration.
     """
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
 
     id: str
     friendly_name: Optional[str] = Field(None, alias="friendlyName")

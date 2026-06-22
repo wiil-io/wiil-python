@@ -7,14 +7,14 @@ capabilities, and associated voices/languages for configuration and deployment.
 
 from typing import List, Optional
 
-from pydantic import BaseModel as PydanticBaseModel
-from pydantic import ConfigDict, Field
+from pydantic import Field
 
+from wiil.models.base import BaseModel
 from wiil.models.service_mgt.voice_language import Language, Voice
 from wiil.models.type_definitions import LLMType, SupportedProprietor
 
 
-class WiilSupportModel(PydanticBaseModel):
+class WiilSupportModel(BaseModel):
     """WIIL Platform supported model configuration.
 
     Represents a language model registered in the WIIL Platform's support registry. The registry
@@ -59,12 +59,6 @@ class WiilSupportModel(PydanticBaseModel):
         )
         ```
     """
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
 
     model_id: str = Field(
         ...,

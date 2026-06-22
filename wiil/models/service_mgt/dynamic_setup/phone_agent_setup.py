@@ -7,9 +7,9 @@ test numbers, and required voice interaction configurations (STT/TTS).
 
 from typing import Optional
 
-from pydantic import BaseModel as PydanticBaseModel
-from pydantic import ConfigDict, Field, model_validator
+from pydantic import Field, model_validator
 
+from wiil.models.base import BaseModel
 from wiil.models.service_mgt.dynamic_setup.base_agent_setup import (
     DynamicAgentSetupResult,
     DynamicBaseAgentSetup,
@@ -72,12 +72,6 @@ class DynamicPhoneAgentSetupResult(DynamicAgentSetupResult):
         phone_number: Phone number associated with the configuration
     """
 
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
-
     phone_number: Optional[str] = Field(
         None,
         description="Phone number associated with the phone configuration used for this assistant",
@@ -85,17 +79,11 @@ class DynamicPhoneAgentSetupResult(DynamicAgentSetupResult):
     )
 
 
-class UpdateDynamicPhoneAgent(PydanticBaseModel):
+class UpdateDynamicPhoneAgent(BaseModel):
     """Schema for updating an existing phone agent configuration.
 
     All fields are optional except id. Phone configuration cannot be changed after creation.
     """
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
 
     id: str = Field(
         ...,

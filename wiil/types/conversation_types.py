@@ -71,6 +71,18 @@ class ConversationStatus(str, Enum):
     UPDATED_SUMMARIZED = "updated_summarized"
     """Conversation summary updated"""
 
+    COMPLETED = "completed"
+    """Conversation completed"""
+
+    FAILED = "failed"
+    """Conversation failed"""
+
+    ABANDONED = "abandoned"
+    """Conversation abandoned"""
+
+    TRANSFERRED = "transferred"
+    """Conversation transferred"""
+
 
 class TranslationDirection(str, Enum):
     """Translation direction enumeration."""
@@ -94,6 +106,9 @@ class ConversationSummarySentiment(str, Enum):
     NEGATIVE = "negative"
     """Negative sentiment"""
 
+    MIXED = "mixed"
+    """Mixed sentiment"""
+
 
 class ConversationDirection(str, Enum):
     """Conversation direction enumeration."""
@@ -113,3 +128,69 @@ class MessageType(str, Enum):
 
     AGENT = "assistant"
     """Agent/Assistant message"""
+
+    HUMAN_AGENT = "human_agent"
+    """Human agent message"""
+
+    SYSTEM = "system"
+    """System-generated message"""
+
+
+class SystemMessageEventType(str, Enum):
+    """System message event type enumeration."""
+
+    HANDOVER_REQUESTED = "handover_requested"
+    HANDOVER_ACCEPTED = "handover_accepted"
+    HANDOVER_COMPLETED = "handover_completed"
+    HANDOVER_FAILED = "handover_failed"
+    AGENT_JOINED = "agent_joined"
+    AGENT_LEFT = "agent_left"
+    CONVERSATION_TRANSFERRED = "conversation_transferred"
+
+
+class CallRequestStatus(str, Enum):
+    """Outbound call request status."""
+
+    PENDING = "pending"
+    SCHEDULED = "scheduled"
+    IN_PROGRESS = "in_progress"
+    COMPLETED = "completed"
+    FAILED = "failed"
+    CANCELLED = "cancelled"
+
+
+class ScheduleType(str, Enum):
+    """Schedule type for outbound calls."""
+
+    IMMEDIATE = "immediate"
+    SCHEDULED = "scheduled"
+    RECURRING = "recurring"
+
+
+class EmailStatus(str, Enum):
+    """Email delivery status."""
+
+    QUEUED = "queued"
+    SENT = "sent"
+    DELIVERED = "delivered"
+    BOUNCED = "bounced"
+    FAILED = "failed"
+    COMPLAINED = "complained"
+
+
+class SmsStatus(str, Enum):
+    """SMS delivery status."""
+
+    QUEUED = "queued"
+    SENT = "sent"
+    DELIVERED = "delivered"
+    FAILED = "failed"
+    UNDELIVERED = "undelivered"
+
+
+class OutboundTemplateChannel(str, Enum):
+    """Outbound template channel enumeration."""
+
+    EMAIL = "EMAIL"
+    SMS = "SMS"
+    WHATSAPP = "WHATSAPP"

@@ -87,6 +87,46 @@ class InstructionConfigurationsResource:
             response_model=PaginatedResult[InstructionConfiguration]
         )
 
+    def add_knowledge_sources(
+        self,
+        config_id: str,
+        knowledge_source_ids: List[str]
+    ) -> InstructionConfiguration:
+        """Attach knowledge sources to an instruction configuration.
+
+        Args:
+            config_id: Instruction configuration ID
+            knowledge_source_ids: Knowledge source IDs to attach
+
+        Returns:
+            The updated instruction configuration
+        """
+        return self._http.post(
+            f'{self._base_path}/{config_id}/knowledge-sources',
+            {'knowledgeSourceIds': knowledge_source_ids},
+            response_model=InstructionConfiguration
+        )
+
+    def remove_knowledge_sources(
+        self,
+        config_id: str,
+        knowledge_source_ids: List[str]
+    ) -> InstructionConfiguration:
+        """Detach knowledge sources from an instruction configuration.
+
+        Args:
+            config_id: Instruction configuration ID
+            knowledge_source_ids: Knowledge source IDs to detach
+
+        Returns:
+            The updated instruction configuration
+        """
+        return self._http.delete(
+            f'{self._base_path}/{config_id}/knowledge-sources',
+            response_model=InstructionConfiguration,
+            json={'knowledgeSourceIds': knowledge_source_ids}
+        )
+
     def get_supported_templates(self) -> List[InstructionConfiguration]:
         """Retrieve the list of supported instruction templates.
 

@@ -182,6 +182,9 @@ class SupportedProprietor(str, Enum):
     GROQ = "Groq"
     """Groq"""
 
+    XAI = "xAI"
+    """xAI"""
+
     DEEPGRAM = "Deepgram"
     """Deepgram"""
 
@@ -210,6 +213,9 @@ class SupportedLLMKit(str, Enum):
     GROQ = "groq-kit"
     """Groq kit"""
 
+    XAI = "xai-kit"
+    """xAI kit"""
+
     DEEPGRAM = "deepgram-kit"
     """Deepgram kit"""
 
@@ -237,6 +243,9 @@ class ModelProprietor(str, Enum):
 
     GROQ = "Groq"
     """Groq"""
+
+    XAI = "xAI"
+    """xAI"""
 
     DEEPGRAM = "Deepgram"
     """Deepgram"""

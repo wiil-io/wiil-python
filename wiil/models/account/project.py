@@ -2,15 +2,14 @@
 
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel as PydanticBaseModel
-from pydantic import ConfigDict, Field, ValidationError
+from pydantic import Field, ValidationError
 
-from wiil.models.base import BaseModel
+from wiil.models.base import BaseModel, EntityModel
 from wiil.models.type_definitions.account_definitions import ServiceStatus
 from wiil.errors import WiilValidationError
 
 
-class Project(BaseModel):
+class Project(EntityModel):
     """Project entity.
 
     Represents a project within an organization, providing environment
@@ -44,11 +43,6 @@ class Project(BaseModel):
         )
         ```
     """
-
-    model_config = ConfigDict(
-        validate_by_name=True, validate_by_alias=True,
-        use_enum_values=True,
-    )
 
     name: str = Field(
         ...,
@@ -84,7 +78,7 @@ class Project(BaseModel):
     )
 
 
-class CreateProject(PydanticBaseModel):
+class CreateProject(BaseModel):
     """Schema for creating a new project.
 
     Omits auto-generated fields (id, timestamps) and system-managed fields (isDefault).
@@ -109,11 +103,6 @@ class CreateProject(PydanticBaseModel):
         )
         ```
     """
-
-    model_config = ConfigDict(
-        validate_by_name=True, validate_by_alias=True,
-        use_enum_values=True,
-    )
 
     name: str = Field(
         ...,
@@ -150,7 +139,7 @@ class CreateProject(PydanticBaseModel):
             raise WiilValidationError('Request validation failed', details=e.errors()) from e
 
 
-class UpdateProject(PydanticBaseModel):
+class UpdateProject(BaseModel):
     """Schema for updating an existing project.
 
     All CreateProject fields are optional (partial), with id required to identify the project.
@@ -174,11 +163,6 @@ class UpdateProject(PydanticBaseModel):
         )
         ```
     """
-
-    model_config = ConfigDict(
-        validate_by_name=True, validate_by_alias=True,
-        use_enum_values=True,
-    )
 
     id: str = Field(..., description="Unique identifier for the project to update")
     name: Optional[str] = Field(

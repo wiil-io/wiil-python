@@ -38,16 +38,9 @@ class TranslationService:
                 exc.errors(),
             )
 
-        response = self._http.post(
+        return self._http.post(
             TRANSLATION_CONNECTION_RESOURCE_PATH,
             validated_request.model_dump(by_alias=True, exclude_none=True),
             schema=TranslationRequest,
+            response_model=TranslationConnectionConfig,
         )
-
-        try:
-            return TranslationConnectionConfig.model_validate(response)
-        except ValidationError as exc:
-            raise WiilValidationError(
-                "Response validation failed for translation connection configuration.",
-                exc.errors(),
-            )

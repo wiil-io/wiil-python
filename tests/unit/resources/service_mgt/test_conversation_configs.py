@@ -21,15 +21,14 @@ class TestConversationConfigurationsResource:
         mock_response = {
             "id": "conv_123",
             "channel_id": "channel_456",
-            "organization_id": "org_789",
             "project_id": "proj_012",
             "deployment_config_id": "deploy_345",
             "channel_identifier": "+12125551234",
             "conversation_type": "TELEPHONY_CALL",
             "status": "active",
             "durationInSeconds": 120,
-            "createdAt": 1234567890,
-            "updatedAt": 1234567890,
+            "created_at": 1234567890,
+            "updated_at": 1234567890,
         }
 
         mock_api.add(
@@ -44,7 +43,6 @@ class TestConversationConfigurationsResource:
 
         assert result.id == "conv_123"
         assert result.channel_id == "channel_456"
-        assert result.organization_id == "org_789"
         assert result.conversation_type == "TELEPHONY_CALL"
 
     def test_get_conversation_configuration_not_found(
@@ -73,28 +71,26 @@ class TestConversationConfigurationsResource:
             {
                 "id": "conv_1",
                 "channel_id": "channel_101",
-                "organization_id": "org_789",
-                "project_id": "proj_012",
+                    "project_id": "proj_012",
                 "deployment_config_id": "deploy_345",
                 "channel_identifier": "+12125551111",
                 "conversation_type": "OTT_CHAT",
                 "status": "active",
                 "durationInSeconds": 45,
-                "createdAt": 1234567890,
-                "updatedAt": 1234567890,
+                "created_at": 1234567890,
+                "updated_at": 1234567890,
             },
             {
                 "id": "conv_2",
                 "channel_id": "channel_102",
-                "organization_id": "org_789",
-                "project_id": "proj_012",
+                    "project_id": "proj_012",
                 "deployment_config_id": "deploy_345",
                 "channel_identifier": "+12125552222",
                 "conversation_type": "SMS",
                 "status": "ended",
                 "durationInSeconds": 90,
-                "createdAt": 1234567891,
-                "updatedAt": 1234567891,
+                "created_at": 1234567891,
+                "updated_at": 1234567891,
             },
         ]
 

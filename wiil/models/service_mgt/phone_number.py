@@ -7,21 +7,14 @@ Supports multiple providers (SignalWire, Twilio) with provider-specific extensio
 
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel as PydanticBaseModel
-from pydantic import ConfigDict, Field
+from pydantic import Field
 
-from wiil.models.base import BaseModel
+from wiil.models.base import BaseModel, EntityModel
 from wiil.models.type_definitions import PhoneNumberType, PhonePurchaseStatus
 
 
-class PhoneCapabilities(PydanticBaseModel):
+class PhoneCapabilities(BaseModel):
     """Phone number capabilities."""
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
 
     voice: bool = Field(
         ...,
@@ -39,7 +32,7 @@ class PhoneCapabilities(PydanticBaseModel):
     )
 
 
-class BasePhoneNumberInfo(PydanticBaseModel):
+class BasePhoneNumberInfo(BaseModel):
     """Base phone number information.
 
     Common properties shared across all phone number providers.
@@ -56,12 +49,6 @@ class BasePhoneNumberInfo(PydanticBaseModel):
         beta: Whether this is a beta number
         number_type: Type of phone number (local, toll-free, etc.)
     """
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
 
     friendly_name: str = Field(
         ...,
@@ -111,21 +98,15 @@ class BasePhoneNumberInfo(PydanticBaseModel):
     )
 
 
-class PhoneProviderResponse(PydanticBaseModel):
+class PhoneProviderResponse(BaseModel):
     """Response from phone number provider API calls."""
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
 
     success: bool
     status: Optional[int] = None
     data: Any = None
 
 
-class PhoneNumberPurchase(BaseModel):
+class PhoneNumberPurchase(EntityModel):
     """Phone number purchase transaction.
 
     Represents a phone number purchase request and its lifecycle through the purchase process.
@@ -141,12 +122,6 @@ class PhoneNumberPurchase(BaseModel):
         completed_at: Timestamp when purchase was completed
         metadata: Additional metadata for the purchase
     """
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
 
     friendly_name: str = Field(
         ...,
@@ -196,17 +171,11 @@ class PhoneNumberPurchase(BaseModel):
     )
 
 
-class CreatePhoneNumberPurchase(PydanticBaseModel):
+class CreatePhoneNumberPurchase(BaseModel):
     """Schema for creating a new phone number purchase.
 
     Omits auto-generated and transaction-specific fields.
     """
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
 
     friendly_name: str = Field(..., alias="friendlyName")
     phone_number: str = Field(..., alias="phoneNumber")
@@ -214,14 +183,8 @@ class CreatePhoneNumberPurchase(PydanticBaseModel):
     number_type: PhoneNumberType = Field(PhoneNumberType.LOCAL, alias="numberType")
 
 
-class BusinessPhoneNumberPurchaseRequest(PydanticBaseModel):
+class BusinessPhoneNumberPurchaseRequest(BaseModel):
     """Schema for business phone number purchase request."""
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
 
     phone_number: str = Field(
         ...,
@@ -239,20 +202,14 @@ class BusinessPhoneNumberPurchaseRequest(PydanticBaseModel):
 PhoneNumberPurchaseRequest = CreatePhoneNumberPurchase
 
 
-class PhoneNumberPrice(PydanticBaseModel):
+class PhoneNumberPrice(BaseModel):
     """Phone number price tier."""
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
 
     base_price: str = Field(..., alias="base_price")
     current_price: str = Field(..., alias="current_price")
 
 
-class PhoneNumberPricing(PydanticBaseModel):
+class PhoneNumberPricing(BaseModel):
     """Phone number pricing information.
 
     Represents pricing details for phone numbers from various providers.
@@ -266,12 +223,6 @@ class PhoneNumberPricing(PydanticBaseModel):
         price_unit: Unit of pricing (e.g., "per month")
         currency: Currency code (3 characters, default: "USD")
     """
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
 
     number_type: PhoneNumberType = Field(..., alias="number_type")
     country: str

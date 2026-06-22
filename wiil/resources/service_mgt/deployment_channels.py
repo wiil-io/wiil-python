@@ -90,6 +90,21 @@ class DeploymentChannelsResource:
         query_string = '?deletePhoneConfig=true' if delete_phone_config else ''
         return self._http.delete(f'{self._base_path}/{channel_id}{query_string}')
 
+    def ping(self, channel_id: str):
+        """Ping a deployment channel to verify connectivity.
+
+        Args:
+            channel_id: Deployment channel ID
+
+        Returns:
+            The ping result payload
+        """
+        return self._http.post(
+            f'{self._base_path}/{channel_id}/ping',
+            {},
+            response_model=None
+        )
+
     def list(
         self,
         params: Optional[PaginationRequest] = None

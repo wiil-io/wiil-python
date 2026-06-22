@@ -1,204 +1,463 @@
-"""Business service configuration schema definitions.
+"""Business service configuration schema definitions."""
 
-This module contains Pydantic models for managing business service configurations
-and QR codes for appointment booking.
-"""
-
+from enum import Enum
 from typing import Optional
 
-from pydantic import BaseModel as PydanticBaseModel
-from pydantic import ConfigDict, Field
+from pydantic import Field, model_validator
 
-from wiil.models.base import BaseModel
+from wiil.models.base import BaseModel, EntityModel
+from wiil.models.business_mgt.bookings_shared import (
+    ServiceBookingRules,
+    ServiceDepositStrategy,
+)
+from wiil.models.type_definitions.business_definitions import (
+    SimpleWeeklySchedule,
+    validate_simple_weekly_schedule,
+)
+from wiil.models.type_definitions.display_order import (
+    CreateDisplayOrderPlacement,
+)
+from wiil.models.type_definitions.dynamic_fields import (
+    FieldDefinition,
+    FieldOverride,
+)
 
 
-class BusinessServiceConfig(BaseModel):
-    """Business service configuration schema.
+class ServicePriceMode(str, Enum):
+    """Service pricing mode options."""
 
-    Service offered by the business with scheduling, pricing, and availability settings.
+    FIXED = "FIXED"
+    STARTS_AT = "STARTS_AT"
+    VARIABLE = "VARIABLE"
 
-    Attributes:
-        name: Name of the service offered
-        description: Detailed description of the service
-        duration: Service duration in minutes (max 8 hours)
-        buffer_time: Buffer time between appointments in minutes
-        is_bookable: Whether this service can be booked online
-        price: Service price in account currency
-        is_active: Whether the service is currently available
-        display_order: Display order in service listings
 
-    Example:
-        ```python
-        service = BusinessServiceConfig(
-            id="service_123",
-            name="Massage Therapy",
-            description="60-minute relaxation massage",
-            duration=60,
-            buffer_time=15,
-            is_bookable=True,
-            price=90.00,
-            is_active=True,
-            display_order=1
-        )
-        ```
-    """
+class ServiceGratuityMode(str, Enum):
+    """Service gratuity mode options."""
 
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
+    NONE = "NONE"
+    OPTIONAL = "OPTIONAL"
+    REQUIRED = "REQUIRED"
 
-    name: str = Field(
-        ...,
-        min_length=1,
-        description="Display name of the service offered"
-    )
-    description: Optional[str] = Field(
+
+class ServiceAvailabilityMode(str, Enum):
+    """Service availability mode options."""
+
+    ALWAYS = "ALWAYS"
+    SCHEDULED = "SCHEDULED"
+    INHERIT = "INHERIT"
+
+
+class ServiceCategoryChannelMapping(BaseModel):
+    """Per-channel service category ID mapping."""
+
+    channel_id: str = Field(..., alias="channelId")
+    external_category_id: str = Field(..., alias="externalCategoryId")
+
+
+class ServiceChannelMapping(BaseModel):
+    """Per-channel service ID mapping."""
+
+    channel_id: str = Field(..., alias="channelId")
+    external_service_id: str = Field(..., alias="externalServiceId")
+    external_category_id: Optional[str] = Field(
         None,
-        description="Detailed description of the service including what's included"
+        alias="externalCategoryId",
     )
-    duration: int = Field(
-        60,
-        gt=0,
-        le=480,
-        description="Service duration in minutes with maximum of 480 minutes (8 hours)"
-    )
-    buffer_time: int = Field(
-        0,
-        ge=0,
-        description="Buffer time in minutes between consecutive appointments",
-        alias="bufferTime"
-    )
-    is_bookable: bool = Field(
-        True,
-        description="Whether this service can be booked online through AI Powered Services",
-        alias="isBookable"
-    )
-    price: Optional[float] = Field(
-        0.0,
-        ge=0,
-        description="Service price in the account's currency"
-    )
-    is_active: bool = Field(
-        True,
-        description="Whether the service is currently active and available for booking",
-        alias="isActive"
-    )
-    display_order: Optional[int] = Field(
+
+
+class ServiceDurationSegments(BaseModel):
+    """Service duration segments for different phases."""
+
+    prep: int = Field(0, ge=0)
+    active: int = Field(60, gt=0)
+    processing: int = Field(0, ge=0)
+    finish: int = Field(0, ge=0)
+    turnover: int = Field(0, ge=0)
+
+
+class ServiceDateRange(BaseModel):
+    """Date range for service availability or exclusion."""
+
+    start_date: str = Field(..., alias="startDate")
+    end_date: str = Field(..., alias="endDate")
+    is_exclusion: bool = Field(False, alias="isExclusion")
+
+
+class ServiceAvailability(BaseModel):
+    """Service availability configuration."""
+
+    mode: ServiceAvailabilityMode = ServiceAvailabilityMode.INHERIT
+    weekly_schedule: Optional[SimpleWeeklySchedule] = Field(
         None,
-        description="Display order in service listings and booking interfaces",
-        alias="displayOrder"
+        alias="weeklySchedule",
     )
-
-
-class ServiceQRCode(PydanticBaseModel):
-    """Service QR code schema for appointment booking.
-
-    QR code configuration for accessing service appointment booking interface.
-
-    Attributes:
-        id: Unique identifier for the QR code
-        appointment_url: Direct link to the appointment page
-        qr_code_image: Base64 encoded QR code image
-        service_id: Specific service ID for direct appointment
-
-    Example:
-        ```python
-        qr_code = ServiceQRCode(
-            id="qr_123",
-            appointment_url="https://book.example.com/services",
-            service_id="service_456"
-        )
-        ```
-    """
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
-
-    id: str = Field(..., description="Unique identifier for this QR code instance")
-    appointment_url: str = Field(
-        ...,
-        description="URL to the appointment booking interface accessed by scanning",
-        alias="appointmentUrl"
-    )
-    qr_code_image: Optional[str] = Field(
+    date_ranges: Optional[list[ServiceDateRange]] = Field(
         None,
-        description="Base64 encoded QR code image for printing or digital display",
-        alias="qrCodeImage"
+        alias="dateRanges",
     )
-    service_id: Optional[str] = Field(
+
+    @model_validator(mode="after")
+    def validate_scheduled_mode(self) -> "ServiceAvailability":
+        """Require weekly schedule in SCHEDULED mode."""
+        if (
+            self.mode == ServiceAvailabilityMode.SCHEDULED
+            and self.weekly_schedule is None
+        ):
+            raise ValueError(
+                "weeklySchedule is required when mode is SCHEDULED"
+            )
+
+        if self.weekly_schedule is not None:
+            validate_simple_weekly_schedule(self.weekly_schedule)
+
+        return self
+
+
+class ServiceAppointmentFieldConfig(BaseModel):
+    """Service-level appointment field configuration."""
+
+    inherited_field_keys: list[str] = Field(
+        default_factory=list,
+        alias="inheritedFieldKeys",
+    )
+    field_overrides: list[FieldOverride] = Field(
+        default_factory=list,
+        alias="fieldOverrides",
+    )
+    additional_fields: list[FieldDefinition] = Field(
+        default_factory=list,
+        alias="additionalFields",
+    )
+    is_active: bool = Field(True, alias="isActive")
+    reuse_details: bool = Field(False, alias="reuseDetails")
+
+
+class ServiceCategory(EntityModel):
+    """Service category schema."""
+
+    service_revision_id: Optional[str] = Field(
         None,
-        description="Optional specific Business Service ID for direct appointment booking",
-        alias="serviceId"
+        alias="serviceRevisionId",
     )
-
-
-class CreateBusinessService(PydanticBaseModel):
-    """Schema for creating a new business service.
-
-    Omits auto-generated fields (id, created_at, updated_at).
-
-    Example:
-        ```python
-        create_data = CreateBusinessService(
-            name="Hair Cut",
-            description="Professional hair cutting service",
-            duration=30,
-            buffer_time=10,
-            is_bookable=True,
-            price=35.00,
-            is_active=True
-        )
-        ```
-    """
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
-
     name: str = Field(..., min_length=1)
     description: Optional[str] = None
-    duration: int = Field(60, gt=0, le=480)
-    buffer_time: int = Field(0, ge=0, alias="bufferTime")
-    is_bookable: bool = Field(True, alias="isBookable")
-    price: Optional[float] = Field(0.0, ge=0)
-    is_active: bool = Field(True, alias="isActive")
-    display_order: Optional[int] = Field(None, alias="displayOrder")
-
-
-class UpdateBusinessService(PydanticBaseModel):
-    """Schema for updating an existing business service.
-
-    All fields are optional except id.
-
-    Example:
-        ```python
-        update_data = UpdateBusinessService(
-            id="service_123",
-            price=40.00,
-            is_active=True
-        )
-        ```
-    """
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
+    image_url: Optional[str] = Field(None, alias="imageUrl")
+    channel_mappings: Optional[list[ServiceCategoryChannelMapping]] = Field(
+        None,
+        alias="channelMappings",
     )
+    display_order: Optional[int] = Field(None, alias="displayOrder")
+    is_active: bool = Field(True, alias="isActive")
+
+
+class CreateServiceCategory(BaseModel):
+    """Schema for creating a service category."""
+
+    service_revision_id: Optional[str] = Field(
+        None,
+        alias="serviceRevisionId",
+    )
+    name: str = Field(..., min_length=1)
+    description: Optional[str] = None
+    image_url: Optional[str] = Field(None, alias="imageUrl")
+    channel_mappings: Optional[list[ServiceCategoryChannelMapping]] = Field(
+        None,
+        alias="channelMappings",
+    )
+    display_order: Optional[int] = Field(None, alias="displayOrder")
+    is_active: bool = Field(True, alias="isActive")
+    placement: Optional[CreateDisplayOrderPlacement] = None
+
+
+class UpdateServiceCategory(BaseModel):
+    """Schema for updating a service category."""
 
     id: str
+    service_revision_id: Optional[str] = Field(
+        None,
+        alias="serviceRevisionId",
+    )
     name: Optional[str] = Field(None, min_length=1)
     description: Optional[str] = None
+    image_url: Optional[str] = Field(None, alias="imageUrl")
+    channel_mappings: Optional[list[ServiceCategoryChannelMapping]] = Field(
+        None,
+        alias="channelMappings",
+    )
+    display_order: Optional[int] = Field(None, alias="displayOrder")
+    is_active: Optional[bool] = Field(None, alias="isActive")
+    placement: Optional[CreateDisplayOrderPlacement] = None
+
+
+class BusinessServiceConfig(EntityModel):
+    """Business service configuration schema."""
+
+    service_revision_id: Optional[str] = Field(
+        None,
+        alias="serviceRevisionId",
+    )
+    name: str = Field(..., min_length=1)
+    description: Optional[str] = None
+    image_url: Optional[str] = Field(None, alias="imageUrl")
+    category_id: Optional[str] = Field(None, alias="categoryId")
+    booking_code: Optional[str] = Field(None, alias="bookingCode")
+    duration: int = Field(60, gt=0, le=480)
+    duration_segments: Optional[ServiceDurationSegments] = Field(
+        None,
+        alias="durationSegments",
+    )
+    buffer_before: int = Field(0, ge=0, alias="bufferBefore")
+    buffer_after: int = Field(0, ge=0, alias="bufferAfter")
+    is_bookable: bool = Field(True, alias="isBookable")
+    allows_processing_chair_swap: Optional[bool] = Field(
+        None,
+        alias="allowsProcessingChairSwap",
+    )
+    service_availability: Optional[ServiceAvailability] = Field(
+        None,
+        alias="serviceAvailability",
+    )
+    max_concurrent_bookings: Optional[int] = Field(
+        None,
+        gt=0,
+        alias="maxConcurrentBookings",
+    )
+    base_price: float = Field(0, ge=0, alias="basePrice")
+    price_mode: Optional[ServicePriceMode] = Field(None, alias="priceMode")
+    gratuity_mode: Optional[ServiceGratuityMode] = Field(
+        None,
+        alias="gratuityMode",
+    )
+    is_active: bool = Field(True, alias="isActive")
+    display_order: Optional[int] = Field(None, alias="displayOrder")
+    channel_mappings: Optional[list[ServiceChannelMapping]] = Field(
+        None,
+        alias="channelMappings",
+    )
+    primary_service_user_account_id: Optional[str] = Field(
+        None,
+        alias="primaryServiceUserAccountId",
+    )
+    required_resources: list[str] = Field(
+        default_factory=list,
+        alias="requiredResources",
+    )
+    booking_rules: Optional[ServiceBookingRules] = Field(
+        None,
+        alias="bookingRules",
+    )
+    deposit_strategy: Optional[ServiceDepositStrategy] = Field(
+        None,
+        alias="depositStrategy",
+    )
+    deposit_value: Optional[float] = Field(None, ge=0, alias="depositValue")
+    late_cancel_fee_percent: float = Field(
+        0,
+        ge=0,
+        le=100,
+        alias="lateCancelFeePercent",
+    )
+    no_show_fee_percent: float = Field(
+        0,
+        ge=0,
+        le=100,
+        alias="noShowFeePercent",
+    )
+    required_datafield_config: Optional[ServiceAppointmentFieldConfig] = Field(
+        None,
+        alias="requiredDatafieldConfig",
+    )
+
+
+class CreateBusinessService(BaseModel):
+    """Schema for creating a business service."""
+
+    service_revision_id: Optional[str] = Field(
+        None,
+        alias="serviceRevisionId",
+    )
+    name: str = Field(..., min_length=1)
+    description: Optional[str] = None
+    image_url: Optional[str] = Field(None, alias="imageUrl")
+    category_id: Optional[str] = Field(None, alias="categoryId")
+    booking_code: Optional[str] = Field(None, alias="bookingCode")
+    duration: int = Field(60, gt=0, le=480)
+    duration_segments: Optional[ServiceDurationSegments] = Field(
+        None,
+        alias="durationSegments",
+    )
+    buffer_before: int = Field(0, ge=0, alias="bufferBefore")
+    buffer_after: int = Field(0, ge=0, alias="bufferAfter")
+    is_bookable: bool = Field(True, alias="isBookable")
+    allows_processing_chair_swap: Optional[bool] = Field(
+        None,
+        alias="allowsProcessingChairSwap",
+    )
+    service_availability: Optional[ServiceAvailability] = Field(
+        None,
+        alias="serviceAvailability",
+    )
+    max_concurrent_bookings: Optional[int] = Field(
+        None,
+        gt=0,
+        alias="maxConcurrentBookings",
+    )
+    base_price: float = Field(0, ge=0, alias="basePrice")
+    price_mode: Optional[ServicePriceMode] = Field(None, alias="priceMode")
+    gratuity_mode: Optional[ServiceGratuityMode] = Field(
+        None,
+        alias="gratuityMode",
+    )
+    is_active: bool = Field(True, alias="isActive")
+    display_order: Optional[int] = Field(None, alias="displayOrder")
+    channel_mappings: Optional[list[ServiceChannelMapping]] = Field(
+        None,
+        alias="channelMappings",
+    )
+    primary_service_user_account_id: Optional[str] = Field(
+        None,
+        alias="primaryServiceUserAccountId",
+    )
+    required_resources: list[str] = Field(
+        default_factory=list,
+        alias="requiredResources",
+    )
+    booking_rules: Optional[ServiceBookingRules] = Field(
+        None,
+        alias="bookingRules",
+    )
+    deposit_strategy: Optional[ServiceDepositStrategy] = Field(
+        None,
+        alias="depositStrategy",
+    )
+    deposit_value: Optional[float] = Field(None, ge=0, alias="depositValue")
+    late_cancel_fee_percent: float = Field(
+        0,
+        ge=0,
+        le=100,
+        alias="lateCancelFeePercent",
+    )
+    no_show_fee_percent: float = Field(
+        0,
+        ge=0,
+        le=100,
+        alias="noShowFeePercent",
+    )
+    required_datafield_config: Optional[ServiceAppointmentFieldConfig] = Field(
+        None,
+        alias="requiredDatafieldConfig",
+    )
+    placement: Optional[CreateDisplayOrderPlacement] = None
+
+
+class UpdateBusinessService(BaseModel):
+    """Schema for updating an existing business service."""
+
+    id: str
+    service_revision_id: Optional[str] = Field(
+        None,
+        alias="serviceRevisionId",
+    )
+    name: Optional[str] = Field(None, min_length=1)
+    description: Optional[str] = None
+    image_url: Optional[str] = Field(None, alias="imageUrl")
+    category_id: Optional[str] = Field(None, alias="categoryId")
+    booking_code: Optional[str] = Field(None, alias="bookingCode")
     duration: Optional[int] = Field(None, gt=0, le=480)
-    buffer_time: Optional[int] = Field(None, ge=0, alias="bufferTime")
+    duration_segments: Optional[ServiceDurationSegments] = Field(
+        None,
+        alias="durationSegments",
+    )
+    buffer_before: Optional[int] = Field(None, ge=0, alias="bufferBefore")
+    buffer_after: Optional[int] = Field(None, ge=0, alias="bufferAfter")
     is_bookable: Optional[bool] = Field(None, alias="isBookable")
-    price: Optional[float] = Field(None, ge=0)
+    allows_processing_chair_swap: Optional[bool] = Field(
+        None,
+        alias="allowsProcessingChairSwap",
+    )
+    service_availability: Optional[ServiceAvailability] = Field(
+        None,
+        alias="serviceAvailability",
+    )
+    max_concurrent_bookings: Optional[int] = Field(
+        None,
+        gt=0,
+        alias="maxConcurrentBookings",
+    )
+    base_price: Optional[float] = Field(None, ge=0, alias="basePrice")
+    price_mode: Optional[ServicePriceMode] = Field(None, alias="priceMode")
+    gratuity_mode: Optional[ServiceGratuityMode] = Field(
+        None,
+        alias="gratuityMode",
+    )
     is_active: Optional[bool] = Field(None, alias="isActive")
     display_order: Optional[int] = Field(None, alias="displayOrder")
+    channel_mappings: Optional[list[ServiceChannelMapping]] = Field(
+        None,
+        alias="channelMappings",
+    )
+    primary_service_user_account_id: Optional[str] = Field(
+        None,
+        alias="primaryServiceUserAccountId",
+    )
+    required_resources: Optional[list[str]] = Field(
+        None,
+        alias="requiredResources",
+    )
+    booking_rules: Optional[ServiceBookingRules] = Field(
+        None,
+        alias="bookingRules",
+    )
+    deposit_strategy: Optional[ServiceDepositStrategy] = Field(
+        None,
+        alias="depositStrategy",
+    )
+    deposit_value: Optional[float] = Field(None, ge=0, alias="depositValue")
+    late_cancel_fee_percent: Optional[float] = Field(
+        None,
+        ge=0,
+        le=100,
+        alias="lateCancelFeePercent",
+    )
+    no_show_fee_percent: Optional[float] = Field(
+        None,
+        ge=0,
+        le=100,
+        alias="noShowFeePercent",
+    )
+    required_datafield_config: Optional[ServiceAppointmentFieldConfig] = Field(
+        None,
+        alias="requiredDatafieldConfig",
+    )
+    placement: Optional[CreateDisplayOrderPlacement] = None
+
+
+class ServiceCatalog(BaseModel):
+    """Service catalog entry with category and services."""
+
+    service_category: ServiceCategory = Field(..., alias="serviceCategory")
+    services: list[BusinessServiceConfig]
+
+
+BusinessServiceCatalog = list[ServiceCatalog]
+
+
+__all__ = [
+    "ServicePriceMode",
+    "ServiceGratuityMode",
+    "ServiceAvailabilityMode",
+    "ServiceCategoryChannelMapping",
+    "ServiceChannelMapping",
+    "ServiceDurationSegments",
+    "ServiceDateRange",
+    "ServiceAvailability",
+    "ServiceAppointmentFieldConfig",
+    "ServiceCategory",
+    "CreateServiceCategory",
+    "UpdateServiceCategory",
+    "BusinessServiceConfig",
+    "CreateBusinessService",
+    "UpdateBusinessService",
+    "ServiceCatalog",
+    "BusinessServiceCatalog",
+]

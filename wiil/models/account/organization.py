@@ -2,17 +2,17 @@
 
 from typing import Any, Dict, List, Optional
 
-from pydantic import ConfigDict, Field
+from pydantic import Field, HttpUrl
 
 from wiil.models.account.supported_business_verticals import SupportedBusinessVerticalId
-from wiil.models.base import BaseModel
+from wiil.models.base import EntityModel
 from wiil.models.type_definitions.account_definitions import (
     ServiceStatus,
     ServiceSuspensionType,
 )
 
 
-class OrganizationServiceStatusRecord(BaseModel):
+class OrganizationServiceStatusRecord(EntityModel):
     """Organization service status history record.
 
     Tracks all status changes for an organization over time, providing
@@ -47,11 +47,6 @@ class OrganizationServiceStatusRecord(BaseModel):
         ```
     """
 
-    model_config = ConfigDict(
-        validate_by_name=True, validate_by_alias=True,
-        use_enum_values=True,
-    )
-
     status: ServiceStatus = Field(
         ...,
         description="Current status at the time of this record"
@@ -83,7 +78,7 @@ class OrganizationServiceStatusRecord(BaseModel):
     )
 
 
-class Organization(BaseModel):
+class Organization(EntityModel):
     """Organization entity.
 
     Represents a complete organization (company/business account) within the platform,
@@ -115,11 +110,6 @@ class Organization(BaseModel):
         )
         ```
     """
-
-    model_config = ConfigDict(
-        validate_by_name=True, validate_by_alias=True,
-        use_enum_values=True,
-    )
 
     company_name: str = Field(
         ...,
@@ -155,4 +145,31 @@ class Organization(BaseModel):
         None,
         description="Organization's platform contact email",
         alias="platformEmail"
+    )
+    primary_slug: Optional[str] = Field(
+        None,
+        description="Primary slug identifier for the organization",
+        alias="primarySlug"
+    )
+    primary_wiil_url: Optional[HttpUrl] = Field(
+        None,
+        description="Primary WIIL URL for the organization",
+        alias="primaryWiilUrl"
+    )
+    transactions_currency: Optional[str] = Field(
+        None,
+        description="Default currency for organization transactions",
+        alias="transactionsCurrency"
+    )
+    business_information: Optional[str] = Field(
+        None,
+        max_length=160,
+        description="Short business information summary (max 160 characters)",
+        alias="businessInformation"
+    )
+    detailed_business_information: Optional[str] = Field(
+        None,
+        max_length=1000,
+        description="Detailed business information (max 1000 characters)",
+        alias="detailedBusinessInformation"
     )

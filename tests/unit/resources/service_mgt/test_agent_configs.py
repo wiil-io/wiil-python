@@ -31,7 +31,7 @@ class TestAgentConfigurationsResource:
             "requiredModelConfig": None,
             "instructionConfigurationId": "inst_789",
             "assistantType": "general",
-            "callTransferConfig": [],
+            "call_transfer_config": [],
             "metadata": None,
             "model": None,
             "createdAt": 1234567890,
@@ -48,8 +48,8 @@ class TestAgentConfigurationsResource:
 
         result = client.agent_configs.create(CreateAgentConfiguration(
             name="Customer Service Agent",
+            model_id="YUSI21217J1",
             instruction_configuration_id="inst_789",
-            assistant_type="general"
         ))
 
         assert result.id == "agent_123"
@@ -69,7 +69,7 @@ class TestAgentConfigurationsResource:
             "requiredModelConfig": None,
             "instructionConfigurationId": "inst_789",
             "assistantType": "general",
-            "callTransferConfig": [],
+            "call_transfer_config": [],
             "metadata": None,
             "model": None,
             "createdAt": 1234567890,
@@ -122,7 +122,7 @@ class TestAgentConfigurationsResource:
             "requiredModelConfig": None,
             "instructionConfigurationId": "inst_789",
             "assistantType": "general",
-            "callTransferConfig": [],
+            "call_transfer_config": [],
             "metadata": {"description": "Updated description"},
             "model": None,
             "createdAt": 1234567890,
@@ -192,7 +192,7 @@ class TestAgentConfigurationsResource:
                 "requiredModelConfig": None,
                 "instructionConfigurationId": "inst_101",
                 "assistantType": "general",
-                "callTransferConfig": [],
+                "call_transfer_config": [],
                 "metadata": None,
                 "model": None,
                 "createdAt": 1234567890,
@@ -207,7 +207,7 @@ class TestAgentConfigurationsResource:
                 "requiredModelConfig": None,
                 "instructionConfigurationId": "inst_102",
                 "assistantType": "phone",
-                "callTransferConfig": [],
+                "call_transfer_config": [],
                 "metadata": None,
                 "model": None,
                 "createdAt": 1234567891,

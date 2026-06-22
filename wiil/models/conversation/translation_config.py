@@ -8,13 +8,12 @@ and cross-border communications.
 
 from typing import Optional
 
-from pydantic import BaseModel as PydanticBaseModel
-from pydantic import ConfigDict, Field
+from pydantic import Field
 
-from wiil.models.base import BaseModel, LanguageCode
+from wiil.models.base import BaseModel, EntityModel, LanguageCode
 
 
-class TranslationServiceRequest(BaseModel):
+class TranslationServiceRequest(EntityModel):
     """Translation service request schema.
 
     Request payload for initiating a real-time translation session between two participants speaking
@@ -39,12 +38,6 @@ class TranslationServiceRequest(BaseModel):
         - Multilingual conference calls with language bridges
     """
 
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
-
     initiator_id: str = Field(
         ...,
         description="Unique identifier for the initiator participant who is requesting the translation service (typically the customer or caller starting the session)"
@@ -67,17 +60,11 @@ class TranslationServiceRequest(BaseModel):
     )
 
 
-class CreateTranslationServiceRequest(PydanticBaseModel):
+class CreateTranslationServiceRequest(BaseModel):
     """Schema for creating a new translation service request.
     Omits auto-generated fields (id, created_at, updated_at).
     """
 
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
-
     initiator_id: str = Field(
         ...,
         description="Unique identifier for the initiator participant who is requesting the translation service (typically the customer or caller starting the session)"
@@ -100,7 +87,7 @@ class CreateTranslationServiceRequest(PydanticBaseModel):
     )
 
 
-class TranslationConversationConfig(PydanticBaseModel):
+class TranslationConversationConfig(BaseModel):
     """Translation conversation configuration schema.
 
     Configuration details for an active translation session including WebRTC connection identifiers,
@@ -123,12 +110,6 @@ class TranslationConversationConfig(PydanticBaseModel):
         - Tokens authenticate WebRTC connections
         - Session-scoped credentials prevent unauthorized access
     """
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
 
     sdrtn_id: Optional[str] = Field(
         None,

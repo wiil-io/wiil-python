@@ -7,9 +7,9 @@ content types and intelligent storage tier management for cost optimization.
 
 from typing import Any, Dict, Optional
 
-from pydantic import ConfigDict, Field
+from pydantic import Field
 
-from wiil.models.base import BaseModel
+from wiil.models.base import EntityModel
 from wiil.models.type_definitions import (
     KnowledgeBaseProcessingStatus,
     KnowledgeTypes,
@@ -17,7 +17,7 @@ from wiil.models.type_definitions import (
 )
 
 
-class KnowledgeSource(BaseModel):
+class KnowledgeSource(EntityModel):
     """Knowledge source for AI agent context.
 
     Knowledge Sources provide contextual information and domain knowledge for AI agents. They are
@@ -58,12 +58,6 @@ class KnowledgeSource(BaseModel):
         original_content_type: Original MIME type of the source content
         content_hash: Hash of content for deduplication and integrity
     """
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
 
     name: str = Field(
         ...,

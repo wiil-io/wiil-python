@@ -5,11 +5,12 @@ This module mirrors src/core/assistant-setups/assistant-setup-result.schema.ts
 
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import Field
 
+from wiil.models.base import BaseModel
 from wiil.models.service_mgt.agent_config import AgentConfiguration
 from wiil.models.service_mgt.interaction_channels import DeploymentChannel
-from wiil.models.service_mgt.deployment_config import DeploymentConfiguration
+from wiil.models.service_mgt.deployment_config import DeploymentConfigurationResult
 from wiil.models.service_mgt.instruction_config import InstructionConfiguration
 
 
@@ -41,12 +42,6 @@ class AssistantSetupResult(BaseModel):
         ```
     """
 
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
-
     success: bool = Field(
         ...,
         description="Whether the setup operation was successful"
@@ -66,7 +61,7 @@ class AssistantSetupResult(BaseModel):
         description="List of deployment channels created",
         alias="deploymentChannels"
     )
-    deployment_configurations: List[DeploymentConfiguration] = Field(
+    deployment_configurations: List[DeploymentConfigurationResult] = Field(
         ...,
         description="List of deployment configurations created",
         alias="deploymentConfigurations"

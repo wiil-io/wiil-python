@@ -64,16 +64,13 @@ class BusinessSupportServices(str, Enum):
         ```python
         enabled_services = [
             BusinessSupportServices.APPOINTMENT_MANAGEMENT,
-            BusinessSupportServices.INVENTORY_MANAGEMENT
+            BusinessSupportServices.MENU_ORDER_MANAGEMENT
         ]
         ```
     """
 
     APPOINTMENT_MANAGEMENT = "appointment_management"
     """Appointment scheduling and management functionality."""
-
-    INVENTORY_MANAGEMENT = "inventory_management"
-    """Inventory tracking and stock management functionality."""
 
     MENU_ORDER_MANAGEMENT = "menu_order_management"
     """Restaurant menu and food order management functionality."""

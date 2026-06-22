@@ -12,6 +12,7 @@ from wiil.models.business_mgt import (
     OrderPricing,
 )
 from wiil.types import PaginationRequest
+from wiil.types.business_types import MenuOrderType, OrderStatus
 
 BASE_URL = "https://api.wiil.io/v1"
 API_KEY = "test-api-key"
@@ -32,6 +33,7 @@ class TestMenuOrdersResource:
                     "id": "order_item_1",
                     "menuOrderId": "order_123",
                     "menuItemId": "item_123",
+                    "variantId": "variant_123",
                     "itemName": "Grilled Salmon",
                     "quantity": 2,
                     "unitPrice": 12.99,
@@ -44,7 +46,6 @@ class TestMenuOrdersResource:
                 }
             ],
             "customerId": "cust_123",
-            "customer": None,
             "pricing": {
                 "subtotal": 25.98,
                 "tax": 0.0,
@@ -64,8 +65,6 @@ class TestMenuOrdersResource:
             "specialInstructions": None,
             "allergies": None,
             "tableNumber": None,
-            "externalOrderId": None,
-            "source": "direct",
             "cancelReason": None,
             "notes": None,
             "serviceConversationConfigId": None,
@@ -83,10 +82,11 @@ class TestMenuOrdersResource:
         )
 
         result = client.menu_orders.create(CreateMenuOrder(
-            type="takeout",
+            type=MenuOrderType.TAKEOUT,
             customer_id="cust_123",
             items=[MenuOrderItemBase(
                 menu_item_id="item_123",
+                variant_id="variant_123",
                 item_name="Grilled Salmon",
                 quantity=2,
                 unit_price=12.99,
@@ -111,6 +111,7 @@ class TestMenuOrdersResource:
                     "id": "order_item_1",
                     "menuOrderId": "order_123",
                     "menuItemId": "item_123",
+                    "variantId": "variant_123",
                     "itemName": "Grilled Salmon",
                     "quantity": 2,
                     "unitPrice": 12.99,
@@ -123,7 +124,6 @@ class TestMenuOrdersResource:
                 }
             ],
             "customerId": "cust_123",
-            "customer": None,
             "pricing": {
                 "subtotal": 25.98,
                 "tax": 0.0,
@@ -143,8 +143,6 @@ class TestMenuOrdersResource:
             "specialInstructions": None,
             "allergies": None,
             "tableNumber": None,
-            "externalOrderId": None,
-            "source": "direct",
             "cancelReason": None,
             "notes": None,
             "serviceConversationConfigId": None,
@@ -178,6 +176,7 @@ class TestMenuOrdersResource:
                     "id": "order_item_1",
                     "menuOrderId": "order_123",
                     "menuItemId": "item_123",
+                    "variantId": "variant_123",
                     "itemName": "Grilled Salmon",
                     "quantity": 2,
                     "unitPrice": 12.99,
@@ -190,7 +189,6 @@ class TestMenuOrdersResource:
                 }
             ],
             "customerId": "cust_123",
-            "customer": None,
             "pricing": {
                 "subtotal": 25.98,
                 "tax": 0.0,
@@ -210,8 +208,6 @@ class TestMenuOrdersResource:
             "specialInstructions": None,
             "allergies": None,
             "tableNumber": "5",
-            "externalOrderId": None,
-            "source": "direct",
             "cancelReason": None,
             "notes": None,
             "serviceConversationConfigId": None,
@@ -230,7 +226,7 @@ class TestMenuOrdersResource:
 
         result = client.menu_orders.update(UpdateMenuOrder(
             id="order_123",
-            status="confirmed",
+            status=OrderStatus.CONFIRMED,
             table_number="5"
         ))
 
@@ -264,6 +260,7 @@ class TestMenuOrdersResource:
                         "id": "order_item_1",
                         "menuOrderId": "order_1",
                         "menuItemId": "item_123",
+                        "variantId": "variant_123",
                         "itemName": "Grilled Salmon",
                         "quantity": 2,
                         "unitPrice": 12.99,
@@ -276,7 +273,6 @@ class TestMenuOrdersResource:
                     }
                 ],
                 "customerId": "cust_123",
-                "customer": None,
                 "pricing": {
                     "subtotal": 25.98,
                     "tax": 0.0,
@@ -296,8 +292,6 @@ class TestMenuOrdersResource:
                 "specialInstructions": None,
                 "allergies": None,
                 "tableNumber": None,
-                "externalOrderId": None,
-                "source": "direct",
                 "cancelReason": None,
                 "notes": None,
                 "serviceConversationConfigId": None,
@@ -327,7 +321,9 @@ class TestMenuOrdersResource:
             status=200,
         )
 
-        result = client.menu_orders.list(PaginationRequest(page=1, page_size=10))
+        result = client.menu_orders.list(
+            PaginationRequest(page=1, page_size=10)
+        )
 
         assert len(result.data) == 1
         assert result.meta.total_count == 1
@@ -344,6 +340,7 @@ class TestMenuOrdersResource:
                     "id": "order_item_1",
                     "menuOrderId": "order_123",
                     "menuItemId": "item_123",
+                    "variantId": "variant_123",
                     "itemName": "Grilled Salmon",
                     "quantity": 2,
                     "unitPrice": 12.99,
@@ -356,7 +353,6 @@ class TestMenuOrdersResource:
                 }
             ],
             "customerId": "cust_123",
-            "customer": None,
             "pricing": {
                 "subtotal": 25.98,
                 "tax": 0.0,
@@ -376,8 +372,6 @@ class TestMenuOrdersResource:
             "specialInstructions": None,
             "allergies": None,
             "tableNumber": None,
-            "externalOrderId": None,
-            "source": "direct",
             "cancelReason": None,
             "notes": None,
             "serviceConversationConfigId": None,
@@ -398,6 +392,154 @@ class TestMenuOrdersResource:
 
         assert result.status == "completed"
 
+    def test_get_by_customer(self, client: WiilClient, mock_api, api_response):
+        """Test retrieving menu orders by customer."""
+        mock_response = {
+            "data": [
+                {
+                    "id": "order_1",
+                    "orderNumber": "A-42",
+                    "type": "takeout",
+                    "status": "pending",
+                    "items": [
+                        {
+                            "id": "order_item_1",
+                            "menuOrderId": "order_1",
+                            "menuItemId": "item_123",
+                            "variantId": "variant_123",
+                            "itemName": "Grilled Salmon",
+                            "quantity": 2,
+                            "unitPrice": 12.99,
+                            "totalPrice": 25.98,
+                            "specialInstructions": None,
+                            "customizations": None,
+                            "status": "pending",
+                            "preparationTime": None,
+                            "notes": None,
+                        }
+                    ],
+                    "customerId": "cust_123",
+                    "pricing": {
+                        "subtotal": 25.98,
+                        "tax": 0.0,
+                        "tip": 0.0,
+                        "shippingAmount": 0.0,
+                        "discount": 0.0,
+                        "total": 25.98,
+                        "currency": "USD",
+                    },
+                    "paymentStatus": "pending",
+                    "paymentMethod": None,
+                    "paymentReference": None,
+                    "orderDate": 1234567890,
+                    "requestedTime": None,
+                    "estimatedReadyTime": None,
+                    "actualReadyTime": None,
+                    "specialInstructions": None,
+                    "allergies": None,
+                    "tableNumber": None,
+                    "cancelReason": None,
+                    "notes": None,
+                    "serviceConversationConfigId": None,
+                    "deliveryAddress": None,
+                    "createdAt": 1234567890,
+                    "updatedAt": 1234567890,
+                }
+            ],
+            "meta": {
+                "page": 1,
+                "pageSize": 10,
+                "totalCount": 1,
+                "totalPages": 1,
+                "hasNextPage": False,
+                "hasPreviousPage": False,
+            },
+        }
+
+        mock_api.add(
+            responses.GET,
+            f"{BASE_URL}/menu-orders/by-customer/cust_123?page=1&pageSize=10",
+            headers={"X-Wiil-Api-Key": API_KEY},
+            json=api_response(mock_response),
+            status=200,
+        )
+
+        result = client.menu_orders.get_by_customer(
+            "cust_123",
+            PaginationRequest(page=1, page_size=10),
+        )
+
+        assert len(result.data) == 1
+        assert result.data[0].customer_id == "cust_123"
+
+    def test_cancel(self, client: WiilClient, mock_api, api_response):
+        """Test canceling a menu order."""
+        mock_response = {
+            "id": "order_123",
+            "orderNumber": "A-42",
+            "type": "takeout",
+            "status": "cancelled",
+            "items": [
+                {
+                    "id": "order_item_1",
+                    "menuOrderId": "order_123",
+                    "menuItemId": "item_123",
+                    "variantId": "variant_123",
+                    "itemName": "Grilled Salmon",
+                    "quantity": 2,
+                    "unitPrice": 12.99,
+                    "totalPrice": 25.98,
+                    "specialInstructions": None,
+                    "customizations": None,
+                    "status": "cancelled",
+                    "preparationTime": None,
+                    "notes": None,
+                }
+            ],
+            "customerId": "cust_123",
+            "pricing": {
+                "subtotal": 25.98,
+                "tax": 0.0,
+                "tip": 0.0,
+                "shippingAmount": 0.0,
+                "discount": 0.0,
+                "total": 25.98,
+                "currency": "USD",
+            },
+            "paymentStatus": "pending",
+            "paymentMethod": None,
+            "paymentReference": None,
+            "orderDate": 1234567890,
+            "requestedTime": None,
+            "estimatedReadyTime": None,
+            "actualReadyTime": None,
+            "specialInstructions": None,
+            "allergies": None,
+            "tableNumber": None,
+            "cancelReason": "Customer request",
+            "notes": None,
+            "serviceConversationConfigId": None,
+            "deliveryAddress": None,
+            "createdAt": 1234567890,
+            "updatedAt": 1234567891,
+        }
+
+        mock_api.add(
+            responses.POST,
+            f"{BASE_URL}/menu-orders/order_123/cancel",
+            headers={"X-Wiil-Api-Key": API_KEY},
+            json=api_response(mock_response),
+            status=200,
+        )
+
+        result = client.menu_orders.cancel(
+            "order_123",
+            reason="Customer request",
+        )
+
+        assert result.status == "cancelled"
+        assert result.cancel_reason == "Customer request"
+
     # =============== Error Handling Tests ===============
 
     def test_create_api_error(
@@ -414,10 +556,11 @@ class TestMenuOrdersResource:
 
         with pytest.raises(WiilAPIError) as exc_info:
             client.menu_orders.create(CreateMenuOrder(
-                type="takeout",
+                type=MenuOrderType.TAKEOUT,
                 customer_id="cust_123",
                 items=[MenuOrderItemBase(
                     menu_item_id="item_123",
+                    variant_id="variant_123",
                     item_name="Test",
                     quantity=1,
                     unit_price=10.0,

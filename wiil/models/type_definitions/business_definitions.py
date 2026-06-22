@@ -3,8 +3,22 @@
 This module mirrors src/core/type-definitions/business-definitions.ts
 """
 
+import re
 from enum import Enum
-from typing import List, TypedDict
+from typing import Dict, List, Optional, TypedDict
+
+from pydantic import Field
+
+from wiil.models.base import BaseModel
+
+
+class ExternalRef(BaseModel):
+    """External system reference for imported/synced records."""
+
+    external_id: str = Field(..., alias="externalId")
+    source: str
+    url: Optional[str] = None
+    synced_at: Optional[int] = Field(None, alias="syncedAt")
 
 
 class BusinessServiceType(str, Enum):
@@ -36,6 +50,7 @@ class ResourceType(str, Enum):
 
     TABLE = "table"
     ROOM = "room"
+    RENTAL = "rental"
     RENTALS = "rentals"
     RESOURCE = "resource"
 
@@ -55,6 +70,18 @@ class ReservationSettingType(str, Enum):
     RESOURCE_SPECIFIC = "resource_specific"
 
 
+class ReservationStatus(str, Enum):
+    """Reservation lifecycle status."""
+
+    PENDING = "pending"
+    CONFIRMED = "confirmed"
+    SEATED = "seated"
+    CHECKED_IN = "checked_in"
+    COMPLETED = "completed"
+    CANCELLED = "cancelled"
+    NO_SHOW = "no_show"
+
+
 class AppointmentStatus(str, Enum):
     """Appointment status enumeration."""
 
@@ -64,6 +91,21 @@ class AppointmentStatus(str, Enum):
     COMPLETED = "completed"
     NO_SHOW = "no_show"
     """For revenue tracking."""
+
+
+class ServiceProviderTimeOffType(str, Enum):
+    """Service provider time-off block type."""
+
+    SPECIFIC = "specific"
+    RECURRING = "recurring"
+
+
+class ServiceProviderTimeOffStatus(str, Enum):
+    """Service provider time-off approval status."""
+
+    PENDING = "pending"
+    APPROVED = "approved"
+    REJECTED = "rejected"
 
 
 class ReservationSlotStatus(str, Enum):
@@ -105,6 +147,26 @@ class PaymentStatus(str, Enum):
     PARTIAL = "partial"
     FAILED = "failed"
     REFUNDED = "refunded"
+
+
+class PricingChannel(str, Enum):
+    """Pricing channel enumeration for pricing rules."""
+
+    ALL = "ALL"
+    DIRECT = "DIRECT"
+    ONLINE = "ONLINE"
+    PHONE = "PHONE"
+    WALK_IN = "WALK_IN"
+
+
+class MenuPricingChannel(str, Enum):
+    """Menu-pricing channel enumeration for menu pricing rules."""
+
+    ALL = "all"
+    DINE_IN = "dine_in"
+    TAKEOUT = "takeout"
+    DELIVERY = "delivery"
+    ONLINE = "online"
 
 
 class MenuOrderType(str, Enum):
@@ -229,8 +291,14 @@ class BusinessDocumentTypes(str, Enum):
     TXT = "text/plain"
     JSON = "application/json"
     PDF = "application/pdf"
-    DOCX = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-    PPTX = "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+    DOCX = (
+        "application/vnd.openxmlformats-officedocument."
+        "wordprocessingml.document"
+    )
+    PPTX = (
+        "application/vnd.openxmlformats-officedocument."
+        "presentationml.presentation"
+    )
     PPT = "application/vnd.ms-powerpoint"
     HTML = "text/html"
     MD = "text/markdown"
@@ -245,6 +313,73 @@ class DayOfWeek(TypedDict):
     id: int
     name: str
     short: str
+
+
+class TimeSlot(TypedDict):
+    """Shared time slot schema with HH:MM 24-hour strings."""
+
+    start: str
+    end: str
+
+
+BreakTime = TimeSlot
+
+
+class SimpleDaySchedule(TypedDict):
+    """Simple day schedule without breaks."""
+
+    isOpen: bool
+    startTime: str
+    endTime: str
+
+
+class DaySchedule(SimpleDaySchedule, total=False):
+    """Day schedule with optional break periods."""
+
+    breakTimes: List[BreakTime]
+
+
+SimpleWeeklySchedule = Dict[str, SimpleDaySchedule]
+WeeklySchedule = Dict[str, DaySchedule]
+
+
+def _validate_time_hhmm(value: str) -> bool:
+    """Validate HH:MM time string."""
+    return re.fullmatch(r"^([01]?[0-9]|2[0-3]):[0-5][0-9]$", value) is not None
+
+
+def validate_time_slot(slot: TimeSlot) -> None:
+    """Validate a time slot shape and time format."""
+    if not _validate_time_hhmm(slot["start"]):
+        raise ValueError("Invalid time format (HH:MM)")
+    if not _validate_time_hhmm(slot["end"]):
+        raise ValueError("Invalid time format (HH:MM)")
+
+
+def validate_simple_day_schedule(schedule: SimpleDaySchedule) -> None:
+    """Validate simple day schedule time fields."""
+    if not _validate_time_hhmm(schedule["startTime"]):
+        raise ValueError("Invalid time format (HH:MM)")
+    if not _validate_time_hhmm(schedule["endTime"]):
+        raise ValueError("Invalid time format (HH:MM)")
+
+
+def validate_simple_weekly_schedule(schedule: SimpleWeeklySchedule) -> None:
+    """Validate weekly schedule keys are day indexes and values are valid."""
+    for day, day_schedule in schedule.items():
+        if re.fullmatch(r"^[0-6]$", day) is None:
+            raise ValueError("Day must be 0-6")
+        validate_simple_day_schedule(day_schedule)
+
+
+def validate_weekly_schedule(schedule: WeeklySchedule) -> None:
+    """Validate weekly schedule including break periods."""
+    for day, day_schedule in schedule.items():
+        if re.fullmatch(r"^[0-6]$", day) is None:
+            raise ValueError("Day must be 0-6")
+        validate_simple_day_schedule(day_schedule)
+        for break_time in day_schedule.get("breakTimes", []):
+            validate_time_slot(break_time)
 
 
 DAYS_OF_WEEK: List[DayOfWeek] = [
@@ -407,3 +542,79 @@ class PropertyInquiryStatus(str, Enum):
     FOLLOW_UP = "follow_up"
     CONVERTED = "converted"
     CLOSED = "closed"
+
+
+class TaxScope(str, Enum):
+    """Tax rule scope."""
+
+    ORDER = "ORDER"
+    ITEM = "ITEM"
+    SERVICE = "SERVICE"
+    DELIVERY = "DELIVERY"
+
+
+class TaxRateType(str, Enum):
+    """Tax rate type."""
+
+    PERCENTAGE = "PERCENTAGE"
+    FIXED = "FIXED"
+
+
+class TaxCatalogScope(str, Enum):
+    """Tax catalog scope."""
+
+    ALL = "ALL"
+    MENU = "MENU"
+    PRODUCT = "PRODUCT"
+    SERVICE = "SERVICE"
+    SET = "SET"
+
+
+class DiscountScope(str, Enum):
+    """Discount rule scope."""
+
+    ORDER = "ORDER"
+    ITEM = "ITEM"
+    SHIPPING = "SHIPPING"
+    SET = "SET"
+
+
+class DiscountType(str, Enum):
+    """Discount type."""
+
+    PERCENTAGE = "PERCENTAGE"
+    FIXED = "FIXED"
+
+
+class DiscountCatalogScope(str, Enum):
+    """Discount catalog scope."""
+
+    ALL = "ALL"
+    MENU = "MENU"
+    PRODUCT = "PRODUCT"
+    SERVICE = "SERVICE"
+    SET = "SET"
+
+
+class PricingRuleApplyLevel(str, Enum):
+    """Pricing rule application level."""
+
+    ITEM = "ITEM"
+    ORDER = "ORDER"
+
+
+class PricingRuleAdjustmentType(str, Enum):
+    """Pricing rule adjustment type."""
+
+    PERCENTAGE = "PERCENTAGE"
+    FIXED = "FIXED"
+    OVERRIDE = "OVERRIDE"
+
+
+class VariantAxisType(str, Enum):
+    """Variant axis display/input type."""
+
+    SWATCH = "swatch"
+    TEXT = "text"
+    IMAGE = "image"
+    NUMERIC = "numeric"

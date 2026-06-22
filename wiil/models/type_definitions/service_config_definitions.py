@@ -5,7 +5,9 @@ This module mirrors src/core/type-definitions/service-config.definitions.ts
 
 from enum import Enum
 
-from wiil.models.type_definitions.account_definitions import BusinessSupportServices
+from wiil.models.type_definitions.account_definitions import (
+    BusinessSupportServices,
+)
 
 
 class DeploymentType(str, Enum):
@@ -34,6 +36,20 @@ class ProviderType(str, Enum):
     TWILIO = "twilio"
     SIGNALWIRE = "signal-wire"
     TELNYX = "telnyx"
+    MESSAGEBIRD = "messagebird"
+    SNS = "sns"
+
+
+class EmailProviderType(str, Enum):
+    """Email provider type enumeration."""
+
+    GOOGLE = "google"
+    OUTLOOK = "outlook"
+    SENDGRID = "sendgrid"
+    SES = "ses"
+    MAILGUN = "mailgun"
+    POSTMARK = "postmark"
+    SMTP = "smtp"
 
 
 class PhonePurchaseStatus(str, Enum):
@@ -118,6 +134,7 @@ class SupportedProprietor(str, Enum):
     GOOGLE = "Google"
     ANTHROPIC = "Anthropic"
     GROQ = "Groq"
+    XAI = "xAI"
     DEEPGRAM = "Deepgram"
     ELEVENLABS = "ElevenLabs"
     DEEPSEEK = "DeepSeek"
@@ -131,6 +148,7 @@ class SupportedLLMKit(str, Enum):
     GOOGLE = "google-kit"
     ANTHROPIC = "anthropic-kit"
     GROQ = "groq-kit"
+    XAI = "xai-kit"
     DEEPGRAM = "deepgram-kit"
     ELEVENLABS = "elevenlabs-kit"
     DEEPSEEK = "deepseek-kit"

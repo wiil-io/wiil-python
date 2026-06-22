@@ -148,14 +148,12 @@ class ProvisioningConfigurationsResource:
 
     def list(
         self,
-        params: Optional[PaginationRequest] = None,
-        include_deleted: Optional[bool] = None
+        params: Optional[PaginationRequest] = None
     ) -> PaginatedResult[TranslationChainConfig]:
         """List translation chain configurations with pagination.
 
         Args:
             params: Pagination parameters
-            include_deleted: Include deleted configurations
 
         Returns:
             Paginated list of translation chain configurations
@@ -166,12 +164,35 @@ class ProvisioningConfigurationsResource:
                 query_parts.append(f'page={params.page}')
             if params.page_size:
                 query_parts.append(f'pageSize={params.page_size}')
-        if include_deleted is not None:
-            query_parts.append(f'includeDeleted={str(include_deleted).lower()}')
 
         query_string = '?' + '&'.join(query_parts) if query_parts else ''
         return self._http.get(
             f'{self._base_path}/translations{query_string}',
+            response_model=PaginatedResult[TranslationChainConfig]
+        )
+
+    def get_provisioning(
+        self,
+        params: Optional[PaginationRequest] = None
+    ) -> PaginatedResult[TranslationChainConfig]:
+        """List provisioning configurations with pagination.
+
+        Args:
+            params: Pagination parameters
+
+        Returns:
+            Paginated list of provisioning configurations
+        """
+        query_parts = []
+        if params:
+            if params.page:
+                query_parts.append(f'page={params.page}')
+            if params.page_size:
+                query_parts.append(f'pageSize={params.page_size}')
+
+        query_string = '?' + '&'.join(query_parts) if query_parts else ''
+        return self._http.get(
+            f'{self._base_path}/provisioning{query_string}',
             response_model=PaginatedResult[TranslationChainConfig]
         )
 

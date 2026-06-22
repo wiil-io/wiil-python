@@ -7,8 +7,7 @@ configurations in phone_agent_setup.py and web_agent_setup.py.
 
 from typing import Any, Dict, List, Literal, Optional
 
-from pydantic import BaseModel as PydanticBaseModel
-from pydantic import ConfigDict, Field
+from pydantic import Field
 
 from wiil.models.base import BaseModel
 from wiil.models.type_definitions import AgentCapabilities, AgentRoleTemplateIdentifier, SupportedProprietor
@@ -18,7 +17,7 @@ from wiil.models.type_definitions import AgentCapabilities, AgentRoleTemplateIde
 ProcessingStatus = Literal["pending", "in_progress", "completed", "failed"]
 
 
-class DynamicBaseAgentSetup(PydanticBaseModel):
+class DynamicBaseAgentSetup(BaseModel):
     """Base agent setup schema.
 
     Attributes:
@@ -32,12 +31,6 @@ class DynamicBaseAgentSetup(PydanticBaseModel):
         provider_type: AI model provider type
         provider_model_id: Specific model ID from the provider
     """
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
 
     assistant_name: str = Field(
         ...,
@@ -83,19 +76,13 @@ class DynamicBaseAgentSetup(PydanticBaseModel):
     )
 
 
-class DynamicModelConfiguration(PydanticBaseModel):
+class DynamicModelConfiguration(BaseModel):
     """Model configuration schema.
 
     Attributes:
         provider_type: AI model provider type
         provider_model_id: Specific model ID from the provider
     """
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
 
     provider_type: SupportedProprietor = Field(
         ...,
@@ -147,7 +134,7 @@ class DynamicTTSModelConfiguration(DynamicModelConfiguration):
     )
 
 
-class DynamicAgentProcessingState(PydanticBaseModel):
+class DynamicAgentProcessingState(BaseModel):
     """Agent processing state schema for tracking long-running setup operations.
 
     Attributes:
@@ -155,12 +142,6 @@ class DynamicAgentProcessingState(PydanticBaseModel):
         progress_percentage: Progress percentage (0-100)
         message: Additional details about current state
     """
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
 
     status: ProcessingStatus = Field(
         ...,
@@ -192,12 +173,6 @@ class DynamicAgentSetupResult(BaseModel):
         error_message: Error message if setup failed
         metadata: Additional metadata about the setup
     """
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
 
     processing_state: DynamicAgentProcessingState = Field(
         ...,

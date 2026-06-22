@@ -11,40 +11,63 @@ from pydantic import ConfigDict, Field
 
 
 class BaseModel(PydanticBaseModel):
-    """Base model for all WIIL entities.
+    """Canonical configuration base for all WIIL SDK models.
 
-    Provides common fields for all models including unique identifier
-    and timestamp tracking.
+    This is the single source of truth for model configuration across the
+    SDK. Every other model in the SDK should extend this class (directly or
+    transitively) so that validation behavior remains consistent.
 
-    Attributes:
-        id: Unique identifier for the model
-        created_at: Date when the model was created (Unix timestamp)
-        updated_at: Date when the model was last updated (Unix timestamp)
+    The configuration enforces:
+        - Population by both field name and alias (``validate_by_name`` and
+          ``validate_by_alias``).
+        - Enum values are used during validation (``use_enum_values``).
+        - Strict type coercion rules (``strict``).
+        - Rejection of unknown fields (``extra="forbid"``).
+
+    This class intentionally declares no fields; it exists purely to provide
+    shared configuration.
     """
 
     model_config = ConfigDict(
-        validate_by_name=True, validate_by_alias=True,
+        validate_by_name=True,
+        validate_by_alias=True,
         use_enum_values=True,
-        validate_assignment=True,
+        strict=True,
+        extra="forbid",
     )
 
-    id: str = Field(..., description="Unique identifier for the model")
+
+class EntityModel(BaseModel):
+    """Base model for persisted WIIL entities.
+
+    Extends :class:`BaseModel` with the fields common to all entities that
+    are stored and tracked over time. Inherits the strict configuration from
+    :class:`BaseModel`.
+
+    Attributes:
+        id: Unique identifier for the entity.
+        created_at: Date when the entity was created (Unix timestamp).
+        updated_at: Date when the entity was last updated (Unix timestamp).
+    """
+
+    id: str = Field(..., description="Unique identifier for the entity")
     created_at: Optional[int] = Field(
         None,
-        description="Date when the model was created",
-        alias="createdAt"
+        alias="createdAt",
+        description="Date when the entity was created",
     )
     updated_at: Optional[int] = Field(
         None,
-        description="Date when the model was last updated",
-        alias="updatedAt"
+        alias="updatedAt",
+        description="Date when the entity was last updated",
     )
 
 
-class Address(PydanticBaseModel):
+class Address(BaseModel):
     """Physical address model.
 
     Represents a complete mailing/physical address with all required components.
+    Inherits the strict configuration from :class:`BaseModel`.
 
     Attributes:
         street: Primary street address
@@ -65,11 +88,6 @@ class Address(PydanticBaseModel):
         )
         ```
     """
-
-    model_config = ConfigDict(
-        validate_by_name=True, validate_by_alias=True,
-        use_enum_values=True,
-    )
 
     street: str = Field(..., min_length=2, description="Primary street address")
     street2: Optional[str] = Field(None, description="Secondary street address")

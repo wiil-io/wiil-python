@@ -55,5 +55,20 @@ class OrganizationsResource:
         """
         return self._http.get('/organizations', response_model=Organization)
 
+    def get_service_status(self):
+        """Retrieve the service status for the organization that owns the API key.
+
+        Returns:
+            The organization service status payload
+
+        Raises:
+            WiilAPIError: When the API returns an error
+            WiilNetworkError: When network communication fails
+
+        Example:
+            >>> status = client.organizations.get_service_status()
+        """
+        return self._http.get('/organizations/service-status', response_model=None)
+
 
 __all__ = ['OrganizationsResource']

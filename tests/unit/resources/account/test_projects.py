@@ -21,7 +21,6 @@ class TestProjectsResource:
         input_data = CreateProject(
             name="Production Environment",
             description="Main production deployment",
-            is_default=True,
         )
 
         mock_response = {
@@ -52,7 +51,7 @@ class TestProjectsResource:
         """Test validation error for invalid input."""
         with pytest.raises(WiilValidationError):
             # Name too short - should fail validation
-            CreateProject(name="P", is_default=True)
+            CreateProject(name="P")
 
     def test_get_project(self, client: WiilClient, mock_api, api_response):
         """Test retrieving a project by ID."""

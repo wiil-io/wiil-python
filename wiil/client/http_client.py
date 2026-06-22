@@ -180,7 +180,12 @@ class HttpClient:
         if schema:
             try:
                 if isinstance(data, dict):
-                    validated_data = schema(**data)
+                    # Validate in JSON mode so wire-format values (e.g. string
+                    # enum members produced by model_dump under
+                    # use_enum_values=True) are accepted while strict type and
+                    # extra-key checks remain enforced — mirrors the response
+                    # validation path.
+                    validated_data = schema.model_validate_json(json.dumps(data))
                     data = validated_data.model_dump(by_alias=True, exclude_none=True)
                 elif isinstance(data, BaseModel):
                     data = data.model_dump(by_alias=True, exclude_none=True)
@@ -274,7 +279,12 @@ class HttpClient:
         if schema:
             try:
                 if isinstance(data, dict):
-                    validated_data = schema(**data)
+                    # Validate in JSON mode so wire-format values (e.g. string
+                    # enum members produced by model_dump under
+                    # use_enum_values=True) are accepted while strict type and
+                    # extra-key checks remain enforced — mirrors the response
+                    # validation path.
+                    validated_data = schema.model_validate_json(json.dumps(data))
                     data = validated_data.model_dump(by_alias=True, exclude_none=True)
                 elif isinstance(data, BaseModel):
                     data = data.model_dump(by_alias=True, exclude_none=True)
@@ -368,7 +378,12 @@ class HttpClient:
         if schema:
             try:
                 if isinstance(data, dict):
-                    validated_data = schema(**data)
+                    # Validate in JSON mode so wire-format values (e.g. string
+                    # enum members produced by model_dump under
+                    # use_enum_values=True) are accepted while strict type and
+                    # extra-key checks remain enforced — mirrors the response
+                    # validation path.
+                    validated_data = schema.model_validate_json(json.dumps(data))
                     data = validated_data.model_dump(by_alias=True, exclude_none=True)
                 elif isinstance(data, BaseModel):
                     data = data.model_dump(by_alias=True, exclude_none=True)
@@ -599,19 +614,29 @@ class HttpClient:
             return data
 
         try:
+            # Validate in JSON mode so wire-format values (e.g. string enum
+            # members) are accepted while strict type/extra-key checks remain
+            # enforced. The data originates from response.json(), so re-encoding
+            # is lossless for JSON-native types.
             # Handle List[Model] types
             origin = get_origin(response_model)
             if origin is list:
                 args = get_args(response_model)
                 if args and isinstance(data, list):
                     item_model = args[0]
-                    return [item_model.model_validate(item) for item in data]
+                    return [
+                        item_model.model_validate_json(json.dumps(item))
+                        for item in data
+                    ]
 
             # Handle single model
             if isinstance(data, list):
-                return [response_model.model_validate(item) for item in data]
+                return [
+                    response_model.model_validate_json(json.dumps(item))
+                    for item in data
+                ]
 
-            return response_model.model_validate(data)
+            return response_model.model_validate_json(json.dumps(data))
 
         except ValidationError as e:
             raise WiilValidationError(

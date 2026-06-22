@@ -157,8 +157,8 @@ class PaginationRequest(BaseModel):
         description="Field name to sort by",
         alias="sortBy"
     )
-    sort_direction: Optional[Literal['asc', 'desc']] = Field(
-        default=None,
+    sort_direction: Literal['asc', 'desc'] = Field(
+        default='asc',
         description="Sort direction - ascending or descending",
         alias="sortDirection"
     )

@@ -5,7 +5,7 @@ from urllib.parse import urlencode
 
 from wiil.client.http_client import HttpClient
 from wiil.models.service_mgt import (
-    DeploymentConfiguration,
+    DeploymentConfigurationResult,
     CreateDeploymentConfiguration,
     CreateChainDeploymentConfiguration,
     UpdateDeploymentConfiguration,
@@ -25,7 +25,7 @@ class DeploymentConfigurationsResource:
         self._http = http
         self._base_path = '/deployment-configurations'
 
-    def create(self, data: CreateDeploymentConfiguration) -> DeploymentConfiguration:
+    def create(self, data: CreateDeploymentConfiguration) -> DeploymentConfigurationResult:
         """Create a new deployment configuration.
 
         Args:
@@ -38,13 +38,13 @@ class DeploymentConfigurationsResource:
             self._base_path,
             data.model_dump(by_alias=True, exclude_none=True),
             schema=CreateDeploymentConfiguration,
-            response_model=DeploymentConfiguration
+            response_model=DeploymentConfigurationResult
         )
 
     def create_chain(
         self,
         data: CreateChainDeploymentConfiguration
-    ) -> DeploymentConfiguration:
+    ) -> DeploymentConfigurationResult:
         """Create a chained deployment configuration.
 
         Args:
@@ -57,18 +57,37 @@ class DeploymentConfigurationsResource:
             self._base_path,
             data.model_dump(by_alias=True, exclude_none=True),
             schema=CreateChainDeploymentConfiguration,
-            response_model=DeploymentConfiguration
+            response_model=DeploymentConfigurationResult
         )
 
-    def get(self, config_id: str) -> DeploymentConfiguration:
+    def create_chain_endpoint(
+        self,
+        data: CreateChainDeploymentConfiguration
+    ) -> DeploymentConfigurationResult:
+        """Create a chained deployment configuration via the dedicated chain route.
+
+        Args:
+            data: Chain deployment configuration data
+
+        Returns:
+            The created deployment configuration
+        """
+        return self._http.post(
+            f'{self._base_path}/chain',
+            data.model_dump(by_alias=True, exclude_none=True),
+            schema=CreateChainDeploymentConfiguration,
+            response_model=DeploymentConfigurationResult
+        )
+
+    def get(self, config_id: str) -> DeploymentConfigurationResult:
         """Retrieve a deployment configuration by ID."""
-        return self._http.get(f'{self._base_path}/{config_id}', response_model=DeploymentConfiguration)
+        return self._http.get(f'{self._base_path}/{config_id}', response_model=DeploymentConfigurationResult)
 
-    def get_by_channel(self, channel_id: str) -> DeploymentConfiguration:
+    def get_by_channel(self, channel_id: str) -> DeploymentConfigurationResult:
         """Retrieve a deployment configuration by channel ID."""
-        return self._http.get(f'{self._base_path}/by-channel/{channel_id}', response_model=DeploymentConfiguration)
+        return self._http.get(f'{self._base_path}/by-channel/{channel_id}', response_model=DeploymentConfigurationResult)
 
-    def update(self, data: UpdateDeploymentConfiguration) -> DeploymentConfiguration:
+    def update(self, data: UpdateDeploymentConfiguration) -> DeploymentConfigurationResult:
         """Update an existing deployment configuration.
 
         Args:
@@ -81,7 +100,7 @@ class DeploymentConfigurationsResource:
             self._base_path,
             data.model_dump(by_alias=True, exclude_none=True),
             schema=UpdateDeploymentConfiguration,
-            response_model=DeploymentConfiguration
+            response_model=DeploymentConfigurationResult
         )
 
     def delete(self, config_id: str) -> bool:
@@ -91,7 +110,7 @@ class DeploymentConfigurationsResource:
     def list(
         self,
         params: Optional[PaginationRequest] = None
-    ) -> PaginatedResult[DeploymentConfiguration]:
+    ) -> PaginatedResult[DeploymentConfigurationResult]:
         """List deployment configurations with pagination.
 
         Args:
@@ -108,14 +127,14 @@ class DeploymentConfigurationsResource:
         query_string = f'?{urlencode(query_params)}' if query_params else ''
         return self._http.get(
             f'{self._base_path}{query_string}',
-            response_model=PaginatedResult[DeploymentConfiguration]
+            response_model=PaginatedResult[DeploymentConfigurationResult]
         )
 
     def list_by_project(
         self,
         project_id: str,
         params: Optional[PaginationRequest] = None
-    ) -> PaginatedResult[DeploymentConfiguration]:
+    ) -> PaginatedResult[DeploymentConfigurationResult]:
         """List deployment configurations by project ID.
 
         Args:
@@ -133,14 +152,14 @@ class DeploymentConfigurationsResource:
         query_string = f'?{urlencode(query_params)}' if query_params else ''
         return self._http.get(
             f'{self._base_path}/by-project/{project_id}{query_string}',
-            response_model=PaginatedResult[DeploymentConfiguration]
+            response_model=PaginatedResult[DeploymentConfigurationResult]
         )
 
     def list_by_agent(
         self,
         agent_id: str,
         params: Optional[PaginationRequest] = None
-    ) -> PaginatedResult[DeploymentConfiguration]:
+    ) -> PaginatedResult[DeploymentConfigurationResult]:
         """List deployment configurations by agent configuration ID.
 
         Args:
@@ -158,14 +177,14 @@ class DeploymentConfigurationsResource:
         query_string = f'?{urlencode(query_params)}' if query_params else ''
         return self._http.get(
             f'{self._base_path}/by-agent/{agent_id}{query_string}',
-            response_model=PaginatedResult[DeploymentConfiguration]
+            response_model=PaginatedResult[DeploymentConfigurationResult]
         )
 
     def list_by_instruction(
         self,
         instruction_id: str,
         params: Optional[PaginationRequest] = None
-    ) -> PaginatedResult[DeploymentConfiguration]:
+    ) -> PaginatedResult[DeploymentConfigurationResult]:
         """List deployment configurations by instruction configuration ID.
 
         Args:
@@ -183,7 +202,7 @@ class DeploymentConfigurationsResource:
         query_string = f'?{urlencode(query_params)}' if query_params else ''
         return self._http.get(
             f'{self._base_path}/by-instruction/{instruction_id}{query_string}',
-            response_model=PaginatedResult[DeploymentConfiguration]
+            response_model=PaginatedResult[DeploymentConfigurationResult]
         )
 
 

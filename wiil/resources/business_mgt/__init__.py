@@ -1,27 +1,102 @@
-"""Business Management resource classes for managing business operations."""
+"""Business management resource classes for business operations."""
 
-from wiil.resources.business_mgt.customers import CustomersResource
-from wiil.resources.business_mgt.menus import MenusResource
-from wiil.resources.business_mgt.menu_orders import MenuOrdersResource
-from wiil.resources.business_mgt.products import ProductsResource
-from wiil.resources.business_mgt.product_orders import ProductOrdersResource
-from wiil.resources.business_mgt.reservations import ReservationsResource
-from wiil.resources.business_mgt.reservation_resources import ReservationResourcesResource
-from wiil.resources.business_mgt.service_appointments import ServiceAppointmentsResource
-from wiil.resources.business_mgt.business_services import BusinessServicesResource
-from wiil.resources.business_mgt.property_config import PropertyConfigResource
-from wiil.resources.business_mgt.property_inquiry import PropertyInquiryResource
+from .customer_management import (
+    CustomerGroupsResource,
+    CustomersResource,
+    ShippingAddressesResource,
+)
+from .menu_management import (
+    MenuItemVariantsResource,
+    MenuOrdersResource,
+    MenuPricingRulesResource,
+    MenusResource,
+    MenuSetsResource,
+    ModifiersResource,
+)
+from .product_management import (
+    ProductAxisBindingsResource,
+    ProductOrdersResource,
+    ProductPricingRulesResource,
+    ProductsResource,
+    ProductSetsResource,
+    ProductVariantAxesResource,
+    ProductVariantsResource,
+)
+from .pricing_rules import DiscountRulesResource, TaxRulesResource
+from .location_management import BusinessLocationsResource
+from .property_management import (
+    PropertyConfigResource,
+    PropertyInquiryResource,
+)
+from .reservation_management import (
+    FloorPlansResource,
+    FloorPlanSectionsResource,
+    MaintenanceBlocksResource,
+    RentalAssignmentsResource,
+    RentalReservationsResource,
+    ReservationResourcesResource,
+    ReservationSettingsResource,
+    ResourceCategoriesResource,
+    ResourceInstancesResource,
+    RoomAssignmentsResource,
+    RoomReservationsResource,
+    TableAssignmentsResource,
+    TableReservationsResource,
+)
+from .service_management import (
+    AppointmentAdditionalInfoResource,
+    AppointmentFieldConfigsResource,
+    BusinessServicesResource,
+    ServiceAppointmentsResource,
+    ServiceCategoriesResource,
+    ServicePersonsResource,
+    ServicePricingRulesResource,
+    ServiceProvidersResource,
+    ServiceTimeOffsResource,
+)
 
 __all__ = [
     'CustomersResource',
+    'CustomerGroupsResource',
+    'ShippingAddressesResource',
     'MenusResource',
     'MenuOrdersResource',
+    'MenuItemVariantsResource',
+    'MenuPricingRulesResource',
+    'MenuSetsResource',
+    'ModifiersResource',
     'ProductsResource',
     'ProductOrdersResource',
-    'ReservationsResource',
+    'ProductVariantsResource',
+    'ProductVariantAxesResource',
+    'ProductAxisBindingsResource',
+    'ProductSetsResource',
+    'ProductPricingRulesResource',
+    'DiscountRulesResource',
+    'TaxRulesResource',
     'ReservationResourcesResource',
+    'ReservationSettingsResource',
+    'ResourceCategoriesResource',
+    'ResourceInstancesResource',
+    'FloorPlansResource',
+    'FloorPlanSectionsResource',
+    'MaintenanceBlocksResource',
+    'TableAssignmentsResource',
+    'RoomAssignmentsResource',
+    'RentalAssignmentsResource',
+    'TableReservationsResource',
+    'RoomReservationsResource',
+    'RentalReservationsResource',
+    'AppointmentAdditionalInfoResource',
+    'AppointmentFieldConfigsResource',
     'ServiceAppointmentsResource',
     'BusinessServicesResource',
+    'ServiceCategoriesResource',
+    'ServicePersonsResource',
+    'ServicePricingRulesResource',
+    'ServiceProvidersResource',
+    'ServiceTimeOffsResource',
     'PropertyConfigResource',
     'PropertyInquiryResource',
+    'BusinessLocationsResource',
 ]

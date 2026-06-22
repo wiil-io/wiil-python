@@ -9,6 +9,7 @@ from wiil.models.business_mgt import (
     CreateResource,
     UpdateResource,
 )
+from wiil.models.type_definitions.business_definitions import ResourceType
 from wiil.types import PaginationRequest
 
 BASE_URL = "https://api.wiil.io/v1"
@@ -31,11 +32,6 @@ class TestReservationResourcesResource:
             "amenities": [],
             "reservationDuration": None,
             "reservationDurationUnit": None,
-            "calendarId": None,
-            "syncEnabled": False,
-            "lastSyncAt": None,
-            "roomResource": None,
-            "rentalResource": None,
             "metadata": None,
             "createdAt": 1234567890,
             "updatedAt": 1234567890,
@@ -50,7 +46,7 @@ class TestReservationResourcesResource:
 
         result = client.reservation_resources.create(CreateResource(
             name="Table 1",
-            resource_type="table",
+            resource_type=ResourceType.TABLE,
             capacity=4,
             description="Window side table"
         ))
@@ -72,11 +68,6 @@ class TestReservationResourcesResource:
             "amenities": [],
             "reservationDuration": None,
             "reservationDurationUnit": None,
-            "calendarId": None,
-            "syncEnabled": False,
-            "lastSyncAt": None,
-            "roomResource": None,
-            "rentalResource": None,
             "metadata": None,
             "createdAt": 1234567890,
             "updatedAt": 1234567890,
@@ -107,11 +98,6 @@ class TestReservationResourcesResource:
             "amenities": [],
             "reservationDuration": None,
             "reservationDurationUnit": None,
-            "calendarId": None,
-            "syncEnabled": False,
-            "lastSyncAt": None,
-            "roomResource": None,
-            "rentalResource": None,
             "metadata": None,
             "createdAt": 1234567890,
             "updatedAt": 1234567891,
@@ -160,11 +146,6 @@ class TestReservationResourcesResource:
                 "amenities": [],
                 "reservationDuration": None,
                 "reservationDurationUnit": None,
-                "calendarId": None,
-                "syncEnabled": False,
-                "lastSyncAt": None,
-                "roomResource": None,
-                "rentalResource": None,
                 "metadata": None,
                 "createdAt": 1234567890,
                 "updatedAt": 1234567890,
@@ -180,11 +161,6 @@ class TestReservationResourcesResource:
                 "amenities": [],
                 "reservationDuration": None,
                 "reservationDurationUnit": None,
-                "calendarId": None,
-                "syncEnabled": False,
-                "lastSyncAt": None,
-                "roomResource": None,
-                "rentalResource": None,
                 "metadata": None,
                 "createdAt": 1234567891,
                 "updatedAt": 1234567891,
@@ -231,11 +207,6 @@ class TestReservationResourcesResource:
                 "amenities": [],
                 "reservationDuration": None,
                 "reservationDurationUnit": None,
-                "calendarId": None,
-                "syncEnabled": False,
-                "lastSyncAt": None,
-                "roomResource": None,
-                "rentalResource": None,
                 "metadata": None,
                 "createdAt": 1234567890,
                 "updatedAt": 1234567890,
@@ -251,11 +222,6 @@ class TestReservationResourcesResource:
                 "amenities": [],
                 "reservationDuration": None,
                 "reservationDurationUnit": None,
-                "calendarId": None,
-                "syncEnabled": False,
-                "lastSyncAt": None,
-                "roomResource": None,
-                "rentalResource": None,
                 "metadata": None,
                 "createdAt": 1234567891,
                 "updatedAt": 1234567891,
@@ -304,8 +270,8 @@ class TestReservationResourcesResource:
 
         with pytest.raises(WiilAPIError) as exc_info:
             client.reservation_resources.create(CreateResource(
-                name="",
-                resource_type="table"
+                name="Table 1",
+                resource_type=ResourceType.TABLE
             ))
 
         assert exc_info.value.code == "VALIDATION_ERROR"

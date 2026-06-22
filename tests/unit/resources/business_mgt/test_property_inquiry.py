@@ -10,6 +10,10 @@ from wiil.models.business_mgt import (
     UpdatePropertyInquiry,
     UpdatePropertyInquiryStatus,
 )
+from wiil.models.type_definitions.business_definitions import (
+    PropertyInquiryStatus,
+    PropertyInquiryType,
+)
 from wiil.types import PaginationRequest
 
 BASE_URL = "https://api.wiil.io/v1"
@@ -46,10 +50,6 @@ class TestPropertyInquiryResource:
             "budgetMin": 300000,
             "budgetMax": 500000,
             "notes": None,
-            "assignedUserAccountId": None,
-            "calendarId": None,
-            "calendarEventId": None,
-            "calendarProvider": None,
             "cancelReason": None,
             "serviceConversationConfigId": None,
             "createdAt": 1234567890,
@@ -67,7 +67,7 @@ class TestPropertyInquiryResource:
         result = client.property_inquiry.create(CreatePropertyInquiry(
             property_id="prop_123",
             customer_id="cust_123",
-            inquiry_type="general",
+            inquiry_type=PropertyInquiryType.GENERAL,
             message="I'm interested in viewing this property",
             source="website",
             preferred_viewing_date=1234567890,
@@ -107,10 +107,6 @@ class TestPropertyInquiryResource:
             "budgetMin": None,
             "budgetMax": None,
             "notes": None,
-            "assignedUserAccountId": None,
-            "calendarId": None,
-            "calendarEventId": None,
-            "calendarProvider": None,
             "cancelReason": None,
             "serviceConversationConfigId": None,
             "createdAt": 1234567890,
@@ -160,10 +156,6 @@ class TestPropertyInquiryResource:
                 "budgetMin": None,
                 "budgetMax": None,
                 "notes": None,
-                "assignedUserAccountId": None,
-                "calendarId": None,
-                "calendarEventId": None,
-                "calendarProvider": None,
                 "cancelReason": None,
                 "serviceConversationConfigId": None,
                 "createdAt": 1234567890,
@@ -229,10 +221,6 @@ class TestPropertyInquiryResource:
                 "budgetMin": 400000,
                 "budgetMax": 600000,
                 "notes": None,
-                "assignedUserAccountId": None,
-                "calendarId": None,
-                "calendarEventId": None,
-                "calendarProvider": None,
                 "cancelReason": None,
                 "serviceConversationConfigId": None,
                 "createdAt": 1234567890,
@@ -295,10 +283,6 @@ class TestPropertyInquiryResource:
             "budgetMin": 350000,
             "budgetMax": 550000,
             "notes": "Serious buyer",
-            "assignedUserAccountId": None,
-            "calendarId": None,
-            "calendarEventId": None,
-            "calendarProvider": None,
             "cancelReason": None,
             "serviceConversationConfigId": None,
             "createdAt": 1234567890,
@@ -316,7 +300,7 @@ class TestPropertyInquiryResource:
         result = client.property_inquiry.update(UpdatePropertyInquiry(
             id="inq_123",
             message="Updated message",
-            status="contacted",
+            status=PropertyInquiryStatus.CONTACTED,
             assigned_agent_id="agent_123",
             scheduled_viewing_date=1234567891,
             follow_up_date=1234567892,
@@ -358,10 +342,6 @@ class TestPropertyInquiryResource:
             "budgetMin": 400000,
             "budgetMax": 500000,
             "notes": None,
-            "assignedUserAccountId": None,
-            "calendarId": None,
-            "calendarEventId": None,
-            "calendarProvider": None,
             "cancelReason": None,
             "serviceConversationConfigId": None,
             "createdAt": 1234567890,
@@ -380,7 +360,7 @@ class TestPropertyInquiryResource:
             "inq_123",
             UpdatePropertyInquiryStatus(
                 id="inq_123",
-                status="converted",
+                status=PropertyInquiryStatus.CONVERTED,
                 viewing_completed=True,
                 viewing_notes="Great viewing, client made an offer"
             )
@@ -431,10 +411,6 @@ class TestPropertyInquiryResource:
                 "budgetMin": None,
                 "budgetMax": None,
                 "notes": None,
-                "assignedUserAccountId": None,
-                "calendarId": None,
-                "calendarEventId": None,
-                "calendarProvider": None,
                 "cancelReason": None,
                 "serviceConversationConfigId": None,
                 "createdAt": 1234567890,
@@ -487,7 +463,7 @@ class TestPropertyInquiryResource:
             client.property_inquiry.create(CreatePropertyInquiry(
                 property_id="",
                 customer_id="cust_123",
-                inquiry_type="general"
+                inquiry_type=PropertyInquiryType.GENERAL
             ))
 
         assert exc_info.value.code == "VALIDATION_ERROR"

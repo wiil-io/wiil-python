@@ -18,17 +18,56 @@ from wiil.errors import WiilConfigurationError
 # Import all resource classes
 from wiil.resources.account import OrganizationsResource, ProjectsResource
 from wiil.resources.business_mgt import (
+    AppointmentAdditionalInfoResource,
+    AppointmentFieldConfigsResource,
+    BusinessLocationsResource,
+    CustomerGroupsResource,
     CustomersResource,
+    DiscountRulesResource,
+    FloorPlansResource,
+    FloorPlanSectionsResource,
+    MaintenanceBlocksResource,
+    MenuItemVariantsResource,
     MenusResource,
     MenuOrdersResource,
+    MenuPricingRulesResource,
+    MenuSetsResource,
+    ModifiersResource,
+    ProductAxisBindingsResource,
     ProductsResource,
     ProductOrdersResource,
+    ProductPricingRulesResource,
+    ProductSetsResource,
+    ProductVariantAxesResource,
+    ProductVariantsResource,
     PropertyConfigResource,
     PropertyInquiryResource,
-    ReservationsResource,
+    RentalAssignmentsResource,
+    RentalReservationsResource,
     ReservationResourcesResource,
-    ServiceAppointmentsResource,
+    ReservationSettingsResource,
+    ResourceCategoriesResource,
+    ResourceInstancesResource,
+    RoomAssignmentsResource,
+    RoomReservationsResource,
     BusinessServicesResource,
+    ServiceAppointmentsResource,
+    ServiceCategoriesResource,
+    ServicePersonsResource,
+    ServicePricingRulesResource,
+    ServiceProvidersResource,
+    ServiceTimeOffsResource,
+    ShippingAddressesResource,
+    TableAssignmentsResource,
+    TableReservationsResource,
+    TaxRulesResource,
+)
+from wiil.resources.conversation import (
+    OutboundCallsResource,
+    OutboundEmailsResource,
+    OutboundSmsResource,
+    OutboundTemplatesResource,
+    TranslationServicesResource,
 )
 from wiil.resources.service_mgt import (
     AgentConfigurationsResource,
@@ -137,16 +176,48 @@ class WiilClient:
 
         # Business Management resources
         self.customers = CustomersResource(self._http)
+        self.customer_groups = CustomerGroupsResource(self._http)
+        self.shipping_addresses = ShippingAddressesResource(self._http)
         self.menus = MenusResource(self._http)
         self.menu_orders = MenuOrdersResource(self._http)
+        self.menu_item_variants = MenuItemVariantsResource(self._http)
+        self.menu_pricing_rules = MenuPricingRulesResource(self._http)
+        self.menu_sets = MenuSetsResource(self._http)
+        self.modifiers = ModifiersResource(self._http)
         self.products = ProductsResource(self._http)
         self.product_orders = ProductOrdersResource(self._http)
+        self.product_variants = ProductVariantsResource(self._http)
+        self.product_variant_axes = ProductVariantAxesResource(self._http)
+        self.product_axis_bindings = ProductAxisBindingsResource(self._http)
+        self.product_sets = ProductSetsResource(self._http)
+        self.product_pricing_rules = ProductPricingRulesResource(self._http)
+        self.discount_rules = DiscountRulesResource(self._http)
+        self.tax_rules = TaxRulesResource(self._http)
         self.property_config = PropertyConfigResource(self._http)
         self.property_inquiry = PropertyInquiryResource(self._http)
-        self.reservations = ReservationsResource(self._http)
+        self.business_locations = BusinessLocationsResource(self._http)
         self.reservation_resources = ReservationResourcesResource(self._http)
+        self.reservation_settings = ReservationSettingsResource(self._http)
+        self.resource_categories = ResourceCategoriesResource(self._http)
+        self.resource_instances = ResourceInstancesResource(self._http)
+        self.floor_plans = FloorPlansResource(self._http)
+        self.floor_plan_sections = FloorPlanSectionsResource(self._http)
+        self.maintenance_blocks = MaintenanceBlocksResource(self._http)
+        self.table_assignments = TableAssignmentsResource(self._http)
+        self.room_assignments = RoomAssignmentsResource(self._http)
+        self.rental_assignments = RentalAssignmentsResource(self._http)
+        self.table_reservations = TableReservationsResource(self._http)
+        self.room_reservations = RoomReservationsResource(self._http)
+        self.rental_reservations = RentalReservationsResource(self._http)
         self.service_appointments = ServiceAppointmentsResource(self._http)
+        self.appointment_additional_info = AppointmentAdditionalInfoResource(self._http)
+        self.appointment_field_configs = AppointmentFieldConfigsResource(self._http)
         self.business_services = BusinessServicesResource(self._http)
+        self.service_categories = ServiceCategoriesResource(self._http)
+        self.service_persons = ServicePersonsResource(self._http)
+        self.service_pricing_rules = ServicePricingRulesResource(self._http)
+        self.service_providers = ServiceProvidersResource(self._http)
+        self.service_time_offs = ServiceTimeOffsResource(self._http)
 
         # Service Management resources
         self.agent_configs = AgentConfigurationsResource(self._http)
@@ -163,6 +234,13 @@ class WiilClient:
         self.dynamic_phone_agent = DynamicPhoneAgentResource(self._http)
         self.dynamic_web_agent = DynamicWebAgentResource(self._http)
         self.dynamic_agent_status = DynamicAgentStatusResource(self._http)
+
+        # Conversation resources
+        self.outbound_calls = OutboundCallsResource(self._http)
+        self.outbound_emails = OutboundEmailsResource(self._http)
+        self.outbound_sms = OutboundSmsResource(self._http)
+        self.outbound_templates = OutboundTemplatesResource(self._http)
+        self.translation_services = TranslationServicesResource(self._http)
 
         # Service layer helpers
         self.ott = OttService(self._http)

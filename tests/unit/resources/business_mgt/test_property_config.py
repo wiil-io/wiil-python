@@ -13,6 +13,13 @@ from wiil.models.business_mgt import (
     CreateProperty,
     UpdateProperty,
 )
+from wiil.models.type_definitions.business_definitions import (
+    ListingStatus,
+    ListingType,
+    PropertyCondition,
+    PropertySubType,
+    PropertyType,
+)
 from wiil.types import PaginationRequest
 
 BASE_URL = "https://api.wiil.io/v1"
@@ -49,7 +56,7 @@ class TestPropertyConfigResource:
         result = client.property_config.create_category(CreatePropertyCategory(
             name="Luxury Homes",
             description="High-end residential properties",
-            property_type="residential",
+            property_type=PropertyType.RESIDENTIAL,
             display_order=1
         ))
 
@@ -448,14 +455,14 @@ class TestPropertyConfigResource:
             category_id="cat_123",
             title="Beautiful 3BR Home",
             description="Spacious family home",
-            property_type="residential",
-            property_sub_type="house",
+            property_type=PropertyType.RESIDENTIAL,
+            property_sub_type=PropertySubType.HOUSE,
             address_id="addr_123",
-            listing_type="sale",
-            listing_status="active",
+            listing_type=ListingType.SALE,
+            listing_status=ListingStatus.ACTIVE,
             sale_price=450000,
             price_negotiable=True,
-            condition="excellent",
+            condition=PropertyCondition.EXCELLENT,
             mls_number="MLS12345"
         ))
 
@@ -823,7 +830,7 @@ class TestPropertyConfigResource:
             id="prop_123",
             title="Updated 3BR Home",
             sale_price=475000,
-            listing_status="active",
+            listing_status=ListingStatus.ACTIVE,
             is_featured=True
         ))
 
@@ -864,7 +871,7 @@ class TestPropertyConfigResource:
         with pytest.raises(WiilAPIError) as exc_info:
             client.property_config.create_category(CreatePropertyCategory(
                 name="Residential",
-                property_type="residential"
+                property_type=PropertyType.RESIDENTIAL
             ))
 
         assert exc_info.value.code == "VALIDATION_ERROR"

@@ -74,10 +74,9 @@ updated = client.business_services.update(
     UpdateBusinessService(id=service.id, name="Premium Massage Therapy", price=90.00)
 )
 
-qr = client.business_services.generate_qr_code(service_id=updated.id)
 deleted = client.business_services.delete(updated.id)
 
-print(loaded.name, services.meta.total_count, qr.appointment_url, deleted)
+print(loaded.name, services.meta.total_count, deleted)
 ```
 
 ## Service Appointments

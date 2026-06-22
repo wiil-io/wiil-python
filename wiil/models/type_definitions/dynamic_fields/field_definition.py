@@ -5,18 +5,14 @@ This module mirrors src/core/type-definitions/dynamic-fields/field-definition.sc
 
 from typing import Any, List, Literal, Optional
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import Field
 
+from wiil.models.base import BaseModel
 from wiil.models.type_definitions.dynamic_fields.field_types import DynamicFieldType
 
 
 class FieldOption(BaseModel):
     """Schema for select/multiselect field options."""
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-    )
 
     value: str = Field(..., description="Option value")
     label: str = Field(..., description="Option display label")
@@ -29,11 +25,6 @@ class FieldOption(BaseModel):
 
 class FieldValidationRules(BaseModel):
     """Validation rules schema for dynamic fields."""
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-    )
 
     required: Optional[bool] = Field(None, description="Whether the field is required")
     min_length: Optional[int] = Field(
@@ -63,11 +54,6 @@ FieldWidth = Literal["full", "half", "third"]
 
 class FieldUIHints(BaseModel):
     """UI hints schema for field rendering."""
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-    )
 
     placeholder: Optional[str] = Field(None, description="Placeholder text")
     help_text: Optional[str] = Field(
@@ -103,11 +89,6 @@ class FieldCondition(BaseModel):
     Show field X only if field Y meets a condition.
     """
 
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-    )
-
     depends_on: str = Field(
         ...,
         description="Field key that this condition depends on",
@@ -128,11 +109,6 @@ class FieldGroup(BaseModel):
 
     Organize fields into logical groups (e.g., "Contact Info", "Preferences").
     """
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-    )
 
     group_key: str = Field(..., description="Unique key for the group", alias="groupKey")
     label: str = Field(..., description="Display label for the group")
@@ -158,11 +134,6 @@ class FieldDefinition(BaseModel):
 
     Defines a single dynamic field with its type, validation, and UI configuration.
     """
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-    )
 
     field_key: str = Field(
         ...,
@@ -216,11 +187,6 @@ class FieldOverride(BaseModel):
 
     Allows overriding specific properties of inherited fields.
     """
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-    )
 
     field_key: str = Field(..., description="Field key to override", alias="fieldKey")
     label: Optional[str] = Field(None, description="Override label")

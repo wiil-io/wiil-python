@@ -5,8 +5,9 @@ This module mirrors src/core/assistant-setups/base-assistant-setup.schema.ts
 
 from typing import List, Optional
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import Field, model_validator
 
+from wiil.models.base import BaseModel
 from wiil.models.service_mgt.instruction_config import CreateInstructionConfiguration
 from wiil.models.service_mgt.provisioning_config import SttModelConfig, TtsModelConfig
 
@@ -36,12 +37,6 @@ class BaseAssistant(BaseModel):
         )
         ```
     """
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
 
     assistant_name: str = Field(
         ...,

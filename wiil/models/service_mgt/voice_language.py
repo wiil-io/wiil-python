@@ -7,15 +7,16 @@ and provisioning chains for voice-based interactions.
 
 from typing import List, Literal, Optional
 
-from pydantic import BaseModel as PydanticBaseModel
-from pydantic import ConfigDict, Field
+from pydantic import Field
+
+from wiil.models.base import BaseModel
 
 
 # Voice gender type
 VoiceGender = Literal["male", "female", "neutral"]
 
 
-class Voice(PydanticBaseModel):
+class Voice(BaseModel):
     """Voice configuration for TTS synthesis.
 
     Represents a synthetic voice option available for text-to-speech (TTS) synthesis. Voices are
@@ -41,12 +42,6 @@ class Voice(PydanticBaseModel):
         language: Language code this voice is optimized for, null if multi-language
         is_default: Whether this is the default voice for its language or model
     """
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
 
     voice_id: str = Field(
         ...,
@@ -79,7 +74,7 @@ class Voice(PydanticBaseModel):
     )
 
 
-class Language(PydanticBaseModel):
+class Language(BaseModel):
     """Language configuration for speech processing.
 
     Represents a language supported by the platform for speech processing (STT/TTS). Languages are
@@ -103,12 +98,6 @@ class Language(PydanticBaseModel):
         is_default: Whether this is the default language for the platform or model
         is_experimental: Whether this language is in experimental/beta support
     """
-
-    model_config = ConfigDict(
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
 
     language_id: str = Field(
         ...,
