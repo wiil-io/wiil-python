@@ -79,6 +79,9 @@ dmypy.json
 .env.local
 .env.*.local
 
+# PyPI config (contains tokens)
+.pypirc
+
 # Documentation builds
 docs/_build/
 site/
@@ -91,3 +94,4 @@ dev.txt
 test.txt
 /ref
 /.venv
+.pypirc.example

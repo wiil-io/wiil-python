@@ -585,6 +585,22 @@ class HttpClient:
             return [self._to_attr_obj(item) for item in value]
         return value
 
+    def _validate_response_json(self, model: Type[T], data: Any) -> T:
+        """Validate response JSON while tolerating additive API fields.
+
+        The reference TypeScript schemas use Zod objects, which strip unknown
+        keys by default. Request validation remains strict in the HTTP verb
+        methods; this response-only path mirrors the reference behavior for
+        forward-compatible reads.
+        """
+        payload = json.dumps(data)
+        try:
+            return model.model_validate_json(payload, extra="ignore")
+        except TypeError as exc:
+            if "extra" not in str(exc):
+                raise
+            return model.model_validate_json(payload)
+
     def _parse_response(
         self,
         data: Any,
@@ -615,8 +631,9 @@ class HttpClient:
 
         try:
             # Validate in JSON mode so wire-format values (e.g. string enum
-            # members) are accepted while strict type/extra-key checks remain
-            # enforced. The data originates from response.json(), so re-encoding
+            # members) are accepted. Unknown response keys are ignored to match
+            # ref-core Zod object parsing, which strips additive fields by
+            # default. The data originates from response.json(), so re-encoding
             # is lossless for JSON-native types.
             # Handle List[Model] types
             origin = get_origin(response_model)
@@ -625,18 +642,18 @@ class HttpClient:
                 if args and isinstance(data, list):
                     item_model = args[0]
                     return [
-                        item_model.model_validate_json(json.dumps(item))
+                        self._validate_response_json(item_model, item)
                         for item in data
                     ]
 
             # Handle single model
             if isinstance(data, list):
                 return [
-                    response_model.model_validate_json(json.dumps(item))
+                    self._validate_response_json(response_model, item)
                     for item in data
                 ]
 
-            return response_model.model_validate_json(json.dumps(data))
+            return self._validate_response_json(response_model, data)
 
         except ValidationError as e:
             raise WiilValidationError(
