@@ -229,6 +229,7 @@ class DynamicPhoneAgentResource:
         model_type: str
     ) -> None:
         """Validate a single model against the support registry."""
+        provider_type = getattr(provider_type, "value", provider_type)
         is_supported = self._http.get(
             f'/support-models/supports/{provider_type}/{provider_model_id}',
             response_model=bool

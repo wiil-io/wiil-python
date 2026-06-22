@@ -20,8 +20,9 @@ class BaseModel(PydanticBaseModel):
     The configuration enforces:
         - Population by both field name and alias (``validate_by_name`` and
           ``validate_by_alias``).
-        - Enum values are used during validation (``use_enum_values``).
-        - Strict type coercion rules (``strict``).
+        - Strict type validation rules (``strict``). Enum-typed fields retain
+          their enum instances after validation, preserving lossless
+          round-trips between request and response payloads.
         - Rejection of unknown fields (``extra="forbid"``).
 
     This class intentionally declares no fields; it exists purely to provide
@@ -31,7 +32,6 @@ class BaseModel(PydanticBaseModel):
     model_config = ConfigDict(
         validate_by_name=True,
         validate_by_alias=True,
-        use_enum_values=True,
         strict=True,
         extra="forbid",
     )

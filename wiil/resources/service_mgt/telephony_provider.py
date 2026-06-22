@@ -200,6 +200,7 @@ class TelephonyProviderResource:
         status = cls._extract_field(payload, "status")
         if status is None:
             return ""
+        status = getattr(status, "value", status)
         return str(status).lower()
 
 

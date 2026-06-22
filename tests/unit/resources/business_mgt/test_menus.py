@@ -95,18 +95,30 @@ class TestMenusResource:
             },
         ]
 
+        mock_response = {
+            "data": mock_categories,
+            "meta": {
+                "page": 1,
+                "pageSize": 20,
+                "totalCount": 2,
+                "totalPages": 1,
+                "hasNextPage": False,
+                "hasPreviousPage": False,
+            },
+        }
+
         mock_api.add(
             responses.GET,
             f"{BASE_URL}/menu-management/categories",
             headers={"X-Wiil-Api-Key": API_KEY},
-            json=api_response(mock_categories),
+            json=api_response(mock_response),
             status=200,
         )
 
         result = client.menus.list_categories()
 
-        assert len(result) == 2
-        assert result[0].name == "Appetizers"
+        assert len(result.data) == 2
+        assert result.data[0].name == "Appetizers"
 
     def test_update_category(self, client: WiilClient, mock_api, api_response):
         """Test updating a menu category."""

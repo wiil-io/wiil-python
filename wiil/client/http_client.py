@@ -15,7 +15,7 @@ import json
 from typing import Any, Dict, List, Optional, Type, TypeVar, Union, get_origin, get_args
 
 import requests
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel, TypeAdapter, ValidationError
 from requests.exceptions import RequestException, Timeout, ConnectionError
 
 from wiil.client.types import WiilClientConfig, APIResponse, APIErrorResponse
@@ -594,6 +594,11 @@ class HttpClient:
         forward-compatible reads.
         """
         payload = json.dumps(data)
+        # Non-class annotations (e.g. typing.Union of model variants) have no
+        # model_validate_json; route them through a TypeAdapter, which selects
+        # the correct union member from the JSON payload.
+        if not (isinstance(model, type) and issubclass(model, BaseModel)):
+            return TypeAdapter(model).validate_json(payload)
         try:
             return model.model_validate_json(payload, extra="ignore")
         except TypeError as exc:

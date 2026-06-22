@@ -89,14 +89,14 @@ class MenusResource:
     def list_categories(
         self,
         params: Optional[PaginationRequest] = None
-    ) -> List[MenuCategory]:
+    ) -> PaginatedResult[MenuCategory]:
         """List all menu categories with optional pagination.
 
         Args:
             params: Optional pagination parameters
 
         Returns:
-            List of menu categories
+            Paginated list of menu categories
         """
         query_params: Dict[str, Any] = {}
         if params:
@@ -106,7 +106,7 @@ class MenusResource:
         query_string = f'?{urlencode(query_params)}' if query_params else ''
         return self._http.get(
             f'{self._base_path}/categories{query_string}',
-            response_model=List[MenuCategory]
+            response_model=PaginatedResult[MenuCategory]
         )
 
     def update_category(self, data: UpdateMenuCategory) -> MenuCategory:
