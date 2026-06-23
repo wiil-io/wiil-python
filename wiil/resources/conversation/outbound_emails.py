@@ -53,7 +53,7 @@ class OutboundEmailsResource:
         params: Optional[PaginationRequest] = None,
     ) -> PaginatedResult[EmailRequest]:
         """Retrieve email requests by status."""
-        query_params: Dict[str, Any] = {"status": status}
+        query_params: Dict[str, Any] = {"status": status.value}
         if params:
             query_params["page"] = params.page
             query_params["pageSize"] = params.page_size

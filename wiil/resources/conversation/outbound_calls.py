@@ -69,7 +69,7 @@ class OutboundCallsResource:
         params: Optional[PaginationRequest] = None,
     ) -> PaginatedResult[BusinessCallRequest]:
         """Retrieve call requests by status."""
-        query_params: Dict[str, Any] = {"status": status}
+        query_params: Dict[str, Any] = {"status": status.value}
         if params:
             query_params["page"] = params.page
             query_params["pageSize"] = params.page_size
@@ -116,7 +116,7 @@ class OutboundCallsResource:
         """Update call request status."""
         return self._http.patch(
             f"{self._base_path}/{call_id}/status",
-            {"status": status},
+            {"status": status.value},
             response_model=BusinessCallRequest,
         )
 
