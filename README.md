@@ -1,582 +1,427 @@
 # WIIL Python SDK
 
-Official Python SDK for the [WIIL Platform](https://console.wiil.io) - AI-powered conversational services platform for intelligent customer interactions, voice processing, real-time translation, and business management.
+Ship AI-powered business features without building telecom, catalog infrastructure, or integration plumbing.
 
 [![Python](https://img.shields.io/badge/Python-3.8+-blue.svg?style=flat-square)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
 
-## Features
+---
 
-- ✅ **Type-Safe** - Full type hints with Pydantic models
-- ✅ **Production-Grade** - Built for enterprise use with robust error handling
-- ✅ **Validated** - Runtime validation using Pydantic
-- ✅ **Well-Documented** - Comprehensive docstrings and API documentation
-- ✅ **Tested** - Extensive test coverage with pytest
-- ✅ **Modern** - Async/await support with httpx
-- ✅ **Comprehensive** - Access to all WIIL Platform domains
+## What You Can Ship
+
+This SDK gives you APIs to build:
+
+- **Catalog-aware AI agents** - Agents grounded in real business data such as menus, products, services, reservations, and properties
+- **Multi-channel conversations** - Web, phone, SMS, and email workflows through unified APIs
+- **Transaction workflows** - Appointments, reservations, orders, inquiries, and outbound follow-ups
+- **Outbound communications** - Automated calls, emails, and SMS without provider setup
+
+What you skip building:
+
+- Telephony integration, SMS gateways, SMTP servers
+- Voice pipeline infrastructure for STT, LLM, and TTS workflows
+- Catalog schema design and multi-location logic
+- Retry logic, queue management, and delivery tracking
+- Channel-specific protocols and failure handling
+
+**You write the business logic. The SDK handles the infrastructure.**
+
+---
 
 ## Installation
-
-### 1. Create and activate a virtual environment
-
-Linux/macOS:
-
-```bash
-python -m venv venv
-source venv/bin/activate
-```
-
-Windows (PowerShell):
-
-```powershell
-python -m venv venv
-venv\Scripts\Activate.ps1
-```
-
-Windows (Command Prompt):
-
-```bat
-python -m venv venv
-venv\Scripts\activate
-```
-
-### 2. Install the SDK
 
 ```bash
 pip install wiil-python
 ```
 
-## Quick Start
+For isolated projects:
 
-```python
-from wiil import WiilClient
-
-# Initialize the client with your API key
-client = WiilClient(api_key="your-api-key")
-
-# Get your organization
-organization = client.organizations.get()
-print(f"Organization: {organization.company_name}")
-
-# Create a project
-project = client.projects.create(
-    name="Production Environment",
-    description="Main production deployment"
-)
-
-print(f"Project created: {project.id}")
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install wiil-python
 ```
 
-## Platform Architecture
+On Windows PowerShell:
 
-The WIIL Platform provides a unified architecture that bridges AI agent deployment with business operations, enabling organizations to conduct intelligent customer conversations that drive measurable business outcomes.
-
-### Unified Architecture Overview
-
-The platform integrates two core architectural domains through the **Conversations** entity:
-
-![WIIL Platform Unified Architecture](unified-architecture.png)
-
-### Core Architectural Domains
-
-#### 1. Service Configuration
-
-**Purpose**: Manages the deployment and behavior of AI agents within the platform.
-
-**Key Components**:
-
-- **Agent Configurations** - Define AI agent capabilities and characteristics
-- **Instruction Configurations** - The heart of agent behavior with system prompts, guidelines, and compliance rules
-- **Deployment Configurations** - Combine agents and instructions into deployable units
-- **Deployment Channels** - Communication channels (OTT Chat, Telephony, SMS, Email)
-- **Phone Configurations** - Telephony-specific settings for voice calls
-- **Conversation Configurations** - Configuration for conversation sessions
-- **Knowledge Sources** - Knowledge bases for agent context and accuracy
-
-**SDK Resources**: `agent_configs`, `instruction_configs`, `deployment_configs`, `deployment_channels`, `phone_configs`, `conversation_configs`, `knowledge_sources`
-
-#### 2. Advanced Service Configuration
-
-**Purpose**: Enables voice-powered conversations with end-to-end processing pipelines.
-
-**Key Components**:
-
-- **Provisioning Chain Configurations** - STT → Agent → TTS voice processing workflows
-- **Speech-to-Text (STT)** - Voice-to-text conversion using Deepgram, OpenAI Whisper, Cartesia
-- **Text-to-Speech (TTS)** - Natural voice generation using ElevenLabs, Cartesia, OpenAI
-
-**SDK Resources**: `provisioning_configs`
-
-#### 3. Translation Services
-
-**Purpose**: Provides real-time multilingual voice translation capabilities.
-
-**Key Components**:
-
-- **Translation Chain Configurations** - STT → Translation Processing → TTS pipelines for language pairs
-- **Translation Service Requests** - Initiate translation sessions
-- **Translation Participants** - Multi-participant translation sessions with language isolation
-- **Translation Service Logs** - Transcription logging and session records
-
-**SDK Resources**: `translation_sessions`
-
-#### 4. Business Management
-
-**Purpose**: Manages business entity catalogs and their transactional operations through AI-powered conversations.
-
-**Management Modules** (Platform Services):
-
-| Module | Manages Catalog | Powers Transactions |
-|--------|----------------|---------------------|
-| **Appointment Management** | Business Services | Service Appointments |
-| **Reservation Management** | Reservable Assets (Resources) | Reservations |
-| **Property Management** | Properties & Listings | Property Inquiries |
-| **Menu Management** | Menu Categories & Items | Menu Orders |
-| **Product Management** | Product Categories & Products | Product Orders |
-
-**Business Catalogs**:
-
-- **Business Services** - Bookable services (salons, clinics, consulting)
-- **Reservable Assets** - Bookable resources (tables, rooms, equipment)
-- **Properties & Listings** - Managed properties and listing availability data
-- **Menu Categories & Items** - Food and beverage offerings
-- **Product Categories & Products** - Retail products
-
-**Transactional Operations** (AI-Powered):
-
-- **Service Appointments** - Created through AI conversations
-- **Reservations** - Created through AI conversations
-- **Property Inquiries** - Created through AI conversations
-- **Menu Orders** - Created through AI conversations
-- **Product Orders** - Created through AI conversations
-
-**SDK Resources**: `business_services`, `reservation_resources`, `property_config`, `property_inquiry`, `menus`, `products`, `customers`, `service_appointments`, `reservations`, `menu_orders`, `product_orders`
-
-### Integration Hub: Conversations
-
-The **Conversations** entity serves as the central integration point, bridging Service Configuration and Business Management:
-
-**Key Attributes**:
-
-```python
-{
-  # Service Configuration References
-  "deployment_config_id": str,      # Which agent deployment
-  "instruction_config_id": str,     # Agent behavior guidelines
-  "channel_id": str,                # Communication channel
-
-  # Business Context
-  "customer_id": str,               # Business customer
-  "conversation_type": str,         # OTT_CHAT, TELEPHONY_CALL, SMS, EMAIL
-
-  # Conversation Data
-  "messages": list,                 # Conversation history
-  "status": str,                    # ACTIVE, COMPLETED, TRANSFERRED
-  "conversation_summary": dict      # AI-generated summary
-}
+```powershell
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+pip install wiil-python
 ```
-
-**Role in Architecture**:
-
-1. **Links** AI agents (via deployment/instruction configs) with business customers
-2. **Enables** AI agents to leverage business catalogs during conversations
-3. **Drives** transactional outcomes (appointments, reservations, orders)
-4. **Supports** multi-channel conversations (voice, chat, SMS, email)
-
-### Data Flow: Conversation to Transaction
-
-```text
-1. Customer Initiates Contact
-         ↓
-2. Channel Routes to Deployment Configuration
-         ↓
-3. Conversation Created
-   • Links deployment_config_id
-   • Links instruction_config_id
-   • Links channel_id
-   • Links customer_id
-         ↓
-4. AI Agent Conducts Conversation
-   • Guided by Instruction Configuration
-   • Queries Business Catalogs (via Management Modules)
-   • Presents available services/products/resources
-         ↓
-5. Customer Confirms Intent
-         ↓
-6. Transaction Created
-   • Service Appointment
-    • Reservation
-    • Property Inquiry
-   • Menu Order
-   • Product Order
-         ↓
-7. Management Module Processes Transaction
-```
-
-### Design Principles
-
-**Unified Customer Experience**: Customers interact through Conversations, unaware of the underlying system complexity.
-
-**Separation of Configuration and Execution**: Service Configuration defines *how* agents behave; Business Management defines *what* they can do.
-
-**AI-First Conversations**: AI Powered Services leverages catalog data in customer conversations to intelligently drive transactional operations.
-
-**Catalog-Transaction Separation**: Clear distinction between catalog/configuration data (managed by Management Modules) and transactional data (powered by AI Powered Services through conversations).
-
-**Multi-Channel Support**: Conversations span multiple channel types (OTT Chat, Telephony, SMS, Email).
-
-**Transactional Outcomes**: Every conversation can result in measurable business transactions.
-
-## Usage Examples
-
-### 1. Dynamic Agent Setup (Recommended)
-
-The Dynamic Agent Setup APIs are the fastest way to deploy agents. Instead of creating each service-management component separately, you can provision a deployable assistant in one call.
-
-#### Phone Agent - Single Call Deployment
-
-```python
-from wiil import WiilClient
-from wiil.models.service_mgt.dynamic_setup import DynamicPhoneAgentSetup
-from wiil.types import BusinessSupportServices
-
-client = WiilClient(api_key="your-api-key")
-
-result = client.dynamic_phone_agent.create(
-    DynamicPhoneAgentSetup(
-        assistant_name="Sarah",
-        language="en-US",
-        capabilities=[BusinessSupportServices.APPOINTMENT_MANAGEMENT],
-    )
-)
-
-print("Phone number:", result.phone_number)
-print("Agent ID:", result.agent_configuration_id)
-```
-
-#### Web Agent - Single Call Deployment
-
-```python
-from wiil import WiilClient
-from wiil.models.service_mgt.dynamic_setup import DynamicWebAgentSetup
-from wiil.types import BusinessSupportServices
-
-client = WiilClient(api_key="your-api-key")
-
-result = client.dynamic_web_agent.create(
-    DynamicWebAgentSetup(
-        assistant_name="Emma",
-        website_url="https://example.com",
-        communication_type="UNIFIED",
-        language="en-US",
-        capabilities=[BusinessSupportServices.APPOINTMENT_MANAGEMENT],
-    )
-)
-
-print("Integration snippets:", result.integration_snippets)
-print("Agent ID:", result.agent_configuration_id)
-```
-
-#### Dynamic Agent with Chained STT/TTS Configuration
-
-```python
-from wiil import WiilClient
-from wiil.models.service_mgt.dynamic_setup import DynamicWebAgentSetup
-from wiil.types import BusinessSupportServices
-
-client = WiilClient(api_key="your-api-key")
-
-result = client.dynamic_web_agent.create(
-    DynamicWebAgentSetup(
-        assistant_name="Marcus",
-        website_url="https://example.com",
-        communication_type="VOICE",
-        language="en-US",
-        capabilities=[
-            BusinessSupportServices.APPOINTMENT_MANAGEMENT,
-            BusinessSupportServices.PRODUCT_ORDER_MANAGEMENT,
-        ],
-        stt_configuration={
-            "provider_type": "Deepgram",
-            "provider_model_id": "nova-2",
-            "language_id": "en-US",
-        },
-        tts_configuration={
-            "provider_type": "ElevenLabs",
-            "provider_model_id": "eleven_turbo_v2",
-            "language_id": "en-US",
-            "voice_id": "voice_rachel",
-        },
-    )
-)
-
-print("Agent ID:", result.agent_configuration_id)
-```
-
-#### Dynamic Agent Operations
-
-```python
-from wiil import WiilClient
-from wiil.models.service_mgt.dynamic_setup import DynamicPhoneAgentSetup, UpdateDynamicPhoneAgent
-
-client = WiilClient(api_key="your-api-key")
-
-# Create
-created = client.dynamic_phone_agent.create(
-    DynamicPhoneAgentSetup(
-        assistant_name="Nathan",
-        language="en-US",
-        capabilities=[],
-    )
-)
-
-# Update (partial)
-updated = client.dynamic_phone_agent.update(
-    UpdateDynamicPhoneAgent(
-        id=created.id,
-        assistant_name="Nathan Updated",
-    )
-)
-
-# Delete
-deleted = client.dynamic_phone_agent.delete(created.id)
-print("Deleted:", deleted)
-```
-
-For full walkthroughs, see `../guides/dynamic-agent-setup-guide.md`.
 
 ---
 
-### 2. Account Management
+## Quick Start
 
 ```python
+import os
+
 from wiil import WiilClient
 
-client = WiilClient(api_key="your-api-key")
-
-# Get your organization (read-only)
-org = client.organizations.get()
-print(f"Organization: {org.company_name}")
-
-# Create a project
-project = client.projects.create(
-    name="Production Environment",
-    description="Main production deployment"
-)
-
-# Get a project
-project = client.projects.get("proj_123")
-
-# Update a project
-updated = client.projects.update(
-    id="proj_123",
-    name="Production Environment v2"
-)
-
-# Delete a project
-deleted = client.projects.delete("proj_123")
-
-# List projects
-projects = client.projects.list(page=1, page_size=20)
+client = WiilClient(api_key=os.environ["WIIL_API_KEY"])
 ```
 
-### 3. Service Configuration
+### Deploy an AI Agent
 
 ```python
-# Create an agent configuration
-agent = client.agent_configs.create(
-    name="Customer Support Agent",
-    description="AI agent for customer support"
+from wiil.models.service_mgt.dynamic_setup import (
+    DynamicPhoneAgentSetup,
+    DynamicWebAgentSetup,
 )
+from wiil.types import BusinessSupportServices
 
-# Get agent configuration
-agent = client.agent_configs.get("agent_123")
+# Phone agent with live number
+phone = client.dynamic_phone_agent.create(
+    DynamicPhoneAgentSetup(
+        assistant_name="Sarah",
+        capabilities=[BusinessSupportServices.APPOINTMENT_MANAGEMENT],
+    )
+)
+print("Phone number:", phone.phone_number)
 
-# List agent configurations
-agents = client.agent_configs.list(page=1, page_size=20)
+# Web agent with widget snippets
+web = client.dynamic_web_agent.create(
+    DynamicWebAgentSetup(
+        assistant_name="Emma",
+        website_url="https://example.com",
+        capabilities=[BusinessSupportServices.APPOINTMENT_MANAGEMENT],
+    )
+)
+print("Widget snippets:", web.integration_snippets)
 ```
 
-### 4. Business Management
+### Send Notifications
 
 ```python
-# Create a business service
+import time
+
+from wiil.models.conversation import (
+    CreateCallRequest,
+    CreateEmailRequest,
+    CreateSmsRequest,
+    EmailRecipient,
+)
+from wiil.types import ScheduleType
+
+# Email
+client.outbound_emails.create(
+    CreateEmailRequest(
+        to=[EmailRecipient(email="customer@example.com")],
+        template_id="order_confirmation",
+        subject="Order confirmed",
+        body_html="<p>Your order {{orderNumber}} is confirmed.</p>",
+        body_text="Your order {{orderNumber}} is confirmed.",
+        variables={"orderNumber": "ORD-123"},
+    )
+)
+
+# SMS
+client.outbound_sms.create(
+    CreateSmsRequest(
+        to="+14155551234",
+        from_number="+14155555678",
+        body="Your appointment is confirmed for tomorrow at 2 PM.",
+    )
+)
+
+# Voice call
+client.outbound_calls.create(
+    CreateCallRequest(
+        to="+14155551234",
+        from_number="+14155555678",
+        agent_configuration_id="reminder_agent",
+        schedule_type=ScheduleType.SCHEDULED,
+        scheduled_at=int(time.time() * 1000) + 2 * 60 * 60 * 1000,
+    )
+)
+```
+
+### Manage Business Catalogs
+
+```python
+from wiil.models.business_mgt import (
+    CreateBusinessMenuItem,
+    CreateBusinessMenuItemVariant,
+    CreateBusinessProduct,
+    CreateBusinessProductVariant,
+    CreateBusinessService,
+)
+
+# Services
 service = client.business_services.create(
-    name="Hair Cut",
-    description="30-minute hair cut service",
-    duration=30,
-    price=50.00
+    CreateBusinessService(
+        name="Hair Styling",
+        duration=60,
+        base_price=75.00,
+    )
 )
 
-# Create a customer
-customer = client.customers.create(
-    name="John Doe",
-    email="john@example.com",
-    phone="+1234567890"
+# Menu items with variants
+menu_item = client.menus.create_item(
+    CreateBusinessMenuItem(
+        name="Cheeseburger",
+        category_id="cat_main",
+        price=12.99,
+        variants=[
+            CreateBusinessMenuItemVariant(
+                name="Regular",
+                price=12.99,
+                is_default=True,
+                is_active=True,
+                is_available=True,
+            )
+        ],
+    )
 )
 
-# Create a service appointment
-appointment = client.service_appointments.create(
-    customer_id="customer_123",
-    service_id="service_123",
-    scheduled_date="2025-01-15",
-    scheduled_time="14:00"
+# Products with variants
+product = client.products.create(
+    CreateBusinessProduct(
+        name="Wireless Mouse",
+        category_id="cat_electronics",
+        price=29.99,
+        is_alcoholic=False,
+        variants=[
+            CreateBusinessProductVariant(
+                axis_values={},
+                price=29.99,
+                is_default=True,
+                is_active=True,
+            )
+        ],
+    )
 )
 ```
+
+### Book Transactions Through AI Workflows
+
+```python
+from wiil.models.business_mgt import CreateServiceAppointment, CreateTableReservation
+
+appointment = client.service_appointments.create(
+    CreateServiceAppointment(
+        business_service_id=service.id,
+        customer_id="cust_123",
+        start_time=int(time.time() * 1000) + 24 * 60 * 60 * 1000,
+        duration=60,
+    )
+)
+
+reservation = client.table_reservations.create(
+    CreateTableReservation(
+        resource_id="table_5",
+        customer_id="cust_123",
+        floor_plan_id="floor_main",
+        persons_number=4,
+        time=int(time.time() * 1000) + 2 * 60 * 60 * 1000,
+        duration=90,
+    )
+)
+```
+
+---
+
+## Examples & Guides
+
+Comprehensive guides are in the [`examples/`](./examples/) directory.
+
+### Getting Started
+
+| Guide | What You Build |
+| ----- | -------------- |
+| [Dynamic Agent Setup](./examples/dynamic-agent-setup-guide.md) | Deploy phone/web agents in one API call |
+| [Fundamental Configuration](./examples/fundamental-configuration-setup.md) | Fine-grained multi-step agent setup |
+
+### Outbound Communications
+
+| Guide | What You Build |
+| ----- | -------------- |
+| [Outbound Communications](./examples/outbound-communications-guide.md) | Full notification system across calls, email, and SMS |
+| [Messaging Quick Start](./examples/messaging-guide.md) | Send your first notification in minutes |
+
+### Business Services
+
+| Guide | What You Build |
+| ----- | -------------- |
+| [Services & Appointments](./examples/business-services/services-and-appointments-guide.md) | Bookable services and appointment scheduling |
+| [Menus & Orders](./examples/business-services/menus-and-orders-guide.md) | Restaurant menus and food ordering |
+| [Products & Orders](./examples/business-services/products-and-orders-guide.md) | Product catalogs and retail orders |
+| [Reservations](./examples/business-services/reservations-guide.md) | Tables, rooms, rentals, and bookings |
+| [Property Management](./examples/business-services/property-management-guide.md) | Listings, inquiries, and lead tracking |
+
+### Channels
+
+| Guide | What You Build |
+| ----- | -------------- |
+| [Web Channels](./examples/channels/web-channels.md) | Chat widget integration |
+| [Voice Channels](./examples/channels/voice-channels.md) | Phone call handling |
+| [SMS Channels](./examples/channels/sms-channels.md) | Text messaging |
+
+[See all examples](./examples/README.md)
+
+---
+
+## SDK Features
+
+- **Type-Safe** - Python type hints with Pydantic models
+- **Validated** - Runtime validation using Pydantic
+- **Production-Grade** - Robust error handling and configurable timeouts
+- **Modern** - Synchronous and asynchronous clients
+- **Comprehensive** - Account, service management, business management, conversation, and outbound resources
+
+---
+
+## Available Resources
+
+### Dynamic Agent Setup
+
+```python
+client.dynamic_phone_agent
+client.dynamic_web_agent
+client.dynamic_agent_status
+```
+
+### Outbound APIs
+
+```python
+client.outbound_templates
+client.outbound_calls
+client.outbound_emails
+client.outbound_sms
+```
+
+### Service Configuration
+
+```python
+client.agent_configs
+client.instruction_configs
+client.deployment_configs
+client.deployment_channels
+client.provisioning_configs
+client.support_models
+client.telephony_provider
+client.conversation_configs
+client.knowledge_sources
+```
+
+### Business Management
+
+```python
+client.business_services
+client.customers
+client.menus
+client.menu_item_variants
+client.modifiers
+client.products
+client.product_variants
+client.product_sets
+client.service_appointments
+client.table_reservations
+client.room_reservations
+client.rental_reservations
+client.menu_orders
+client.product_orders
+client.reservation_resources
+client.floor_plans
+client.property_config
+client.property_inquiry
+```
+
+---
 
 ## Error Handling
 
 ```python
-from wiil import WiilClient
-from wiil.errors import (
-    WiilAPIError,
-    WiilValidationError,
-    WiilNetworkError,
-    WiilConfigurationError
-)
+from wiil.errors import WiilAPIError, WiilNetworkError, WiilValidationError
 
 try:
-    project = client.projects.create(name="My Project")
-except WiilValidationError as e:
-    print(f"Validation failed: {e.message}")
-    print(f"Details: {e.details}")
-except WiilAPIError as e:
-    print(f"API Error {e.status_code}: {e.message}")
-    print(f"Error Code: {e.code}")
-except WiilNetworkError as e:
-    print(f"Network error: {e.message}")
-except WiilConfigurationError as e:
-    print(f"Configuration error: {e.message}")
+    result = client.business_services.create(
+        CreateBusinessService(name="Consultation", duration=30, base_price=50)
+    )
+except WiilValidationError as exc:
+    print("Invalid input:", exc.details)
+except WiilAPIError as exc:
+    print(f"API error {exc.status_code}:", exc.message)
+    print("Code:", exc.code)
+except WiilNetworkError:
+    print("Network error. Retry with backoff.")
 ```
+
+---
 
 ## Async Support
 
 ```python
+import asyncio
+import os
+
 from wiil import AsyncWiilClient
 
-async def main():
-    async with AsyncWiilClient(api_key="your-api-key") as client:
-        # Get organization
-        org = await client.organizations.get()
-        print(f"Organization: {org.company_name}")
 
-        # Create project
-        project = await client.projects.create(
-            name="Production",
-            is_default=True
-        )
-        print(f"Project: {project.id}")
+async def main() -> None:
+    async with AsyncWiilClient(api_key=os.environ["WIIL_API_KEY"]) as client:
+        organization = await client.organizations.get()
+        print("Organization:", organization.company_name)
 
-import asyncio
+
 asyncio.run(main())
 ```
 
-## WiilService (OTT + Translation)
+---
 
-`WiilService` is a service-focused client exposes high-level workflows for OTT and translation services.
+## Configuration
 
 ```python
-from wiil import WiilService
+from wiil import WiilClient
 
-service = WiilService(api_key="your-api-key")
-
-# Create translation connection config
-translation = service.translation.create_connection_config(
-    {
-        "initiatorId": "initiator_123",
-        "participantLanguageCode": "es",
-        "initiatorLanguageCode": "en",
-    }
+client = WiilClient(
+    api_key="your-api-key",
+    base_url="https://api.wiil.io/v1",
+    timeout=60,
 )
-
-print(translation.channel_identifier)
-
-# Fetch OTT chat connection configuration
-chat_config = service.ott.get_chat_connection_configuration(
-    {
-        "configId": "config_abc",
-        "contact": {
-            "email": "user@example.com",
-            "phone": "+12065551234",
-        },
-    }
-)
-
-print(chat_config.connection_url)
 ```
 
-## Development
-
-### Setup
-
-```bash
-# Clone the repository
-git clone https://github.com/wiil-io/wiil-python.git
-cd wiil-python
-
-# Create virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install development dependencies
-pip install -e ".[dev]"
-```
-
-### Testing
-
-```bash
-# Run tests
-pytest
-
-# Run tests with coverage
-pytest --cov=wiil --cov-report=html
-
-# Run specific test file
-pytest tests/unit/test_client.py
-```
-
-### Code Quality
-
-```bash
-# Format code with black
-black wiil tests
-
-# Lint with ruff
-ruff check wiil tests
-
-# Type check with mypy
-mypy wiil
-```
-
-## Requirements
-
-- **Python**: 3.8 or higher
-- **Dependencies**: httpx, pydantic
+---
 
 ## Security
 
-⚠️ **Important**: This SDK is designed for **server-side use only**. Never expose your API key in client-side code.
-
-- Store API keys securely using environment variables
-- Never commit API keys to version control
-- Use environment-specific API keys (development, staging, production)
-- Rotate API keys regularly
-
-### Best Practices
+Server-side only. Never expose your API key in client-side code.
 
 ```python
 import os
+
 from wiil import WiilClient
 
-# ✅ Good - Use environment variables
-client = WiilClient(api_key=os.getenv("WIIL_API_KEY"))
+# Good: environment variable
+client = WiilClient(api_key=os.environ["WIIL_API_KEY"])
 
-# ❌ Bad - Never hardcode API keys
-client = WiilClient(api_key="your-api-key-here")  # Don't do this!
+# Bad: hardcoded key
+client = WiilClient(api_key="sk_live_...")
 ```
 
-## License
+---
 
-MIT © [WIIL](https://console.wiil.io)
+## Requirements
+
+- Python 3.8 or higher
+- Pydantic
+- requests/httpx, depending on sync or async usage
+
+---
+
+## Development
+
+```bash
+pip install -e ".[dev]"
+pytest
+pytest --cov=wiil --cov-report=html
+black wiil tests
+ruff check wiil tests
+mypy wiil
+```
+
+---
 
 ## Support
 
@@ -585,10 +430,12 @@ MIT © [WIIL](https://console.wiil.io)
 - **Issues**: [GitHub Issues](https://github.com/wiil-io/wiil-python/issues)
 - **Email**: [dev-support@wiil.io](mailto:dev-support@wiil.io)
 
-## Contributing
+---
 
-Contributions are welcome! Please read our [Contributing Guide](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
+## License
+
+MIT (c) [WIIL](https://wiil.io)
 
 ---
 
-Built with ❤️ by the WIIL team
+Built with care by the WIIL team

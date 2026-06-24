@@ -11,11 +11,10 @@ from wiil.models.business_mgt import (
     CreatePropertyAddress,
     CreatePropertyCategory,
 )
-from wiil.resources.business_mgt import PropertyConfigResource, PropertyInquiryResource
 
 client = WiilClient(api_key="your-api-key")
-property_config = PropertyConfigResource(client._http)
-property_inquiry = PropertyInquiryResource(client._http)
+property_config = client.property_config
+property_inquiry = client.property_inquiry
 
 category = property_config.create_category(
     CreatePropertyCategory(
@@ -131,13 +130,19 @@ print(loaded.title, all_properties.meta.total_count, category_properties.meta.to
 ## Property Inquiries
 
 ```python
-from wiil.models.business_mgt import CreatePropertyInquiry, UpdatePropertyInquiry
+from wiil.models.business_mgt import (
+    CreatePropertyInquiry,
+    UpdatePropertyInquiry,
+    UpdatePropertyInquiryStatus,
+)
+from wiil.models.type_definitions import PropertyInquiryType, PropertyInquiryStatus
 from wiil.types import PaginationRequest
 
 inquiry = property_inquiry.create(
     CreatePropertyInquiry(
         property_id="property_123",
         customer_id="cust_456",
+        inquiry_type=PropertyInquiryType.GENERAL,
         message="Is this property still available?",
     )
 )
@@ -150,9 +155,70 @@ updated = property_inquiry.update(
     UpdatePropertyInquiry(id=inquiry.id, notes="Customer requested weekend viewing")
 )
 
-status_updated = property_inquiry.update_status(inquiry.id, "in_progress")
+status_updated = property_inquiry.update_status(
+    inquiry.id,
+    UpdatePropertyInquiryStatus(
+        id=inquiry.id,
+        status=PropertyInquiryStatus.IN_PROGRESS,
+    )
+)
 print(by_property.meta.total_count, updated.id, status_updated.status)
 ```
+
+## Viewing Slots
+
+Query available viewing slots for a property and schedule viewings using the slot's UTC timestamp.
+
+```python
+from datetime import datetime
+from wiil.models.business_mgt import CreatePropertyInquiry, UpdatePropertyInquiryStatus
+from wiil.models.type_definitions import PropertyInquiryType, PropertyInquiryStatus
+
+# Get available viewing slots for a property on a specific date
+slots_response = property_inquiry.get_viewing_slots(
+    property_id="property_123",
+    local_date="2026-06-25"
+)
+
+print(f"Timezone: {slots_response.timezone}")
+print(f"Available slots for {slots_response.local_date}:")
+
+for slot in slots_response.slots:
+    print(f"  {slot.start_time_of_day} - Provider: {slot.provider_id}")
+    print(f"    UTC start: {slot.start_time_utc_sec}")
+
+# Schedule a viewing using the slot's start_time_utc_sec
+if slots_response.slots:
+    selected_slot = slots_response.slots[0]
+    
+    # Use start_time_utc_sec directly for scheduling (already in UTC seconds)
+    inquiry = property_inquiry.create(
+        CreatePropertyInquiry(
+            property_id="property_123",
+            customer_id="cust_456",
+            inquiry_type=PropertyInquiryType.GENERAL,
+            message="I'd like to schedule a viewing",
+            scheduled_viewing_date=selected_slot.start_time_utc_sec,
+            assigned_agent_id=selected_slot.provider_id,
+        )
+    )
+    
+    # Update status to viewing scheduled
+    property_inquiry.update_status(
+        inquiry.id,
+        UpdatePropertyInquiryStatus(
+            id=inquiry.id,
+            status=PropertyInquiryStatus.VIEWING_SCHEDULED,
+            scheduled_viewing_date=selected_slot.start_time_utc_sec,
+        )
+    )
+    
+    # For display purposes only, convert to datetime
+    viewing_time = datetime.utcfromtimestamp(selected_slot.start_time_utc_sec)
+    print(f"Viewing scheduled for: {viewing_time.isoformat()}")
+```
+
+**Timestamp Format:** All timestamps use UTC seconds. The `start_time_utc_sec` value from slots passes directly to API calls—no conversion needed. Only multiply by 1000 when converting to millisecond-based APIs for display.
 
 ## Batch Operations
 

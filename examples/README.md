@@ -1,19 +1,6 @@
-# WIIL JavaScript SDK Examples
+# WIIL Python SDK Examples
 
-This directory contains comprehensive examples and guides for building AI-powered conversational services using the WIIL JavaScript SDK.
-
-## Table of Contents
-
-- [Getting Started](#getting-started)
-- [Quick Start Guide](#quick-start-guide)
-  - [Dynamic Agent Setup (Recommended)](#dynamic-agent-setup-recommended)
-  - [Fundamental Configuration Setup (Traditional)](#fundamental-configuration-setup-traditional)
-- [Core Guides](#core-guides)
-- [Business Service Guides](#business-service-guides)
-- [Configuration Flow](#configuration-flow)
-- [Best Practices](#best-practices)
-
----
+This directory contains examples and guides for building AI-powered business workflows with the WIIL Python SDK.
 
 ## Getting Started
 
@@ -24,102 +11,108 @@ This directory contains comprehensive examples and guides for building AI-powere
    - Complete email verification
 
 2. **API Key**
-   - Navigate to **Settings** → **API Keys** in WIIL Console
+   - Navigate to **Settings** -> **API Keys** in the WIIL Console
    - Generate and securely store your API key
 
-3. **Development Environment**
-   - Node.js 16.x or higher
-   - npm or yarn package manager
+3. **Python Environment**
+   - Python 3.8 or higher
+   - A virtual environment is recommended
 
 ### Installation
 
 ```bash
-npm install wiil-js
-# or
-yarn add wiil-js
+pip install wiil-python
 ```
 
 ### Environment Setup
 
-Create a `.env` file in your project root:
+Create a `.env` file or export the variable in your shell:
 
 ```env
 WIIL_API_KEY=your-api-key-here
 ```
 
-**Security Note**: Never commit `.env` to version control. Add it to `.gitignore`.
+Never commit API keys or `.env` files to version control.
 
 ---
 
-## Quick Start Guide
+## Quick Start Guides
 
-### Dynamic Agent Setup (Recommended)
+### Dynamic Agent Setup
 
 **File**: [dynamic-agent-setup-guide.md](./dynamic-agent-setup-guide.md)
 
-**The fastest way to deploy AI agents** - single-call deployment instead of 7+ API calls.
+The fastest path to deploy phone or web agents. Use this when you want the platform to provision the required agent, instruction, deployment, and channel pieces for you.
 
-This is the **recommended starting point** for most users. It covers:
+```python
+import os
 
-- **Phone Agent** - Deploy a voice-capable AI agent with automatic phone provisioning
-- **Web Agent** - Deploy a web chat widget with integration snippets
-- **Chained Configuration** - STT (Speech-to-Text) and TTS (Text-to-Speech)
-- **Role Templates** - Pre-configured agent personas
-- **Business Capabilities** - Enable appointment booking, orders, reservations
+from wiil import WiilClient
+from wiil.models.service_mgt.dynamic_setup import DynamicPhoneAgentSetup
+from wiil.types import BusinessSupportServices
 
-```typescript
-// Deploy a phone agent in a single call
-const result = await client.dynamicPhoneAgent.create({
-  assistantName: 'Sarah',
-  capabilities: [BusinessSupportServices.APPOINTMENT_MANAGEMENT],
-});
-console.log('Phone number:', result.phoneNumber);
+client = WiilClient(api_key=os.environ["WIIL_API_KEY"])
+
+result = client.dynamic_phone_agent.create(
+    DynamicPhoneAgentSetup(
+        assistant_name="Sarah",
+        capabilities=[BusinessSupportServices.APPOINTMENT_MANAGEMENT],
+    )
+)
+
+print("Phone number:", result.phone_number)
 ```
 
-[📖 Read the Dynamic Setup Guide](./dynamic-agent-setup-guide.md)
+[Read the Dynamic Setup Guide](./dynamic-agent-setup-guide.md)
 
-### Fundamental Configuration Setup (Traditional)
+### Fundamental Configuration Setup
 
 **File**: [fundamental-configuration-setup.md](./fundamental-configuration-setup.md)
 
-**For fine-grained control** - complete walkthrough of the multi-step configuration process.
-
-Choose this guide when you need:
-
-- Custom instruction configurations with detailed guidelines
-- Complex multi-agent deployments
-- Advanced deployment channel configurations
-- Granular control over each component
+Use the fundamental setup guide when you need fine-grained control over instructions, support models, agent configurations, deployment channels, and deployment configurations.
 
 Setup steps:
 
-1. Initialize Client & Verify Organization
-2. Create or Select Project
-3. Create Instruction Configuration (agent behavior)
-4. Get AI Models from Support Model Registry
-5. Create Agent Configuration (link instructions + model)
-6. Create Deployment Channel (web, phone, SMS)
-7. Create Deployment Configuration (link everything)
-8. Deploy & Verify
+1. Initialize the client and verify organization access
+2. Create or select a project
+3. Create an instruction configuration
+4. Select a support model
+5. Create an agent configuration
+6. Create a deployment channel
+7. Create a deployment configuration
+8. Deploy and verify
 
-[📖 Read the Full Guide](./fundamental-configuration-setup.md)
+[Read the Fundamental Configuration Guide](./fundamental-configuration-setup.md)
 
 ---
 
-## Core Guides
+## Outbound Communications
 
-### Channels
+### Full Guide
 
-**Directory**: [channels/](./channels/)
+**File**: [outbound-communications-guide.md](./outbound-communications-guide.md)
 
-Guides for setting up different communication channels:
+Build notification workflows across SMS, email, and AI-powered outbound calls without managing provider integrations directly.
 
-- **[README.md](./channels/README.md)** - Channel overview and concepts
-- **[Understanding Channels](./channels/understanding-channels.md)** - Channel types and architecture
-- **[Web Channels](./channels/web-channels.md)** - Web chat widget integration
-- **[Voice Channels](./channels/voice-channels.md)** - Phone call integration
-- **[SMS Channels](./channels/sms-channels.md)** - Text messaging integration
-- **[Troubleshooting](./channels/troubleshooting.md)** - Common channel issues
+### Messaging Quick Start
+
+**File**: [messaging-guide.md](./messaging-guide.md)
+
+Send your first SMS, email, and outbound call:
+
+```python
+from wiil.models.conversation import CreateSmsRequest
+
+sms = client.outbound_sms.create(
+    CreateSmsRequest(
+        to="+12125551234",
+        from_number="+12125559999",
+        body="Your appointment is confirmed for tomorrow at 3 PM.",
+    )
+)
+```
+
+[Read the Messaging Guide](./messaging-guide.md)
 
 ---
 
@@ -127,401 +120,105 @@ Guides for setting up different communication channels:
 
 **Directory**: [business-services/](./business-services/)
 
-Guides for managing business operations and customer transactions:
+| Guide | What You Build |
+| ----- | -------------- |
+| [Services & Appointments](./business-services/services-and-appointments-guide.md) | Bookable services and appointment scheduling |
+| [Menus & Orders](./business-services/menus-and-orders-guide.md) | Restaurant menus, item variants, modifiers, and orders |
+| [Products & Orders](./business-services/products-and-orders-guide.md) | Product catalogs, variants, pricing, and product orders |
+| [Reservations](./business-services/reservations-guide.md) | Reservable tables, rooms, rentals, and booking flows |
+| [Property Management](./business-services/property-management-guide.md) | Property listings, inquiries, and lead tracking |
 
-### Services & Appointments
+---
 
-**File**: [services-and-appointments-guide.md](./business-services/services-and-appointments-guide.md)
+## Channels
 
-Manage professional services and appointment bookings:
+**Directory**: [channels/](./channels/)
 
-- Service configuration (haircuts, consultations, etc.)
-- Appointment scheduling and management
-- Calendar integration
-- Status tracking
+| Guide | What You Build |
+| ----- | -------------- |
+| [Channel Overview](./channels/README.md) | Channel concepts and setup flow |
+| [Understanding Channels](./channels/understanding-channels.md) | Channel types and architecture |
+| [Web Channels](./channels/web-channels.md) | Web chat widget deployment |
+| [Voice Channels](./channels/voice-channels.md) | Phone call handling |
+| [SMS Channels](./channels/sms-channels.md) | Text messaging channels |
+| [Phone Purchase](./channels/phone-purchase.md) | Phone number provisioning |
+| [Troubleshooting](./channels/troubleshooting.md) | Common channel issues |
 
-### Menus & Orders
+---
 
-**File**: [menus-and-orders-guide.md](./business-services/menus-and-orders-guide.md)
+## Service Management Guides
 
-Restaurant and food service management:
+**Directory**: [service-mgt/](./service-mgt/)
 
-- Menu categories and items
-- Nutritional information and allergens
-- Order creation and tracking (dine-in, takeout, delivery)
-- Order status management
-
-### Products & Orders
-
-**File**: [products-and-orders-guide.md](./business-services/products-and-orders-guide.md)
-
-Retail product and order management:
-
-- Product catalogs and categories
-- Inventory tracking (SKU, barcode, stock levels)
-- Product orders and fulfillment
-- Shipping and tracking
-
-### Reservations
-
-**File**: [reservations-guide.md](./business-services/reservations-guide.md)
-
-Resource reservation management:
-
-- Reservation resources (tables, rooms, rentals)
-- Customer reservations and bookings
-- Capacity management
-- Calendar sync
-
-### Property Management
-
-**File**: [property-management-guide.md](./business-services/property-management-guide.md)
-
-Real estate property and inquiry management:
-
-- Property categories and listings
-- Property addresses and verification
-- Listing types (sale, rent, both)
-- Customer inquiries and lead tracking
-- Viewing scheduling and follow-ups
+| Guide | What You Configure |
+| ----- | ------------------ |
+| [Agent Configs](./service-mgt/agent-configs-guide.md) | Agent identity, services, and model selection |
+| [Instruction Configs](./service-mgt/instruction-configs-guide.md) | Agent role, instructions, and guardrails |
+| [Deployment Channels](./service-mgt/deployment-channels-guide.md) | Web, voice, SMS, and email channels |
+| [Deployment Configs](./service-mgt/deployment-configs-guide.md) | Live deployment bindings |
+| [Provisioning Configs](./service-mgt/provisioning-configs-guide.md) | STT/TTS voice chains |
+| [Knowledge Sources](./service-mgt/knowledge-sources-guide.md) | Agent knowledge bases |
+| [Support Models](./service-mgt/support-models-guide.md) | Available AI, STT, and TTS models |
+| [Telephony Provider](./service-mgt/telephony-provider-guide.md) | Phone number/provider operations |
+| [Translation Sessions](./service-mgt/translation-sessions-guide.md) | Real-time translation sessions |
 
 ---
 
 ## Configuration Flow
 
-Understanding how configurations relate to each other:
-
-```
+```text
 Organization
-    │
-    └─→ Project (e.g., "Customer Support")
-           │
-           ├─→ Instruction Configuration
-           │   └─→ Defines: Role, behavior, guidelines, guardrails
-           │
-           ├─→ Support Models (from registry)
-           │   └─→ Available AI models from various providers
-           │
-           ├─→ Agent Configuration
-           │   └─→ Links: Model + Instructions
-           │
-           ├─→ Deployment Channel
-           │   └─→ Defines: Channel type (WEB, CALLS, SMS)
-           │
-           └─→ Deployment Configuration
-               └─→ Links: Agent + Instructions + Channel → Live Agent
+  -> Project
+    -> Instruction Configuration
+    -> Support Model
+    -> Agent Configuration
+    -> Deployment Channel
+    -> Deployment Configuration
+      -> Live Agent
 ```
 
-### Setup Order
-
-Follow this chronological order for initial setup:
-
-1. **Initialize Client** → Verify Organization
-2. **Create/Select Project** → Organizational grouping
-3. **Create Instruction Configuration** → Agent behavior (required first)
-4. **Get Support Models** → Choose AI model
-5. **Create Agent Configuration** → Link instructions + model
-6. **Create Deployment Channel** → Communication method (required first)
-7. **Create Deployment Configuration** → Link agent + channel
-8. **Deploy & Integrate** → Add to your application
+Dynamic setup creates much of this chain for you. Fundamental setup exposes each step directly.
 
 ---
 
-## Best Practices
+## Error Handling
 
-### 1. Instruction Configuration
+```python
+from wiil.errors import WiilAPIError, WiilNetworkError, WiilValidationError
 
-**Be Specific and Comprehensive:**
-
-```typescript
-const instructions = await client.instructionConfigs.create({
-  instructionName: 'customer-support-agent',
-  role: 'Customer Support Specialist',
-  introductionMessage: 'Hello! How can I help you today?',
-
-  // Detailed behavior guidelines
-  instructions: `
-    Your role and responsibilities:
-    - Greet customers warmly and professionally
-    - Answer questions about products and services
-    - Help with bookings and reservations
-    - Escalate complex issues appropriately
-
-    Communication style:
-    - Professional yet friendly
-    - Clear and concise
-    - Patient and empathetic
-  `,
-
-  // Safety and compliance
-  guardrails: `
-    Data Privacy:
-    - Never share sensitive information
-    - Follow GDPR regulations
-
-    Escalation Triggers:
-    - Customer requests human agent
-    - Keywords: complaint, refund, legal
-  `
-});
-```
-
-### 2. Error Handling
-
-Always implement comprehensive error handling:
-
-```typescript
-import {
-  WiilAPIError,
-  WiilValidationError,
-  WiilNetworkError
-} from 'wiil-js';
-
-try {
-  const deployment = await client.deploymentConfigs.create({
-    // ... configuration
-  });
-} catch (error) {
-  if (error instanceof WiilValidationError) {
-    console.error('Invalid configuration:', error.details);
-  } else if (error instanceof WiilAPIError) {
-    console.error(`API Error ${error.statusCode}:`, error.message);
-  } else if (error instanceof WiilNetworkError) {
-    console.error('Network error. Check your connection.');
-  }
-}
-```
-
-### 3. Model Selection
-
-Choose the right model for your use case:
-
-```typescript
-// For conversational AI (text, voice, vision)
-const defaultModel = await client.supportModels.getDefaultMultiMode();
-
-// For specific providers
-const geminiModel = await client.supportModels.getByProprietorAndProviderModelId(
-  'Google',
-  'gemini-2.0-flash-exp'
-);
-
-// For voice applications
-const ttsModel = await client.supportModels.getDefaultTTS();
-const sttModel = await client.supportModels.getDefaultSTT();
-```
-
-### 4. Channel Configuration
-
-**Web Chat:**
-
-```typescript
-const webChannel = await client.deploymentChannels.create({
-  channelName: 'Website Live Chat',
-  deploymentType: 'WEB',
-  channelIdentifier: 'web-chat-01',
-  recordingEnabled: true,
-  configuration: {
-    communicationType: 'TEXT',  // TEXT, VOICE, or UNIFIED
-    widgetConfiguration: {
-      position: 'right'  // left or right
-    }
-  }
-});
-```
-
-**Voice (Phone):**
-
-```typescript
-const voiceChannel = await client.deploymentChannels.create({
-  channelName: 'Support Hotline',
-  deploymentType: 'CALLS',
-  channelIdentifier: '+15551234567',
-  recordingEnabled: true,
-  configuration: {
-    communicationType: 'VOICE'
-  }
-});
-```
-
-### 5. Business Services Integration
-
-When building transactional agents, configure business services:
-
-```typescript
-// Service appointments
-const service = await client.services.create({
-  name: 'Hair Styling',
-  description: 'Professional hair styling service',
-  duration: 60,
-  price: 75.00
-});
-
-// Menu items for restaurants
-const menuItem = await client.menus.createItem({
-  name: 'Cheeseburger',
-  price: 12.99,
-  categoryId: 'category_main'
-});
-
-// Products for retail
-const product = await client.products.create({
-  name: 'Wireless Mouse',
-  price: 29.99,
-  trackInventory: true,
-  stockQuantity: 150
-});
-
-// Reservation resources
-const table = await client.reservationResources.create({
-  resourceType: 'table',
-  name: 'Table 5',
-  capacity: 4
-});
+try:
+    result = client.deployment_configs.create(payload)
+except WiilValidationError as exc:
+    print("Invalid input:", exc.details)
+except WiilAPIError as exc:
+    print(f"API error {exc.status_code}:", exc.message)
+except WiilNetworkError:
+    print("Network error. Check connectivity and retry.")
 ```
 
 ---
 
-## Monitoring and Analytics
+## Security
 
-After deployment, monitor your agent's performance in the WIIL Console:
+The WIIL Python SDK is intended for server-side use. Never expose your API key in browser or mobile client code.
 
-### WIIL Console Dashboards
+```python
+import os
 
-- Navigate to **Analytics** → **Conversations**
-- View real-time conversation logs
-- Track performance metrics
-- Export data for analysis
+from wiil import WiilClient
 
----
-
-## Integration Examples
-
-### HTML Web Chat Widget
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>My Website</title>
-</head>
-<body>
-  <h1>Welcome to ACME Corporation</h1>
-
-  <!-- WIIL Widget -->
-  <div
-    id="wiil-widget"
-    data-config-id="your-deployment-config-id"
-    data-features="chat,voice"
-  ></div>
-  <script src="https://cdn.wiil.io/public/wiil-widget.js"></script>
-  <script>WiilWidget.init();</script>
-</body>
-</html>
-```
-
-### React Integration
-
-```tsx
-import { useEffect } from 'react';
-
-function App() {
-  useEffect(() => {
-    const widgetDiv = document.createElement('div');
-    widgetDiv.id = 'wiil-widget';
-    widgetDiv.setAttribute('data-config-id', 'your-deployment-config-id');
-    widgetDiv.setAttribute('data-features', 'chat,voice');
-    document.body.appendChild(widgetDiv);
-
-    const script = document.createElement('script');
-    script.src = 'https://cdn.wiil.io/public/wiil-widget.js';
-    script.async = true;
-    script.onload = () => window.WiilWidget.init();
-    document.body.appendChild(script);
-
-    return () => {
-      document.body.removeChild(widgetDiv);
-      document.body.removeChild(script);
-    };
-  }, []);
-
-  return <div className="App">Your content</div>;
-}
+client = WiilClient(api_key=os.environ["WIIL_API_KEY"])
 ```
 
 ---
 
-## Troubleshooting
+## Support
 
-### Common Issues
-
-#### Problem: API Key Authentication Failed
-
-```text
-Error: 401 Unauthorized
-```
-
-**Solution**: Verify your API key is correct and active in WIIL Console.
-
-#### Problem: Deployment Not Active
-
-```text
-Error: Deployment configuration is not active
-```
-
-**Solution**: Ensure `isActive: true` when creating deployment configuration.
-
-#### Problem: Widget Not Appearing
-
-```text
-Widget script loaded but no UI visible
-```
-
-**Solution**:
-
-- Check `data-config-id` matches your deployment
-- Verify deployment status is ACTIVE in console
-- Check browser console for errors
-
-For channel-specific issues, see [Channel Troubleshooting Guide](./channels/troubleshooting.md).
-
----
-
-## Support & Resources
-
-### Documentation
-
-- **Platform Docs**: [https://docs.wiil.io](https://docs.wiil.io)
+- **Documentation**: [https://docs.wiil.io](https://docs.wiil.io)
 - **API Reference**: [https://docs.wiil.io/developer/api-reference](https://docs.wiil.io/developer/api-reference)
-- **SDK Reference**: [https://github.com/wiil-io/wiil-js](https://github.com/wiil-io/wiil-js)
-
-### Support Channels
-
+- **SDK Reference**: [https://github.com/wiil-io/wiil-python](https://github.com/wiil-io/wiil-python)
 - **Email**: [dev-support@wiil.io](mailto:dev-support@wiil.io)
-- **Console**: [https://console.wiil.io](https://console.wiil.io)
-- **GitHub Issues**: [https://github.com/wiil-io/wiil-js/issues](https://github.com/wiil-io/wiil-js/issues)
-
-### Community
-
-- **Discord**: Join our developer community
-- **Blog**: Technical articles and best practices
-- **Changelog**: Stay updated with new features
 
 ---
 
-## Contributing
-
-Found an issue or want to add a new example? Please submit a pull request or open an issue on GitHub.
-
----
-
-## Ready to Get Started?
-
-Begin with the [Dynamic Agent Setup Guide](./dynamic-agent-setup-guide.md) to deploy your first AI agent in a single API call! 🚀
-
-For fine-grained control, see the [Fundamental Configuration Setup Guide](./fundamental-configuration-setup.md).
-
----
-
-*Built with ❤️ by the WIIL team*
+Start with [Dynamic Agent Setup](./dynamic-agent-setup-guide.md) for the quickest deployment path, or use [Fundamental Configuration](./fundamental-configuration-setup.md) when you need full control.

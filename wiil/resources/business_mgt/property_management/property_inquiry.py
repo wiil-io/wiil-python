@@ -9,6 +9,7 @@ from wiil.models.business_mgt import (
     CreatePropertyInquiry,
     UpdatePropertyInquiry,
     UpdatePropertyInquiryStatus,
+    ServiceSlotQueryResponse,
 )
 from wiil.types import PaginatedResult, PaginationRequest
 
@@ -38,6 +39,25 @@ class PropertyInquiryResource:
             data.model_dump(by_alias=True, exclude_none=True),
             schema=CreatePropertyInquiry,
             response_model=PropertyInquiry
+        )
+
+    def get_viewing_slots(
+        self,
+        property_id: str,
+        local_date: str
+    ) -> ServiceSlotQueryResponse:
+        """Get available viewing slots for a property on a specific date.
+
+        Args:
+            property_id: Property ID to get viewing slots for
+            local_date: Business local date in YYYY-MM-DD format
+
+        Returns:
+            Available viewing slots with UTC timestamps
+        """
+        return self._http.get(
+            f'{self._base_path}/viewing-slots/{property_id}?localDate={local_date}',
+            response_model=ServiceSlotQueryResponse
         )
 
     def get(self, inquiry_id: str) -> PropertyInquiry:
