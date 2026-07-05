@@ -17,6 +17,27 @@ from wiil.models.type_definitions import AgentCapabilities, AgentRoleTemplateIde
 ProcessingStatus = Literal["pending", "in_progress", "completed", "failed"]
 
 
+class TextBasedKnowledgeSource(BaseModel):
+    """Text-based knowledge source schema.
+
+    Used to create a new knowledge source from raw text during a web agent update.
+
+    Attributes:
+        name: Optional human-readable name for the text knowledge source
+        content: Raw text content to create as a new knowledge source
+    """
+
+    name: Optional[str] = Field(
+        None,
+        description="Optional human-readable name for the text knowledge source"
+    )
+    content: str = Field(
+        ...,
+        min_length=1,
+        description="Raw text content to create as a new knowledge source"
+    )
+
+
 class DynamicBaseAgentSetup(BaseModel):
     """Base agent setup schema.
 
@@ -73,6 +94,11 @@ class DynamicBaseAgentSetup(BaseModel):
         None,
         description="The specific model ID from the provider to use for this agent, e.g., gpt-4, gpt-3.5-turbo, etc.",
         alias="providerModelId"
+    )
+    text_knowledge_source: Optional[TextBasedKnowledgeSource] = Field(
+        None,
+        description="New text knowledge source to create and associate with this web agent",
+        alias="textKnowledgeSource"
     )
 
 

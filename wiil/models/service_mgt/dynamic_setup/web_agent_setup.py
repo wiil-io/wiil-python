@@ -5,7 +5,7 @@ Extends the base agent setup with web-specific settings like website URL,
 communication type, and optional voice interaction configurations.
 """
 
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 from pydantic import Field, field_validator, model_validator
 
@@ -50,6 +50,11 @@ class DynamicWebAgentSetup(DynamicBaseAgentSetup):
         None,
         description="Text-to-speech model configuration for the web assistant, if using voice interactions",
         alias="ttsConfiguration"
+    )
+    widget_configuration: Optional[Dict[str, str]] = Field(
+        None,
+        description="Custom theme configuration for the web chat widget",
+        alias="widgetConfiguration"
     )
 
     @model_validator(mode="after")
@@ -116,6 +121,7 @@ class UpdateDynamicWebAgent(BaseModel):
     communication_type: Optional[OttCommunicationType] = Field(None, alias="communicationType")
     stt_configuration: Optional[DynamicSTTModelConfiguration] = Field(None, alias="sttConfiguration")
     tts_configuration: Optional[DynamicTTSModelConfiguration] = Field(None, alias="ttsConfiguration")
+    widget_configuration: Optional[Dict[str, str]] = Field(None, alias="widgetConfiguration")
 
     @field_validator("communication_type", mode="before")
     @classmethod

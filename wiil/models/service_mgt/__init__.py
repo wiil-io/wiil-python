@@ -131,6 +131,7 @@ from wiil.models.service_mgt.dynamic_setup import (
     DynamicWebAgentSetup,
     DynamicWebAgentSetupResult,
     ProcessingStatus,
+    TextBasedKnowledgeSource,
     UpdateDynamicPhoneAgent,
     UpdateDynamicWebAgent,
 )
@@ -230,6 +231,7 @@ __all__ = [
     "DynamicWebAgentSetup",
     "DynamicWebAgentSetupResult",
     "ProcessingStatus",
+    "TextBasedKnowledgeSource",
     "UpdateDynamicPhoneAgent",
     "UpdateDynamicWebAgent",
 ]

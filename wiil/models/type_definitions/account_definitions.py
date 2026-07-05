@@ -84,5 +84,8 @@ class BusinessSupportServices(str, Enum):
     PROPERTY_MANAGEMENT = "property_management"
     """Property listing and rental management functionality."""
 
+    MEMBERSHIP_MANAGEMENT = "membership_management"
+    """Membership and subscription management functionality."""
+
     NONE = "none"
     """No business support services enabled."""

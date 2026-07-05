@@ -85,5 +85,8 @@ class BusinessSupportServices(str, Enum):
     RESERVATION_MANAGEMENT = "reservation_management"
     """Table and venue reservation management functionality"""
 
+    MEMBERSHIP_MANAGEMENT = "membership_management"
+    """Membership and subscription management functionality"""
+
     NONE = "none"
     """No business support services enabled"""

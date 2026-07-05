@@ -14,6 +14,7 @@ from wiil.models.service_mgt.dynamic_setup.base_agent_setup import (
     DynamicSTTModelConfiguration,
     DynamicTTSModelConfiguration,
     ProcessingStatus,
+    TextBasedKnowledgeSource,
 )
 
 # Phone agent setup models
@@ -39,6 +40,7 @@ __all__ = [
     "DynamicSTTModelConfiguration",
     "DynamicTTSModelConfiguration",
     "ProcessingStatus",
+    "TextBasedKnowledgeSource",
     # Phone agent setup models
     "DynamicPhoneAgentSetup",
     "DynamicPhoneAgentSetupResult",
