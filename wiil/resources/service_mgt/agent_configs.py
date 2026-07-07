@@ -6,6 +6,7 @@ from urllib.parse import urlencode
 from wiil.client.http_client import HttpClient
 from wiil.models.service_mgt import (
     AgentConfiguration,
+    AgentGraph,
     CreateAgentConfiguration,
     UpdateAgentConfiguration,
 )
@@ -43,6 +44,23 @@ class AgentConfigurationsResource:
     def get(self, config_id: str) -> AgentConfiguration:
         """Retrieve an agent configuration by ID."""
         return self._http.get(f'{self._base_path}/{config_id}', response_model=AgentConfiguration)
+
+    def get_graph(self, config_id: str) -> AgentGraph:
+        """Retrieve the full agent graph for an agent configuration.
+
+        Returns a fully hydrated view of the agent including its instruction
+        configuration, knowledge sources, and deployment channels.
+
+        Args:
+            config_id: Agent configuration ID
+
+        Returns:
+            Full agent graph with all related entities
+        """
+        return self._http.get(
+            f'{self._base_path}/{config_id}/graph',
+            response_model=AgentGraph
+        )
 
     def update(self, data: UpdateAgentConfiguration) -> AgentConfiguration:
         """Update an existing agent configuration.

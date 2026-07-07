@@ -15,6 +15,12 @@ from wiil.models.service_mgt.agent_config import (
     UpdateAgentConfiguration,
 )
 
+# Agent graph models
+from wiil.models.service_mgt.agent_graph import (
+    AgentDeploymentNode,
+    AgentGraph,
+)
+
 # Call transfer configuration models
 from wiil.models.service_mgt.call_transfer_config import (
     CallTransferConfig,
@@ -142,6 +148,9 @@ __all__ = [
     "AgentConfigurationDeleteRequest",
     "CreateAgentConfiguration",
     "UpdateAgentConfiguration",
+    # Agent graph models
+    "AgentDeploymentNode",
+    "AgentGraph",
     # Call transfer configuration models
     "CallTransferConfig",
     "TransferType",

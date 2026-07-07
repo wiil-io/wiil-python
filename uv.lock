@@ -1926,7 +1926,7 @@ wheels = [
 
 [[package]]
 name = "wiil-python"
-version = "0.0.16"
+version = "0.0.17"
 source = { editable = "." }
 dependencies = [
     { name = "email-validator" },

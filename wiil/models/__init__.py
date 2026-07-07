@@ -293,6 +293,9 @@ from wiil.models.service_mgt import (
     AgentConfigurationDeleteRequest,
     CreateAgentConfiguration,
     UpdateAgentConfiguration,
+    # Agent graph
+    AgentDeploymentNode,
+    AgentGraph,
     # Call transfer
     CallTransferConfig,
     TransferType,
@@ -688,6 +691,8 @@ __all__ = [
     "AgentConfigurationDeleteRequest",
     "CreateAgentConfiguration",
     "UpdateAgentConfiguration",
+    "AgentDeploymentNode",
+    "AgentGraph",
     "CallTransferConfig",
     "TransferType",
     "CreateChainDeploymentConfiguration",
