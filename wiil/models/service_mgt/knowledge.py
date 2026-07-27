@@ -9,7 +9,7 @@ from typing import Any, Dict, Optional
 
 from pydantic import Field
 
-from wiil.models.base import EntityModel
+from wiil.models.base import BaseModel, EntityModel
 from wiil.models.type_definitions import (
     KnowledgeBaseProcessingStatus,
     KnowledgeTypes,
@@ -155,4 +155,31 @@ class KnowledgeSource(EntityModel):
     content_hash: Optional[str] = Field(
         None,
         description="Hash of content (e.g., SHA-256) for deduplication and integrity verification"
+    )
+
+
+class CreateTextKnowledgeSource(BaseModel):
+    """Payload for creating a knowledge source from raw text content.
+
+    Text knowledge sources are ingested and stored as CORPUS-type knowledge sources.
+    The content must be at least 1000 characters.
+
+    Attributes:
+        name: Optional human-readable name; the server may auto-name from content if omitted.
+        content: Raw text content to ingest (minimum 1000 characters).
+        metadata: Additional metadata (tags, categories, custom attributes).
+    """
+
+    name: Optional[str] = Field(
+        None,
+        description="Optional human-readable name for the text knowledge source; the server may derive one from the content if omitted"
+    )
+    content: str = Field(
+        ...,
+        min_length=1000,
+        description="Raw text content to ingest as a new knowledge source (minimum 1000 characters; stored as a CORPUS knowledge source)"
+    )
+    metadata: Optional[Dict[str, Any]] = Field(
+        None,
+        description="Additional metadata for the knowledge source including tags, categories, or custom attributes"
     )

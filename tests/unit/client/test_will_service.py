@@ -14,7 +14,7 @@ def test_will_service_defaults_to_ott_base_url():
     """WiilService should default to OTT base URL."""
     service = WiilService(api_key="test-key")
 
-    assert service.config.base_url == "https://ott.wiil.io"
+    assert service.config.base_url == "https://ott.wiil.io/v1"
     assert service.config.timeout == 30
 
 

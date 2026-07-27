@@ -67,7 +67,6 @@ from wiil.resources.conversation import (
     OutboundEmailsResource,
     OutboundSmsResource,
     OutboundTemplatesResource,
-    TranslationServicesResource,
 )
 from wiil.resources.service_mgt import (
     AgentConfigurationsResource,
@@ -80,12 +79,11 @@ from wiil.resources.service_mgt import (
     PhoneConfigurationsResource,
     ProvisioningConfigurationsResource,
     ConversationConfigurationsResource,
-    TranslationSessionsResource,
     KnowledgeSourcesResource,
     SupportModelsResource,
     TelephonyProviderResource,
 )
-from wiil.services import OttService, TranslationService
+from wiil.services import OttService
 
 # Default configuration values
 DEFAULT_CONFIG = {
@@ -227,7 +225,6 @@ class WiilClient:
         self.phone_configs = PhoneConfigurationsResource(self._http)
         self.provisioning_configs = ProvisioningConfigurationsResource(self._http)
         self.conversation_configs = ConversationConfigurationsResource(self._http)
-        self.translation_sessions = TranslationSessionsResource(self._http)
         self.knowledge_sources = KnowledgeSourcesResource(self._http)
         self.support_models = SupportModelsResource(self._http)
         self.telephony_provider = TelephonyProviderResource(self._http)
@@ -240,11 +237,9 @@ class WiilClient:
         self.outbound_emails = OutboundEmailsResource(self._http)
         self.outbound_sms = OutboundSmsResource(self._http)
         self.outbound_templates = OutboundTemplatesResource(self._http)
-        self.translation_services = TranslationServicesResource(self._http)
 
         # Service layer helpers
         self.ott = OttService(self._http)
-        self.translation = TranslationService(self._http)
 
     def _validate_config(
         self,

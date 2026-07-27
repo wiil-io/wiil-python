@@ -5,10 +5,10 @@ from urllib.parse import urlparse
 from wiil.client.http_client import HttpClient
 from wiil.client.types import WiilClientConfig
 from wiil.errors import WiilConfigurationError
-from wiil.services import MessagingService, OttService, TranslationService
+from wiil.services import MessagingService, OttService
 
 
-DEFAULT_OTT_BASE_URL = "https://ott.wiil.io"
+DEFAULT_OTT_BASE_URL = "https://ott.wiil.io/v1"
 DEFAULT_API_BASE_URL = "https://api.wiil.io/v1"
 DEFAULT_TIMEOUT = 30
 
@@ -16,8 +16,8 @@ DEFAULT_TIMEOUT = 30
 class WiilService:
     """WIIL SDK client for outbound communication and real-time services.
 
-    Provides access to messaging (calls, SMS, email), translation sessions,
-    and OTT connection services for AI-powered customer interactions.
+    Provides access to messaging (calls, SMS, email) and OTT connection
+    services for AI-powered customer interactions.
 
     Example:
         >>> from wiil import WiilService
@@ -57,7 +57,6 @@ class WiilService:
                 timeout=timeout,
             )
         )
-        self.translation = TranslationService(self._http)
         self.ott = OttService(self._http)
         self.messaging = MessagingService(self._api_http)
 

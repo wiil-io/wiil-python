@@ -4,8 +4,7 @@ This module contains all conversation-related models including:
 - Conversation configurations and management
 - Message schemas (chat and email)
 - Outbound messaging requests (call, email, SMS)
-- Translation services and configurations
-- Translation conversations and participants
+- Translation sessions, participants, and transcripts
 """
 
 # Conversation configuration models
@@ -92,23 +91,33 @@ from wiil.models.conversation.outbound_template import (
     WhatsappTemplate,
 )
 
-# Translation configuration models
-from wiil.models.conversation.translation_config import (
-    CreateTranslationServiceRequest,
-    TranslationConversationConfig,
-    TranslationServiceRequest,
-)
-
 # Translation conversation models
 from wiil.models.conversation.translation_conversation import (
-    CreateTranslationParticipant,
-    CreateTranslationServiceLog,
-    TranslationMessage,
+    # Session models
+    TranslationSession,
+    TranslationSessionStatus,
+    TranslationSessionStateHistory,
+    CreateTranslationSession,
+    UpdateTranslationSession,
+    TransitionTranslationSession,
+    # Participant models
     TranslationParticipant,
-    TranslationServiceLog,
+    TranslationParticipantRole,
+    CreateTranslationParticipant,
     UpdateTranslationParticipant,
-    UpdateTranslationServiceLog,
+    # Transcript entry models
+    TranslationTranscriptEntry,
+    CreateTranslationTranscriptEntry,
+    # Request/response DTOs
+    TranslationSessionRequest,
+    TranslationSessionParticipantRequest,
+    TranslationSessionInitiatorRequest,
+    TranslationSessionAccess,
+    TranslationParticipantAccess,
 )
+
+# Translation direction enum (from types to avoid duplication)
+from wiil.types.conversation_types import TranslationDirection
 
 __all__ = [
     # Conversation configuration models
@@ -180,16 +189,27 @@ __all__ = [
     "UpdateSmsTemplate",
     "UpdateWhatsappTemplate",
     "WhatsappTemplate",
-    # Translation configuration models
-    "CreateTranslationServiceRequest",
-    "TranslationConversationConfig",
-    "TranslationServiceRequest",
-    # Translation conversation models
-    "CreateTranslationParticipant",
-    "CreateTranslationServiceLog",
-    "TranslationMessage",
+    # Translation session models
+    "TranslationSession",
+    "TranslationSessionStatus",
+    "TranslationSessionStateHistory",
+    "CreateTranslationSession",
+    "UpdateTranslationSession",
+    "TransitionTranslationSession",
+    # Translation participant models
     "TranslationParticipant",
-    "TranslationServiceLog",
+    "TranslationParticipantRole",
+    "CreateTranslationParticipant",
     "UpdateTranslationParticipant",
-    "UpdateTranslationServiceLog",
+    # Translation transcript models
+    "TranslationTranscriptEntry",
+    "CreateTranslationTranscriptEntry",
+    # Translation request/response DTOs
+    "TranslationSessionRequest",
+    "TranslationSessionParticipantRequest",
+    "TranslationSessionInitiatorRequest",
+    "TranslationSessionAccess",
+    "TranslationParticipantAccess",
+    # Translation direction enum
+    "TranslationDirection",
 ]

@@ -76,7 +76,10 @@ from wiil.models.service_mgt.interaction_channels import (
 )
 
 # Knowledge source models
-from wiil.models.service_mgt.knowledge import KnowledgeSource
+from wiil.models.service_mgt.knowledge import (
+    CreateTextKnowledgeSource,
+    KnowledgeSource,
+)
 
 # Phone configuration models
 from wiil.models.service_mgt.phone_config import (
@@ -194,6 +197,7 @@ __all__ = [
     "WebChannelConfig",
     "WebChannelType",
     # Knowledge source models
+    "CreateTextKnowledgeSource",
     "KnowledgeSource",
     # Phone configuration models
     "PhoneConfiguration",

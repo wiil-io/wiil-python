@@ -15,7 +15,6 @@ from wiil.resources.service_mgt.provisioning_configs import (
 from wiil.resources.service_mgt.conversation_configs import (
     ConversationConfigurationsResource,
 )
-from wiil.resources.service_mgt.translation_sessions import TranslationSessionsResource
 from wiil.resources.service_mgt.knowledge_sources import KnowledgeSourcesResource
 from wiil.resources.service_mgt.support_models import SupportModelsResource
 from wiil.resources.service_mgt.telephony_provider import TelephonyProviderResource
@@ -41,7 +40,6 @@ __all__ = [
     'PhoneConfigurationsResource',
     'ProvisioningConfigurationsResource',
     'ConversationConfigurationsResource',
-    'TranslationSessionsResource',
     'KnowledgeSourcesResource',
     'SupportModelsResource',
     'TelephonyProviderResource',

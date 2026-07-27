@@ -259,18 +259,28 @@ from wiil.models.conversation import (
     EmailRequest,
     CreateSmsRequest,
     SmsRequest,
-    # Translation config
-    CreateTranslationServiceRequest,
-    TranslationConversationConfig,
-    TranslationServiceRequest,
-    # Translation conversation
-    CreateTranslationParticipant,
-    CreateTranslationServiceLog,
-    TranslationMessage,
+    # Translation session models
+    TranslationSession,
+    TranslationSessionStatus,
+    TranslationSessionStateHistory,
+    CreateTranslationSession,
+    UpdateTranslationSession,
+    TransitionTranslationSession,
+    # Translation participant models
     TranslationParticipant,
-    TranslationServiceLog,
+    TranslationParticipantRole,
+    CreateTranslationParticipant,
     UpdateTranslationParticipant,
-    UpdateTranslationServiceLog,
+    # Translation transcript models
+    TranslationTranscriptEntry,
+    CreateTranslationTranscriptEntry,
+    # Translation request/response DTOs
+    TranslationSessionRequest,
+    TranslationSessionParticipantRequest,
+    TranslationSessionInitiatorRequest,
+    TranslationSessionAccess,
+    TranslationParticipantAccess,
+    TranslationDirection,
 )
 
 # Request models
@@ -331,6 +341,7 @@ from wiil.models.service_mgt import (
     WebChannel,
     WebChannelConfig,
     # Knowledge
+    CreateTextKnowledgeSource,
     KnowledgeSource,
     # Phone configuration
     PhoneConfiguration,
@@ -666,16 +677,28 @@ __all__ = [
     "EmailRequest",
     "CreateSmsRequest",
     "SmsRequest",
-    "CreateTranslationServiceRequest",
-    "TranslationConversationConfig",
-    "TranslationServiceRequest",
-    "CreateTranslationParticipant",
-    "CreateTranslationServiceLog",
-    "TranslationMessage",
+    # Translation session models
+    "TranslationSession",
+    "TranslationSessionStatus",
+    "TranslationSessionStateHistory",
+    "CreateTranslationSession",
+    "UpdateTranslationSession",
+    "TransitionTranslationSession",
+    # Translation participant models
     "TranslationParticipant",
-    "TranslationServiceLog",
+    "TranslationParticipantRole",
+    "CreateTranslationParticipant",
     "UpdateTranslationParticipant",
-    "UpdateTranslationServiceLog",
+    # Translation transcript models
+    "TranslationTranscriptEntry",
+    "CreateTranslationTranscriptEntry",
+    # Translation request/response DTOs
+    "TranslationSessionRequest",
+    "TranslationSessionParticipantRequest",
+    "TranslationSessionInitiatorRequest",
+    "TranslationSessionAccess",
+    "TranslationParticipantAccess",
+    "TranslationDirection",
     # Request models
     "AccountPaginatedTimestampQuery",
     "BasePaginatedResult",
@@ -723,6 +746,7 @@ __all__ = [
     "UpdateDeploymentChannel",
     "WebChannel",
     "WebChannelConfig",
+    "CreateTextKnowledgeSource",
     "KnowledgeSource",
     "PhoneConfiguration",
     "UpdatePhoneConfiguration",

@@ -1,59 +1,107 @@
 # Knowledge Sources Guide
 
-This guide covers accessing knowledge sources using the WIIL Platform Python SDK. Knowledge sources represent repositories of information that AI agents can access for context and factual grounding.
+This guide covers managing knowledge sources using the WIIL Platform Python SDK. Knowledge sources represent repositories of information that AI agents can access for context and factual grounding.
 
 ## Quick Start
 
 ```python
 from wiil import WiilClient
+from wiil.models.service_mgt import CreateTextKnowledgeSource
 
 client = WiilClient(api_key='your-api-key')
+
+# Create a text knowledge source
+source = client.knowledge_sources.create_text(
+    CreateTextKnowledgeSource(
+        name='Product FAQ',
+        content='Your text content here (minimum 1000 characters)...',
+        metadata={'category': 'support', 'version': '1.0'},
+    )
+)
+
+print('Created:', source.id)
+print('Processing status:', source.processing_status)
 
 # List knowledge sources
 result = client.knowledge_sources.list()
 
-print(f'Total sources: {result.meta.total_count}')
+print('Total sources:', result.meta.total_count)
 for source in result.data:
-    print(f'- {source.name} ({source.type})')
+    print(f'- {source.name} ({source.source_type})')
 ```
 
 ## Architecture Overview
 
-Knowledge sources are a **read-only resource** that provides:
+Knowledge sources provide:
 
 - **Information Repositories**: Documents, FAQs, product catalogs, and other data
 - **Agent Context**: Factual grounding for AI agent responses
 - **Referenced by Instructions**: Instruction configurations link to knowledge sources via `knowledge_source_ids`
+- **Multi-tier Storage**: Automatic optimization between Firestore (fast) and Cloud Storage (cost-effective)
 
-**Relationship with Instruction Configurations:**
-```python
-instruction = client.instruction_configs.create(
-    CreateInstructionConfiguration(
-        # ... other fields
-        knowledge_source_ids=['ks_123', 'ks_456'],  # Link to knowledge sources
-    )
-)
-```
+### Knowledge Source Types
+
+- `document` - Uploaded files (PDF, DOCX, TXT, etc.)
+- `url` - Web page content
+- `business_website` - Crawled website content
+- `corpus` - Text collections (created via `create_text`)
+- `batch_document` - Multiple files processed together
+
+### Processing Status
+
+- `pending` - Awaiting processing
+- `processing` - Being prepared for AI consumption
+- `completed` - Ready for use
+- `failed` - Processing error
 
 ## Operations
+
+### Create Text Knowledge Source
+
+Create a knowledge source from raw text content (minimum 1000 characters):
+
+```python
+from wiil.models.service_mgt import CreateTextKnowledgeSource
+
+source = client.knowledge_sources.create_text(
+    CreateTextKnowledgeSource(
+        name='Company Policies',
+        content='''
+            Your comprehensive text content here...
+            This must be at least 1000 characters long.
+            Include all the information you want the AI agent to access.
+            The content will be processed and optimized for AI consumption.
+            ...
+        ''',
+        metadata={
+            'category': 'policies',
+            'department': 'HR',
+            'version': '2.0',
+            'last_updated': '2024-01-15',
+        },
+    )
+)
+
+print('Created:', source.id)
+print('Name:', source.name)
+print('Type:', source.source_type)  # 'corpus'
+print('Status:', source.processing_status)
+```
 
 ### List Knowledge Sources
 
 ```python
-from wiil import WiilClient
-
-client = WiilClient(api_key='your-api-key')
-
 # List with default pagination
 result = client.knowledge_sources.list()
 
-print(f'Total knowledge sources: {result.meta.total_count}')
-print(f'Page: {result.meta.page} of {result.meta.total_pages}')
+print('Total knowledge sources:', result.meta.total_count)
+print('Page:', result.meta.page, 'of', result.meta.total_pages)
 
 for source in result.data:
     print(f'{source.name}:')
     print(f'  ID: {source.id}')
-    print(f'  Type: {source.type}')
+    print(f'  Type: {source.source_type}')
+    print(f'  Status: {source.processing_status}')
 ```
 
 ### List with Custom Pagination
@@ -72,13 +120,54 @@ print(f'Showing {len(result.data)} of {result.meta.total_count} sources')
 ### Get Knowledge Source by ID
 
 ```python
+from datetime import datetime
+
 source = client.knowledge_sources.get('ks_123')
 
 print('Knowledge Source:')
-print(f'  ID: {source.id}')
-print(f'  Name: {source.name}')
-print(f'  Type: {source.type}')
-print(f'  Created: {source.created_at}')
+print('  ID:', source.id)
+print('  Name:', source.name)
+print('  Type:', source.source_type)
+print('  Status:', source.processing_status)
+print('  Storage Tier:', source.storage_tier)
+print('  Access Count:', source.access_count)
+
+if source.content_size:
+    print(f'  Content Size: {source.content_size / 1024:.2f} KB')
+
+if source.created_at:
+    print('  Created:', datetime.fromtimestamp(source.created_at / 1000).isoformat())
+```
+
+## API Reference
+
+### `create_text(data)` - Create text knowledge source
+
+```python
+source = client.knowledge_sources.create_text(
+    CreateTextKnowledgeSource(
+        name='FAQ Document',           # Optional - server may auto-name
+        content='Text content...',     # Required - min 1000 chars
+        metadata={'key': 'value'},     # Optional
+    )
+)
+# Returns: KnowledgeSource
+```
+
+### `get(source_id)` - Get by ID
+
+```python
+source = client.knowledge_sources.get('ks_123')
+# Returns: KnowledgeSource
+```
+
+### `list(params?)` - List with pagination
+
+```python
+result = client.knowledge_sources.list(
+    params=PaginationRequest(page=1, page_size=50)
+)
+# Returns: PaginatedResult[KnowledgeSource]
 ```
 
 ## Using Knowledge Sources with Instructions
@@ -86,49 +175,60 @@ print(f'  Created: {source.created_at}')
 Knowledge sources provide context for AI agents through instruction configurations:
 
 ```python
-from wiil import WiilClient
 from wiil.models.service_mgt import (
+    CreateTextKnowledgeSource,
     CreateInstructionConfiguration,
     CreateAgentConfiguration,
 )
 from wiil.models.type_definitions import BusinessSupportServices
 
-client = WiilClient(api_key='your-api-key')
+# 1. Create a knowledge source
+faq_source = client.knowledge_sources.create_text(
+    CreateTextKnowledgeSource(
+        name='Product FAQ',
+        content='''
+            Q: What are your business hours?
+            A: We are open Monday through Friday, 9 AM to 5 PM EST.
+            
+            Q: How do I return a product?
+            A: You can return any product within 30 days for a full refund...
+            
+            ... (continue with at least 1000 characters of FAQ content)
+        ''',
+    )
+)
 
-# 1. List available knowledge sources
+# 2. Wait for processing to complete (poll or check later)
+print('Processing status:', faq_source.processing_status)
+
+# 3. List all available knowledge sources
 sources = client.knowledge_sources.list()
-
-print('Available knowledge sources:')
-for source in sources.data:
-    print(f'  {source.id}: {source.name}')
-
-# 2. Select relevant sources for your agent
-relevant_source_ids = [
-    s.id for s in sources.data
-    if s.type in ('faq', 'documentation')
+completed_sources = [
+    s for s in sources.data
+    if s.processing_status == 'completed'
 ]
 
-# 3. Get a model
+# 4. Get a model
 models = client.support_models.list()
 model = next(
     (m for m in models if m.type == 'multi_mode' and not m.discontinued),
     None
 )
 
-# 4. Create instruction with knowledge sources
+# 5. Create instruction with knowledge sources
 instruction = client.instruction_configs.create(
     CreateInstructionConfiguration(
         instruction_name='Knowledge-Enhanced Agent',
         role='Support Agent',
         introduction_message='Hello! I have access to our knowledge base.',
-        instructions='Use the linked knowledge sources to answer questions.',
+        instructions='Use the linked knowledge sources to answer questions accurately.',
         guardrails='Only provide information from verified knowledge sources.',
         supported_services=[BusinessSupportServices.APPOINTMENT_MANAGEMENT],
-        knowledge_source_ids=relevant_source_ids,
+        knowledge_source_ids=[s.id for s in completed_sources],
     )
 )
 
-# 5. Create agent with the instruction
+# 6. Create agent with the instruction
 agent = client.agent_configs.create(
     CreateAgentConfiguration(
         name='KnowledgeBot',
@@ -137,128 +237,152 @@ agent = client.agent_configs.create(
     )
 )
 
-print(f'Agent created with knowledge sources: {agent.id}')
+print('Agent created with knowledge sources:', agent.id)
 ```
 
 ## Complete Example
 
 ```python
 import os
+import time
+from datetime import datetime
 
 from wiil import WiilClient
-from wiil.models.service_mgt import (
-    CreateInstructionConfiguration,
-    CreateAgentConfiguration,
-)
-from wiil.models.type_definitions import BusinessSupportServices
+from wiil.models.service_mgt import CreateTextKnowledgeSource
 from wiil.types import PaginationRequest
 
 client = WiilClient(api_key=os.environ['WIIL_API_KEY'])
 
 
-def explore_knowledge_sources():
-    # 1. List all knowledge sources
-    all_sources = client.knowledge_sources.list(
-        params=PaginationRequest(page=1, page_size=100)
+def knowledge_source_workflow():
+    # 1. Create a text knowledge source
+    print('Creating knowledge source...')
+    
+    content = '''
+        Product Support Knowledge Base
+        ==============================
+        
+        Getting Started
+        ---------------
+        Welcome to our product! This guide will help you get started quickly.
+        
+        Installation
+        ------------
+        1. Download the installer from our website
+        2. Run the installer with administrator privileges
+        3. Follow the on-screen instructions
+        4. Restart your computer when prompted
+        
+        Common Issues
+        -------------
+        Q: The application won't start
+        A: Try running as administrator or reinstalling the application.
+        
+        Q: I forgot my password
+        A: Click "Forgot Password" on the login screen to reset it.
+        
+        Q: How do I contact support?
+        A: Email support@example.com or call 1-800-EXAMPLE.
+        
+        ... (additional content to meet 1000 character minimum)
+    '''
+
+    source = client.knowledge_sources.create_text(
+        CreateTextKnowledgeSource(
+            name='Product Support KB',
+            content=content,
+            metadata={
+                'category': 'support',
+                'product': 'main-app',
+                'version': '1.0',
+            },
+        )
     )
 
-    print(f'Total knowledge sources: {all_sources.meta.total_count}')
+    print('Created knowledge source:', source.id)
+    print('Processing status:', source.processing_status)
 
-    if not all_sources.data:
-        print('No knowledge sources available')
-        return
+    # 2. List all knowledge sources
+    all_sources = client.knowledge_sources.list(
+        params=PaginationRequest(page_size=100)
+    )
+    print('\nTotal knowledge sources:', all_sources.meta.total_count)
 
-    # 2. Categorize by type
+    # 3. Categorize by type
     by_type = {}
-
-    for source in all_sources.data:
-        source_type = source.type or 'unknown'
+    for s in all_sources.data:
+        source_type = s.source_type or 'unknown'
         by_type[source_type] = by_type.get(source_type, 0) + 1
 
     print('\nKnowledge sources by type:')
     for source_type, count in by_type.items():
         print(f'  {source_type}: {count}')
 
-    # 3. Get details of a specific source
-    source_id = all_sources.data[0].id
-    source_details = client.knowledge_sources.get(source_id)
+    # 4. Categorize by processing status
+    by_status = {}
+    for s in all_sources.data:
+        status = s.processing_status or 'unknown'
+        by_status[status] = by_status.get(status, 0) + 1
+
+    print('\nKnowledge sources by status:')
+    for status, count in by_status.items():
+        print(f'  {status}: {count}')
+
+    # 5. Get details of the created source
+    source_details = client.knowledge_sources.get(source.id)
 
     print('\nSource details:')
-    print(f'  ID: {source_details.id}')
-    print(f'  Name: {source_details.name}')
-    print(f'  Type: {source_details.type}')
-
-    # 4. Example: Create an agent with knowledge sources
-    print('\nExample: Creating agent with knowledge sources...')
-
-    models = client.support_models.list()
-    model = next(
-        (m for m in models if m.type == 'multi_mode' and not m.discontinued),
-        None
-    )
-    if not model:
-        print('No model available')
-        return
-
-    # Select first 3 knowledge sources
-    selected_source_ids = [s.id for s in all_sources.data[:3]]
-
-    import time
-    timestamp = int(time.time())
-
-    instruction = client.instruction_configs.create(
-        CreateInstructionConfiguration(
-            instruction_name=f'KS_Test_Instructions_{timestamp}',
-            role='Knowledge Base Agent',
-            introduction_message='Hello! I can answer questions using our knowledge base.',
-            instructions='Answer questions using the linked knowledge sources.',
-            guardrails='Cite sources when providing information.',
-            supported_services=[BusinessSupportServices.APPOINTMENT_MANAGEMENT],
-            knowledge_source_ids=selected_source_ids,
-        )
-    )
-
-    print(f'Instruction created with {len(selected_source_ids)} knowledge sources')
-
-    agent = client.agent_configs.create(
-        CreateAgentConfiguration(
-            name='KnowledgeAgent',
-            model_id=model.model_id,
-            instruction_configuration_id=instruction.id,
-        )
-    )
-
-    print(f'Agent created: {agent.id}')
-
-    # Cleanup
-    client.agent_configs.delete(agent.id)
-    client.instruction_configs.delete(instruction.id)
-    print('Cleanup complete')
+    print('  ID:', source_details.id)
+    print('  Name:', source_details.name)
+    print('  Type:', source_details.source_type)
+    print('  Status:', source_details.processing_status)
+    print('  Storage Tier:', source_details.storage_tier)
 
 
 if __name__ == '__main__':
-    explore_knowledge_sources()
+    knowledge_source_workflow()
 ```
 
 ## Best Practices
 
-1. **Select relevant sources** - Only link knowledge sources that are relevant to the agent's purpose. Too many sources can slow down responses.
+1. **Provide meaningful names** - Use descriptive names that indicate the content purpose.
 
-2. **Check source availability** - Always list and verify knowledge sources exist before referencing them in instruction configurations.
+2. **Structure content well** - Organize text content with clear headings and sections for better AI comprehension.
 
-3. **Use appropriate source types** - Match source types to your use case:
-   - FAQs for common questions
-   - Documentation for technical details
-   - Product catalogs for sales agents
+3. **Include metadata** - Add relevant metadata (categories, versions, dates) for organization and filtering.
 
-4. **Keep sources updated** - Knowledge sources should be kept current. Outdated information can lead to incorrect agent responses.
+4. **Check processing status** - Wait for `completed` status before using knowledge sources in instruction configurations.
+
+5. **Select relevant sources** - Only link knowledge sources that are relevant to the agent's purpose. Too many sources can slow down responses.
+
+6. **Keep sources updated** - Create new versions of knowledge sources when content changes significantly.
 
 ## Troubleshooting
+
+### Content Too Short
+
+**Error:**
+
+```text
+WiilValidationError: Content must be at least 1000 characters
+```
+
+**Solution:**
+Ensure your content is at least 1000 characters:
+
+```python
+content = '...your text...'
+print('Content length:', len(content))
+
+if len(content) < 1000:
+    print('Need', 1000 - len(content), 'more characters')
+```
 
 ### Knowledge Source Not Found
 
 **Error:**
-```
+
+```text
 WiilAPIError: Knowledge source not found
 ```
 
@@ -267,49 +391,28 @@ Verify the source ID exists by listing available sources:
 
 ```python
 sources = client.knowledge_sources.list()
-
 source_ids = [s.id for s in sources.data]
-print(f'Available source IDs: {source_ids}')
 
-# Check if your ID exists
 target_id = 'ks_123'
 if target_id in source_ids:
     source = client.knowledge_sources.get(target_id)
-    print(f'Source found: {source.name}')
+    print('Source found:', source.name)
 else:
-    print('Source not found in available sources')
+    print('Source not found')
 ```
 
-### No Knowledge Sources Available
+### Processing Failed
 
-If no knowledge sources exist, they need to be created through the WIIL Console or admin API. Knowledge sources are typically managed by administrators and include:
+If a knowledge source has `processing_status == 'failed'`, the content could not be processed. Check:
 
-- Uploaded documents (PDFs, text files)
-- FAQ databases
-- Product catalogs
-- Help center content
-- Custom knowledge bases
-
-### Invalid Knowledge Source Reference
-
-**Error:**
-```
-WiilValidationError: Invalid knowledge_source_ids
-```
-
-**Solution:**
-Ensure all referenced knowledge source IDs are valid:
+- Content is valid text (not binary data)
+- Content is at least 1000 characters
+- No encoding issues
 
 ```python
-sources = client.knowledge_sources.list()
-valid_ids = {s.id for s in sources.data}
+source = client.knowledge_sources.get('ks_123')
 
-requested_ids = ['ks_123', 'ks_456', 'ks_789']
-invalid_ids = [id for id in requested_ids if id not in valid_ids]
-
-if invalid_ids:
-    print(f'Invalid knowledge source IDs: {invalid_ids}')
-
-valid_requested_ids = [id for id in requested_ids if id in valid_ids]
-# Use valid_requested_ids in your instruction configuration
+if source.processing_status == 'failed':
+    print('Processing failed for:', source.name)
+    # Create a new knowledge source with corrected content
 ```

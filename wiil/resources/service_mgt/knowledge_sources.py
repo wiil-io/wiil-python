@@ -4,7 +4,7 @@ from typing import Any, Dict, Optional
 from urllib.parse import urlencode
 
 from wiil.client.http_client import HttpClient
-from wiil.models.service_mgt import KnowledgeSource
+from wiil.models.service_mgt import CreateTextKnowledgeSource, KnowledgeSource
 from wiil.types import PaginatedResult, PaginationRequest
 
 
@@ -45,6 +45,39 @@ class KnowledgeSourcesResource:
         return self._http.get(
             f'{self._base_path}{query_string}',
             response_model=PaginatedResult[KnowledgeSource]
+        )
+
+    def create_text(self, data: CreateTextKnowledgeSource) -> KnowledgeSource:
+        """Create a knowledge source from raw text content.
+
+        Text knowledge sources are ingested and stored as CORPUS-type knowledge sources.
+        The content must be at least 1000 characters.
+
+        Args:
+            data: Text knowledge source creation data containing:
+                - name: Optional human-readable name
+                - content: Raw text content (minimum 1000 characters)
+                - metadata: Optional additional metadata
+
+        Returns:
+            The created knowledge source.
+
+        Example:
+            >>> source = client.knowledge_sources.create_text(
+            ...     CreateTextKnowledgeSource(
+            ...         name='Product FAQ',
+            ...         content='Your text content here (minimum 1000 characters)...',
+            ...         metadata={'category': 'support', 'version': '1.0'}
+            ...     )
+            ... )
+            >>> print('Created:', source.id)
+            >>> print('Processing status:', source.processing_status)
+        """
+        return self._http.post(
+            f'{self._base_path}/text',
+            data.model_dump(by_alias=True, exclude_none=True),
+            schema=CreateTextKnowledgeSource,
+            response_model=KnowledgeSource,
         )
 
 
